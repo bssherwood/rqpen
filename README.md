@@ -1,2 +1,0 @@
-# rqpen
-Penalized Quantile Regression
