@@ -1,0 +1,11 @@
+Package: rqPen
+Type: Package
+Title: Penalized Quantile Regression
+Version: 1.2
+Date: 2015-10-22
+Author: Ben Sherwood 
+Depends: R (>= 3.0.0),quantreg, regpro
+Maintainer: Ben Sherwood <bsherwo2@jhu.edu>
+Description: Performs penalized quantile regression for LASSO, SCAD and MCP functions including group penalties. Provides a function that automatically generates lambdas and evaluates different models with cross validation or BIC, including a large p version of BIC. 
+ByteCompile: TRUE
+License: MIT + file LICENSE

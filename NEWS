@@ -1,0 +1,21 @@
+rqPen 1.2 (Release date: 2015-10-13)
+==============
+Changes:
+
+* Added group penalty function with two implementations. QICD, a coordinate descent approach, and a linear programming approach.
+* New functions for group penalties include: groupQICD, groupQICDMultLambda and nonzero
+* Added coefficient functions for cv.rq.group.pen and cv.rq.pen
+* Added kernel based weight functions kernel_estimates and kernel_weights. These will be for future implementations that use inverse weighting as an approach for handling missing data.
+
+rqPen 1.1 (Release date: 2015-03-15)
+==============
+
+Changes:
+
+* Corrected errors in SCAD and MCP penalties
+* Combined scad_1_deriv and scad_2_deriv into one function scad_deriv
+* swapped order of weights and lambda in functions rq.lasso.fit, rq.nc.fit and cv.rq.pen
+
+
+rqPen 1.0 (Release date: 2014-10-29)
+==============
