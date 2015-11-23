@@ -1,3 +1,5 @@
+useDynLib("rqpen")
+
 import(quantreg) 
 import(regpro)
 importFrom("graphics", "lines", "plot")
@@ -36,3 +38,4 @@ export(groupMultLambda)
 export(nonzero)
 S3method(plot,cv.rq.group.pen)
 S3method("nonzero","cv.rq.group.pen")
+export(QICD)
