@@ -168,10 +168,10 @@ QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  p
 
   if(intercept){ 
     coefficients <- c(beta1[ c( nxzcol, 1:nxcol )])
-    PenRho <- rho + sum(scad( coefficients[-1], lambda=lambda, a=a ))
+    PenRho <- rho + sum(scad( abs(coefficients[-1]), lambda=lambda, a=a ))
   } else {
     coefficients <- c(beta1)
-    PenRho <- rho + sum(scad( coefficients, lambda=lambda, a=a ))
+    PenRho <- rho + sum(scad( abs(coefficients), lambda=lambda, a=a ))
   }
   names(coefficients) <- rownames
 
