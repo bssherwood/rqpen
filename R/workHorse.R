@@ -386,8 +386,8 @@ groupQICD <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
             }
             else {
                 inner_count <- inner_count + 1
-            
-}        }
+            }        
+		}
         new_outer_parameters <- new_inner_parameters
         if (sum((new_outer_parameters - old_outer_parameters)^2) < 
             eps | outer_count == max_iter) {
@@ -429,16 +429,7 @@ nonzero.cv.rq.group.pen <- function (obj)
 {
     coefs <- coefficients(obj)
     if (obj$intercept) {
-        coefs <- coefs[-1]
+		coefs <- coefs[-1]
     }
     tapply(coefs, obj$groups, sum) != 0
 }
-
-
-
-
-
-
-
-
-

@@ -112,6 +112,7 @@ QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  p
     if(intercept){ beta_initial <- c(beta_initial,0) }
     if( length(beta_initial) != nxzcol ){
       stop("beta_initial does not have length ncol(x)")
+	}
   }
 
 

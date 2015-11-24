@@ -5,7 +5,7 @@
 groupQICD(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                          max_iter = 100, eps = 1e-05, penalty = "SCAD", 
                          a = 3.7, coef.cutoff = 1e-08, 
-                         initial_beta = NULL) 
+                         initial_beta = NULL,method="br") 
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -24,6 +24,7 @@ groupQICD(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
   \item{a}{Additional tuning parameter for SCAD and MCP}  
   \item{coef.cutoff}{Coefficients below this value are set to zero.}
   \item{initial_beta}{Initial value of beta to start algorithm. Default is all zeros.}
+  \item{method}{Use method "br" or "fn" as outlined in quantreg package. Method "fn" better for large n or p.}
 }
 \value{
 Returns coefficients of the model. This is mostly used as a worker function for 

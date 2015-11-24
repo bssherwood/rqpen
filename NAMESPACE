@@ -1,4 +1,4 @@
-useDynLib("rqpen")
+useDynLib("rqPen")
 
 import(quantreg) 
 import(regpro)
