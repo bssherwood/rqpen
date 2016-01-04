@@ -120,8 +120,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # coef.cutoff is a threshold to set to zero. 
 # Choose the method used to estimate the coefficients ("br" or "fn")
 ### According to quantreg manual and my experience, "fn" is much faster for big n
-### The "n" can grow rapidly using lin. prog. approach
-
+### The "n" can grow rapidly using lin. prog. approach  
 
    if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
@@ -174,8 +173,12 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    attributes(return_val$coefficients)$names <- x_names
    return_val$coefficients[abs(return_val$coefficients) < coef.cutoff] <- 0
    return_val$PenRho <- model$rho
-   return_val$residuals <- model$residuals[1:n]      
-   return_val$rho <- sum(sapply(return_val$residuals,check,tau))
+   return_val$residuals <- model$residuals[1:n]   
+   if(is.null(weights)){   
+     return_val$rho <- sum(sapply(return_val$residuals,check,tau))
+   } else{
+     return_val$rho <- sum(weights*sapply(return_val$residuals,check,tau))
+   }
    return_val$tau <- tau
    return_val$n <- n                  
    return_val$intercept <- intercept
