@@ -113,7 +113,7 @@ rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=
 }
 
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
-                         coef.cutoff=1e-08, method="br", ...){
+                         coef.cutoff=1e-08, method="br",penVars=NULL, ...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
@@ -121,6 +121,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # Choose the method used to estimate the coefficients ("br" or "fn")
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
+# penVars - variables to be penalized, doesn't work if lambda has multiple entries
 
    if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
@@ -136,12 +137,17 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if( sum(lambda < 0) > 0){
       stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
    }
+   if(is.null(penVars) !=TRUE & length(lambda) == 1){
+      mult_lambda <- rep(0,p)
+      mult_lambda[penVars] <- lambda
+      lambda <- mult_lambda
+   }
    lambda <- lambda*n # need this to account for the fact that rq does not normalize the objective function
    if(length(lambda)==1){
       pen_x <- rbind(diag(rep(lambda,p)),diag(rep(-lambda,p)))
    } else{
       pen_x <- rbind(diag(lambda), diag(-lambda))
-      pen_x <- pen_x[rowSums(pen_x==0)!=dim(pen_x)[2],]
+      pen_x <- pen_x[rowSums(pen_x==0)!=dim(pen_x)[2],]#drop all zero rows
    }
    aug_n <- dim(pen_x)[1]
    aug_x <- rbind(x,pen_x)
@@ -155,6 +161,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
      if(length(weights) != n){
        stop("Length of weights does not match length of y")
      }
+     orig_weights <- weights
      weights <- c(weights, rep(1,aug_n))
      model <- rq(aug_y ~ aug_x+0, tau=tau, weights=weights, method=method,...)
    }
@@ -177,7 +184,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if(is.null(weights)){   
      return_val$rho <- sum(sapply(return_val$residuals,check,tau))
    } else{
-     return_val$rho <- sum(weights*sapply(return_val$residuals,check,tau))
+     return_val$rho <- sum(orig_weights*sapply(return_val$residuals,check,tau))
    }
    return_val$tau <- tau
    return_val$n <- n                  

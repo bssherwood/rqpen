@@ -2,11 +2,17 @@ kernel_estimates <- function(x,y,h,...){
   kernel_estimates <- NULL
   if(is.null(dim(x))){
     n <- length(x)
+    d <- 1
   } else{
     n <- dim(x)[1]
+    d <- dim(x)[2]
   }
   for(i in 1:n){
-     kernel_estimates <- c(kernel_estimates,kernesti.regr(x[i,],x,y,h=h,...))
+     if(d == 1){
+        kernel_estimates <- c(kernel_estimates,kernesti.regr(x[i],x,y,h=h,...))
+     } else{
+        kernel_estimates <- c(kernel_estimates,kernesti.regr(x[i,],x,y,h=h,...))
+     }
   }
   kernel_estimates
 }
@@ -44,13 +50,18 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
   coefficients(object$models[[target_model]])
 }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
 # nfolds: number of folds for cross validation
 # foldid: preset id of folds
-  p_range <- 1:dim(x)[2] + intercept
+# penVar: variables to be penalized, default is all non-intercept terms
+  p <- dim(x)[2]
+  if(is.null(penVars)){
+    penVars <- 1:p
+  }
+  p_range <- penVars + intercept
   n <- dim(x)[1]
   pen_func <- switch(which(c("LASSO","SCAD","MCP")==penalty), lasso, scad, mcp)
   if(is.null(lambda)){
@@ -60,7 +71,8 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   # \lambda* = \sum \rho_\tau(y-quantile(y,tau)) / \sum p_\lambda(|beta_j|) repeat as needed
      sample_q <- quantile(y,tau)
      inter_only_rho <- sum(check(y-sample_q,tau))
-     lambda_star <- init.lambda
+     lambda_star <- rep(0,p)
+     lambda_star[penVars] <- init.lambda
      searching <- TRUE
      while(searching){
        if(penalty=="LASSO"){
@@ -71,17 +83,19 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
        if(sum(init_fit$coefficients[p_range])==0){
          searching <- FALSE     
        } else{
-         lambda_star = inter_only_rho / sum(sapply(init_fit$coefficients[p_range],pen_func,1)) 
+         lambda_star[penVars] <- inter_only_rho / sum(sapply(init_fit$coefficients[p_range],pen_func,1)) 
          #1 used here because solving for lambda
        }
      }
      lambda_min <- eps*lambda_star
-     lambda <- exp(seq(log(lambda_min),log(lambda_star),length.out=nlambda))
+     lambda <- exp(seq(log(max(lambda_min)),log(max(lambda_star)),length.out=nlambda))#max is included to handle cases where
+     # some variables are unpenalized and thus lambda is a multivalued vector with some zeros
   }
   if(penalty=="LASSO"){
-     models <- lapply(lambda,rq.lasso.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,...)
+     models <- lapply(lambda,rq.lasso.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penVars=penVars,...)
   } else{
-     models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,...)
+     models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,
+                                        penVars=penVars,...)
   }
   cv_results <- NULL
   if(criteria=="CV"){
@@ -125,11 +139,13 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
 
 
-rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty="SCAD",a=3.7,iterations=10,converge_criteria=.0001,...){
+rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty="SCAD",a=3.7,iterations=10,converge_criteria=.0001,penVars=NULL,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # penalty SCAD or MCP
+# penVars - variables to be penalized, doesn't work if lambda has multiple entries
+
    if(penalty=="SCAD"){
      deriv_func <- scad_deriv
    }
@@ -147,14 +163,22 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty
    if(is.null(lambda)==TRUE | (length(lambda) != 1 & length(lambda) != dim(x)[2])){
       stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
    }
-   if( sum(lambda <= 0) > 0){
+   if( sum(lambda < 0) > 0){
       stop('lambda must be positive')
    }
+   if(is.null(penVars) !=TRUE & length(lambda) == 1){
+      mult_lambda <- rep(0,p)
+      mult_lambda[penVars] <- lambda
+      lambda <- mult_lambda
+   }
    if(length(lambda) != 1){
-      pen_vars <- 1:p[lambda != 0]
-      pen_range <- intercept + pen_vars
+      penVars <- (1:p)[lambda != 0]
+      pen_range <- intercept + penVars
    } else{
       pen_range <- intercept + 1:p
+      if(is.null(penVars)){
+         penVars <- 1:p
+      }
    }
    #lambda_update <- n*lambda
    lambda_update <- lambda
@@ -166,13 +190,13 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty
       if(length(lambda)==1){
           lambda_update <- sapply(abs(sub_fit$coefficients[pen_range]),deriv_func, lambda=lambda, a=a)
       } else{
-          lambda_update[!pen_range] <- 0
-          lambda_update[pen_range] <- mapply(deriv_func, beta=abs(sub_fit$coefficients[pen_range]),
-                                                         lambda=lambda,
+          lambda_update[-penVars] <- 0
+          lambda_update[penVars] <- mapply(deriv_func, x=abs(sub_fit$coefficients[pen_range]),
+                                                         lambda=lambda[penVars],
                                                          MoreArgs=list(a=a))
       }
       #lambda_update <- n*lambda_update
-      iter_num <- 1
+      iter_num <- iter_num + 1
       new_beta <- sub_fit$coefficients
       beta_diff <- sum( (old_beta - new_beta)^2)
       if(iter_num == iterations | beta_diff < converge_criteria){
