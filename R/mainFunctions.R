@@ -108,9 +108,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
       test_x <- x[foldid==i,]
       test_y <- y[foldid==i]
       if(penalty=="LASSO"){
-         cv_models <- lapply(lambda,rq.lasso.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,...)
+         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,...)
       } else{
-         cv_models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,...)
+         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,...)
       }
       if(cvFunc=="check"){
          cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, tau=tau))
