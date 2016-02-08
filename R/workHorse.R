@@ -16,7 +16,7 @@ check <- function(x,tau=.5){
 }
 
 pos_part <- function(x){
-  min(x,0)
+  mapply( function(t) min(t,0), x) # min(x,0) # 
 }
 
 lasso <- function(x,lambda=1){
@@ -24,36 +24,44 @@ lasso <- function(x,lambda=1){
 }
 
 scad <- function(x, lambda=1, a=3.7){
-  if(abs(x) < lambda){
-    lambda*abs(x)
+  scadmapp <- function(xmapp,lambdamapp,amapp){
+    if(abs(xmapp) < lambdamapp){
+      lambdamapp*abs(xmapp)
+    }
+    else if( abs(xmapp) >= amapp*lambdamapp){
+    #third case but easier to program
+     (amapp+1)*lambdamapp^2 / 2
+    }
+    else{
+      ( (amapp^2-1)*lambdamapp^2 - (abs(xmapp)-amapp*lambdamapp)^2) / ( 2*(amapp-1)) 
+    }
   }
-  else if( abs(x) >= a*lambda){
-  #third case but easier to program
-    (a+1)*lambda^2 / 2
-  }
-  else{
-    ( (a^2-1)*lambda^2 - (abs(x)-a*lambda)^2) / ( 2*(a-1)) 
-  }
+
+  mapply(scadmapp, x, lambdamapp=lambda, amapp=a)
 }
 
 scad_deriv <- function(x, lambda=1,a=3.7){
-  if(abs(x) <= lambda){
-  #really undefined but should be penalized as lambda using the taylor expansion technique
-    return_val <- lambda
-  } 
-  if(lambda == 0){
-    return_val <- 0
+  scad_derivmapp <- function(xmapp,lambdamapp,amapp){
+    if(abs(xmapp) <= lambdamapp){
+    #really undefined but should be penalized as lambda using the taylor expansion technique
+      return_val <- lambdamapp
+    } 
+    if(lambda == 0){
+      return_val <- 0
+    }
+    if(abs(xmapp) > lambdamapp){
+      return_val <- max(amapp*lambdamapp-abs(xmapp),0)/(amapp-1)
+    }
+    if(return_val == 0){
+      0
+    } else if(xmapp == 0){
+      lambda
+    } else {
+      sign(xmapp)*return_val
+    }
   }
-  if(abs(x) > lambda){
-     return_val <- max(a*lambda-abs(x),0)/(a-1)
-  }
-  if(return_val == 0){
-    0
-  } else if(x == 0){
-    lambda
-  }else{
-    sign(x)*return_val
-  }
+
+  mapply(scad_derivmapp, x, lambdamapp=lambda, amapp=a)
 }
 
 #scad_1_deriv <- function(x,lambda=1,a=3.7){
@@ -65,22 +73,31 @@ scad_deriv <- function(x, lambda=1,a=3.7){
 #}
 
 mcp <- function(x, lambda=1, a=3){
-    if(abs(x) < a*lambda){
-      lambda*(abs(x)-x^2/(2*a*lambda))
+  mcpmapp <- function(xmapp,lambdamapp,amapp){
+    if(abs(xmapp) < amapp*lambdamapp){
+      lambdamapp*(abs(xmapp)-xmapp^2/(2*amapp*lambdamapp))
     } else{
-      a*lambda^2 / 2
+      amapp*lambdamapp^2 / 2
     }
+  }
+
+  mapply(mcpmapp, x, lambdamapp=lambda, amapp=a)
 }
 
 mcp_deriv <- function(x, lambda=1, a=3){
-  if(x == 0){
-     lambda
-  } else if(abs(x) < a*lambda){
-    lambda*sign(x)- x*(1/a)
-  } else{
-    0
+  mcp_derivmapp <- function(xmapp,lambdamapp,amapp){
+    if(xmapp == 0){
+       lambdamapp
+    } else if(abs(xmapp) < amapp*lambdamapp){
+      lambdamapp*sign(xmapp)- xmapp*(1/amapp)
+    } else{
+      0
+    }
   }
+
+  mapply(mcp_derivmapp, x, lambdamapp=lambda, amapp=a)
 }
+
 
 square <- function(x){
   x^2

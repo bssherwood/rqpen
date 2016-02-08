@@ -77,7 +77,6 @@ QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  p
 #maxin: maximum number of iterations for inside coordinate descent,default value is 100
 #maxout: maximum number of iterations for outside MM step,default value is 20
 {
-  #dyn.load("QCD.dll")
 #######################################################
 
    if(is.null(dim(x))){                                                                                    
