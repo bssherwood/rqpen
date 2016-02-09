@@ -26,7 +26,7 @@ shortrq.fit.br <- function (x, y, tau = 0.5)
         sol = double((p + 3) * nsol), dsol = double(n * ndsol),
         lsol = as.integer(0), h = integer(p * nsol), qn = as.double(qn),
         cutoff = as.double(cutoff), ci = double(4 * p), tnmat = double(4 *
-            p), as.double(big), as.logical(lci1), PACKAGE = "quantreg")
+            p), as.double(big), as.logical(lci1))
     if (z$flag != 0)
         warning(switch(z$flag, "Solution may be nonunique", "Premature end - possible conditioning problem in x"))
     coef <- z$coef
@@ -50,7 +50,7 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
         c = as.double(-y), rhs = as.double(rhs), d = as.double(d),as.double(u),
         beta = as.double(beta), eps = as.double(eps),
         wn = as.double(wn), wp = double((p + 3) * p),
-        it.count = integer(3), info = integer(1), PACKAGE= "quantreg")
+        it.count = integer(3), info = integer(1))
     if (z$info != 0)
         stop(paste("Error info = ", z$info, "in stepy: singular design"))
     coefficients <- -z$wp[1:p]
