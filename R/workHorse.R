@@ -16,7 +16,7 @@ check <- function(x,tau=.5){
 }
 
 pos_part <- function(x){
-  mapply( function(t) min(t,0), x) # min(x,0) # 
+  ifelse( x < 0, x, 0 ) # min(x,0) # 
 }
 
 lasso <- function(x,lambda=1){
@@ -24,44 +24,30 @@ lasso <- function(x,lambda=1){
 }
 
 scad <- function(x, lambda=1, a=3.7){
-  scadmapp <- function(xmapp,lambdamapp,amapp){
-    if(abs(xmapp) < lambdamapp){
-      lambdamapp*abs(xmapp)
-    }
-    else if( abs(xmapp) >= amapp*lambdamapp){
-    #third case but easier to program
-     (amapp+1)*lambdamapp^2 / 2
-    }
-    else{
-      ( (amapp^2-1)*lambdamapp^2 - (abs(xmapp)-amapp*lambdamapp)^2) / ( 2*(amapp-1)) 
-    }
-  }
-
-  mapply(scadmapp, x, lambdamapp=lambda, amapp=a)
+  absx <- abs(x)
+  ifelse( absx < lambda, # Evaluate this
+          lambda*absx, # If true (absx < lambda)
+          ifelse( absx < a*lambda, # If false, evaluate this
+                  ( (a^2-1)*lambda^2 - (absx-a*lambda)^2 ) / ( 2*(a-1) ), # If true (absx < a*lambda)
+                  (a+1)*lambda^2 / 2 # If false (absx > a*lambda)
+                ) 
+        )
 }
 
-scad_deriv <- function(x, lambda=1,a=3.7){
-  scad_derivmapp <- function(xmapp,lambdamapp,amapp){
-    if(abs(xmapp) <= lambdamapp){
-    #really undefined but should be penalized as lambda using the taylor expansion technique
-      return_val <- lambdamapp
-    } 
-    if(lambda == 0){
-      return_val <- 0
-    }
-    if(abs(xmapp) > lambdamapp){
-      return_val <- max(amapp*lambdamapp-abs(xmapp),0)/(amapp-1)
-    }
-    if(return_val == 0){
-      0
-    } else if(xmapp == 0){
-      lambda
-    } else {
-      sign(xmapp)*return_val
-    }
-  }
 
-  mapply(scad_derivmapp, x, lambdamapp=lambda, amapp=a)
+scad_deriv <- function(x, lambda=1,a=3.7){
+  absx <- u <- abs(x)
+  u[] <- 0
+  index <- absx < a*lambda & absx > 0
+  u[ index ] <-
+       ifelse( absx[ index ] <= lambda, 
+               lambda,
+               ( a*lambda - absx[ index ] )/( a-1 ) 
+             )
+  u[index] <- u[index]*sign( x[index] )
+  u[ x == 0 ] <- lambda # because we take derivative as x approaces 0 from above
+
+  u
 }
 
 #scad_1_deriv <- function(x,lambda=1,a=3.7){
@@ -73,30 +59,26 @@ scad_deriv <- function(x, lambda=1,a=3.7){
 #}
 
 mcp <- function(x, lambda=1, a=3){
-  mcpmapp <- function(xmapp,lambdamapp,amapp){
-    if(abs(xmapp) < amapp*lambdamapp){
-      lambdamapp*(abs(xmapp)-xmapp^2/(2*amapp*lambdamapp))
-    } else{
-      amapp*lambdamapp^2 / 2
-    }
-  }
-
-  mapply(mcpmapp, x, lambdamapp=lambda, amapp=a)
+  absx <- abs(x)
+  ifelse( absx < a*lambda, # Evaluate this
+          lambda*(absx - absx^2/(2*a*lambda)), # If true (absx < a*lambda)
+          a*lambda^2/2 # If false
+        )
 }
+
 
 mcp_deriv <- function(x, lambda=1, a=3){
-  mcp_derivmapp <- function(xmapp,lambdamapp,amapp){
-    if(xmapp == 0){
-       lambdamapp
-    } else if(abs(xmapp) < amapp*lambdamapp){
-      lambdamapp*sign(xmapp)- xmapp*(1/amapp)
-    } else{
-      0
-    }
-  }
+  u <- x
+  u[] <- 0
+  index <- abs(x) < a*lambda
+  u[ index ] <- ifelse( x[index] == 0,
+                        lambda,
+                        lambda*sign(x[index]) - x[index]/a
+                      )
 
-  mapply(mcp_derivmapp, x, lambdamapp=lambda, amapp=a)
+  u
 }
+
 
 
 square <- function(x){
