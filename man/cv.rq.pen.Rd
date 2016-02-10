@@ -4,7 +4,7 @@
 \usage{
 cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
           intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,
-          foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,...)
+          foldid=NULL,nlambda=100,eps=.0001,init.lambda=1, penVars=NULL,...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -21,6 +21,7 @@ cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
   \item{nlambda}{ Number of lambdas for which models are fit.}
   \item{eps}{ Smallest lambda used.}
   \item{init.lambda}{ Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
+  \item{penVars}{Vector containing 1s for penalized coefficients and 0s for nonpenalized coefficients.}
   \item{...}{Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.}   
 }
 \value{

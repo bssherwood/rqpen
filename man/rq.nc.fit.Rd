@@ -4,7 +4,7 @@
 \usage{
 rq.nc.fit(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
           penalty="SCAD",a=3.7,iterations=10,
-          converge_criteria=.0001,...)
+          converge_criteria=.0001, penVars=NULL, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -17,6 +17,7 @@ rq.nc.fit(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
   \item{a}{ Second tuning parameter.} 
   \item{iterations}{ Number of iterations to be done for iterative LLA algorithm.} 
   \item{converge_criteria}{ Difference in betas from iteration process that would satisfy convergence.}
+  \item{penVars}{Vector containing 1s for penalized coefficients and 0s for nonpenalized coefficients.}
   \item{...}{Additional items to be sent to rq.lasso.fit. LLA algorithm is used so rq.lasso.fit is used to approximate the non-convex objective function. See Wang, Wu and Li (2012) for details. }   
 }
 \value{
