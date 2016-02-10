@@ -61,8 +61,8 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 
 
 
-QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  penalty="SCAD",a=3.7, converge_criteria=1e-06,
-               maxin=100,maxout=20, method="br")
+QICD <- function(y, x, tau=.5,lambda=NULL, weights=NULL, beta_initial=NULL, intercept=TRUE,  penalty="SCAD",a=3.7, 
+                converge_criteria=1e-06, maxin=100,maxout=20, method="br")
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #y: response variable, length n vector
 #lambda is the tuning parameter (numeric value > 0)
@@ -154,12 +154,12 @@ QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  p
   tau       <- as.double(tau)
   int       <- as.integer(intercept)
   a         <- as.double(a)
-  thresh    <- as.double(thresh)
+  thresh    <- as.double(converge_criteria)
   maxin     <- as.integer(maxin)
 
     beta1 <- QICDx( y=y, nyrow=nyrow, x=xdes, nxcol=xdescol, beta=beta_initial,
               tau=tau, intercept=int, pentype=pentype, lambda=as.double(lambda.new), a=a,
-              thresh=converge_criteria, maxin=maxin, maxout=maxout, method=method )
+              thresh=thresh, maxin=maxin, maxout=maxout, method=method )
     #final beta coefficients, Order of coefficients is linear,intercept
 
   residuals <-  y - xdes%*%beta1
@@ -172,7 +172,7 @@ QICD <- function(y, x, tau=.5,lambda=NULL, beta_initial=NULL, intercept=TRUE,  p
     coefficients <- c(beta1)
     PenRho <- rho + sum(scad( abs(coefficients), lambda=lambda, a=a ))
   }
-  names(coefficients) <- rownames
+  names(coefficients) <- rowname
 
   sub_fit <- list(coefficients = coefficients,
                  PenRho = PenRho,
@@ -208,7 +208,7 @@ QICDx <- function( y, nyrow, x, nxcol, beta, tau, intercept, pentype, lambda, a,
   }
 
   if(i == maxout & distance > thresh){
-      warning(paste("did not converge after ", iterations, " iterations", sep=""))
+      warning(paste("did not converge after ", maxout, " iterations", sep=""))
     }
 
   return( beta1 )
