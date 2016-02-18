@@ -4,7 +4,7 @@
 \usage{
 QICD(y, x, tau = 0.5, lambda = NULL, weights=NULL, beta_initial = NULL, 
     intercept = TRUE, penalty = "SCAD", a = 3.7, converge_criteria = 1e-06, 
-    maxin = 100, maxout = 20, method = "br")
+    maxin = 100, maxout = 20, method = "br",...)
 }
 \arguments{
   \item{y}{Vector of response values.}
@@ -20,6 +20,7 @@ QICD(y, x, tau = 0.5, lambda = NULL, weights=NULL, beta_initial = NULL,
   \item{maxin}{Maximum number of iterations of the coordinate descent part of the QICD algorithm to be done.}
   \item{maxout}{Maximum number of iterations of the Minimize-Majorize (MM) part of the QICD algorithm to be done.}
   \item{method}{Use method "br" or "fn" as outlined in quantreg package. Method "fn" better for large n or p.}
+  \item{...}{Additional arguments sent to rq.lasso.fit for initial estimates}
 }
 \value{
 Returns the following:

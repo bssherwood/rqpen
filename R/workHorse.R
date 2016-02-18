@@ -442,3 +442,15 @@ nonzero.cv.rq.group.pen <- function (obj)
     }
     tapply(coefs, obj$groups, sum) != 0
 }
+
+print.cv.rq.pen <- function(x,...){
+   cat("\nCoefficients:\n")
+   print(coefficients(x,...))
+   cat("\nCross Validation (or BIC) Results\n")
+   print(x$cv)
+}
+
+print.rq.pen <- function(x,...){
+    cat("\nCoefficients:\n")
+	print(coefficients(x,...))
+}

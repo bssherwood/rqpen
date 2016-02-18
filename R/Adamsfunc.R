@@ -62,7 +62,7 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 
 
 QICD <- function(y, x, tau=.5,lambda=NULL, weights=NULL, beta_initial=NULL, intercept=TRUE,  penalty="SCAD",a=3.7, 
-                converge_criteria=1e-06, maxin=100,maxout=20, method="br")
+                converge_criteria=1e-06, maxin=100,maxout=20, method="br",...)
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #y: response variable, length n vector
 #lambda is the tuning parameter (numeric value > 0)

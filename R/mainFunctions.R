@@ -71,19 +71,20 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   # \lambda* = \sum \rho_\tau(y-quantile(y,tau)) / \sum p_\lambda(|beta_j|) repeat as needed
      sample_q <- quantile(y,tau)
      inter_only_rho <- sum(check(y-sample_q,tau))
-     lambda_star <- rep(0,p)
-     lambda_star[penVars] <- init.lambda
+     #lambda_star <- rep(0,p)
+     #lambda_star[penVars] <- init.lambda
+	 lambda_star <- init.lambda
      searching <- TRUE
      while(searching){
        if(penalty=="LASSO"){
-         init_fit <- rq.lasso.fit(x,y,tau,lambda=lambda_star,weights,intercept,...)
+         init_fit <- rq.lasso.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,...)
        } else{
-         init_fit <- rq.nc.fit(x,y,tau,lambda=lambda_star,weights,intercept,...)
+         init_fit <- rq.nc.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,...)
        }
        if(sum(init_fit$coefficients[p_range])==0){
          searching <- FALSE     
        } else{
-         lambda_star[penVars] <- inter_only_rho / sum(sapply(init_fit$coefficients[p_range],pen_func,1)) 
+         lambda_star <- inter_only_rho / sum(sapply(init_fit$coefficients[p_range],pen_func,1)) 
          #1 used here because solving for lambda
        }
      }
@@ -108,9 +109,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
       test_x <- x[foldid==i,]
       test_y <- y[foldid==i]
       if(penalty=="LASSO"){
-         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,...)
+         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,penVars=penVars,...)
       } else{
-         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,...)
+         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
       }
       if(cvFunc=="check"){
          cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, tau=tau))
