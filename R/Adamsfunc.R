@@ -111,7 +111,7 @@ QICD <- function(y, x, tau=.5,lambda=NULL, weights=NULL, beta_initial=NULL, inte
     if(intercept){ beta_initial <- c(beta_initial,0) }
     if( length(beta_initial) != nxzcol ){
       stop("beta_initial does not have length ncol(x)")
-  }
+	}
   }
 
 
@@ -180,6 +180,7 @@ QICD <- function(y, x, tau=.5,lambda=NULL, weights=NULL, beta_initial=NULL, inte
                  rho = rho,
                  tau = tau,
                  n = nyrow,
+				 intercept=intercept,
                  penalty = penalty)
 
   class(sub_fit) <-  c("rq.pen", "rqNC")
@@ -318,6 +319,7 @@ QICD.nonpen <- function(x, z, y, tau=.5,lambda=NULL, weights=NULL, beta_initial=
                  rho = rho,
                  tau = tau,
                  n = nyrow,
+				 intercept = intercept,
                  penalty = penalty)
 
   class(sub_fit) <-  c("rq.pen", "rqNC")
