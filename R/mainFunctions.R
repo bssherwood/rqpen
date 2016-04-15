@@ -92,11 +92,35 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
      lambda <- exp(seq(log(max(lambda_min)),log(max(lambda_star)),length.out=nlambda))#max is included to handle cases where
      # some variables are unpenalized and thus lambda is a multivalued vector with some zeros
   }
+  models <- list()
+  fit_models <- TRUE
+  lam_pos <- 1
   if(penalty=="LASSO"){
-     models <- lapply(lambda,rq.lasso.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penVars=penVars,...)
+   while(fit_models){
+		if(fit_models){
+			models[[lam_pos]] <- rq.lasso.fit(x,y,tau,lambda[lam_pos],weights,intercept,penVars=penVars,...)
+      
+		}
+		if(sum(abs(coefficients(models[[lam_pos]])[p_range]))==0 || lam_pos==length(lambda)){
+		#if we got a fully sparse model, no need to fit more sparse models
+			fit_models <- FALSE
+			lambda <- lambda[1:lam_pos]
+		}
+    lam_pos <- lam_pos + 1
+	 }
   } else{
-     models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,
-                                        penVars=penVars,...)
+  	while(fit_models){
+  		if(fit_models){
+  			models[[lam_pos]] <- rq.nc.fit(x,y,tau,lambda[lam_pos],weights,intercept,penalty=penalty,penVars=penVars,...)
+      }
+  		if(sum(abs(coefficients(models[[lam_pos]])[p_range]))==0 || lam_pos==length(lambda)){
+  			fit_models <- FALSE
+  			lambda <- lambda[1:lam_pos]
+  		}
+      lam_pos <- lam_pos + 1
+  	 }
+     #models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,
+     #                                   penVars=penVars,...)
   }
   cv_results <- NULL
   if(criteria=="CV"){
@@ -140,78 +164,96 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
 
 
-rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty="SCAD",a=3.7,iterations=10,converge_criteria=.0001,penVars=NULL,...){
+rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty="SCAD",a=3.7,iterations=10,converge_criteria=1e-06,alg=ifelse(p<50,"LP","QICD"),penVars=NULL,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # penalty SCAD or MCP
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries
-
-   if(penalty=="SCAD"){
-     deriv_func <- scad_deriv
-   }
-   if(penalty=="MCP"){
-     deriv_func <- mcp_deriv
-   }
-   if(is.null(dim(x))){                                                                                    
-      stop('x needs to be a matrix with more than 1 column')
-   }
    p <- dim(x)[2]
    n <- dim(x)[1]
-   if(n != length(y)){
-      stop('length of y and rows of x do not match')
-   }
-   if(is.null(lambda)==TRUE | (length(lambda) != 1 & length(lambda) != dim(x)[2])){
-      stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
-   }
-   if( sum(lambda < 0) > 0){
-      stop('lambda must be positive')
-   }
-   if(is.null(penVars) !=TRUE & length(lambda) == 1){
-      mult_lambda <- rep(0,p)
-      mult_lambda[penVars] <- lambda
-      lambda <- mult_lambda
-   }
-   if(length(lambda) != 1){
-      penVars <- (1:p)[lambda != 0]
-      pen_range <- intercept + penVars
-   } else{
-      pen_range <- intercept + 1:p
-      if(is.null(penVars)){
-         penVars <- 1:p
-      }
-   }
-   #lambda_update <- n*lambda
-   lambda_update <- lambda
-   iter_complete <- FALSE
-   iter_num <- 0
-   old_beta <- rep(0, p+intercept)
-   while(!iter_complete){
-      sub_fit <- rq.lasso.fit(x=x,y=y,tau=tau,lambda=lambda_update,weights=weights,intercept=intercept,...)
-      if(length(lambda)==1){
-          lambda_update <- sapply(abs(sub_fit$coefficients[pen_range]),deriv_func, lambda=lambda, a=a)
-      } else{
-          lambda_update[-penVars] <- 0
-          lambda_update[penVars] <- mapply(deriv_func, x=abs(sub_fit$coefficients[pen_range]),
-                                                         lambda=lambda[penVars],
-                                                         MoreArgs=list(a=a))
-      }
-      #lambda_update <- n*lambda_update
-      iter_num <- iter_num + 1
-      new_beta <- sub_fit$coefficients
-      beta_diff <- sum( (old_beta - new_beta)^2)
-      if(iter_num == iterations | beta_diff < converge_criteria){
-        iter_complete <- TRUE
-        if(iter_num == iterations & beta_diff > converge_criteria){
-          warning(paste("did not converge after ", iterations, " iterations", sep=""))
-        }
-      } else{
-        old_beta <- new_beta
-      }
-   }
-   sub_fit$penalty <- penalty
-   class(sub_fit) <-  c("rq.pen", "rqNC")
-   sub_fit
+   if(alg=="QICD"){
+	 if(length(lambda) > 1){
+		stop("QICD algorithm currently only allows one value of lambda")		
+	 } else{
+		#so qicd algorithm is on the same scale as the lp algorithm
+		lambda <- n*lambda
+	 }
+	 if(is.null(penVars)==TRUE){
+		return_val <- QICD(y, x, tau,lambda, weights, intercept=intercept,penalty=penalty,a=a, 
+							converge_criteria=converge_criteria, ...)
+	 } else{
+		x_pen <- x[,penVars]
+		z <- x[,-penVars]
+		return_val <- QICD.nonpen(x_pen, z, y, tau,lambda, weights, intercept=intercept,penalty=penalty,a=a, 
+								converge_criteria=converge_criteria,...)
+	 }
+	} else{
+	   if(penalty=="SCAD"){
+		 deriv_func <- scad_deriv
+	   }
+	   if(penalty=="MCP"){
+		 deriv_func <- mcp_deriv
+	   }
+	   if(is.null(dim(x))){                                                                                    
+		  stop('x needs to be a matrix with more than 1 column')
+	   }
+	   if(n != length(y)){
+		  stop('length of y and rows of x do not match')
+	   }
+	   if(is.null(lambda)==TRUE | (length(lambda) != 1 & length(lambda) != dim(x)[2])){
+		  stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
+	   }
+	   if( sum(lambda < 0) > 0){
+		  stop('lambda must be positive')
+	   }
+	   if(is.null(penVars) !=TRUE & length(lambda) == 1){
+		  mult_lambda <- rep(0,p)
+		  mult_lambda[penVars] <- lambda
+		  lambda <- mult_lambda
+	   }
+	   if(length(lambda) != 1){
+		  penVars <- (1:p)[lambda != 0]
+		  pen_range <- intercept + penVars
+	   } else{
+		  pen_range <- intercept + 1:p
+		  if(is.null(penVars)){
+			 penVars <- 1:p
+		  }
+	   }
+	   #lambda_update <- n*lambda
+	   lambda_update <- lambda
+	   iter_complete <- FALSE
+	   iter_num <- 0
+	   old_beta <- rep(0, p+intercept)
+	   while(!iter_complete){
+		  sub_fit <- rq.lasso.fit(x=x,y=y,tau=tau,lambda=lambda_update,weights=weights,intercept=intercept,...)
+		  if(length(lambda)==1){
+			  lambda_update <- sapply(abs(sub_fit$coefficients[pen_range]),deriv_func, lambda=lambda, a=a)
+		  } else{
+			  lambda_update[-penVars] <- 0
+			  lambda_update[penVars] <- mapply(deriv_func, x=abs(sub_fit$coefficients[pen_range]),
+															 lambda=lambda[penVars],
+															 MoreArgs=list(a=a))
+		  }
+		  #lambda_update <- n*lambda_update
+		  iter_num <- iter_num + 1
+		  new_beta <- sub_fit$coefficients
+		  beta_diff <- sum( (old_beta - new_beta)^2)
+		  if(iter_num == iterations | beta_diff < converge_criteria){
+			iter_complete <- TRUE
+			if(iter_num == iterations & beta_diff > converge_criteria){
+			  warning(paste("did not converge after ", iterations, " iterations", sep=""))
+			}
+		  } else{
+			old_beta <- new_beta
+		  }
+	   }
+	   sub_fit$penalty <- penalty
+	   class(sub_fit) <-  c("rq.pen", "rqNC")
+	   return_val <- sub_fit
+	}
+	return(return_val)
 }
 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
