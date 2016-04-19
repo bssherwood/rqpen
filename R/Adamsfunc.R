@@ -241,9 +241,10 @@ QICD.nonpen <- function(x, z, y, tau=.5,lambda=NULL, weights=NULL, beta_initial=
     }
 
   if( is.null(beta_initial) ){
-    # Put intercept as last value
-    beta_initial <- rq.lasso.fit(x=x,y=y,tau=tau,lambda=lambda,weights=weights,intercept=intercept,...)$coefficients[c((1:p)+intercept, nonpen)]
-    beta_initial <- c( beta_initial, rep(0,nxcol) )
+    # Put intercept after linear coefficients, but before nonlinear coefficients
+    beta_initial <- rq.lasso.fit(x=x,y=y,tau=tau,lambda=lambda,weights=weights,intercept=intercept,...)$coefficients
+    if(intercept) { beta_initial <-  beta_initial[ c( (1:nxcol)+intercept, 1 ) ] }
+    beta_initial <- c( beta_initial,  rep(0, nzcol) )
   } else {
     if(intercept){ beta_initial <- c(beta_initial[1:nxcol], 0, beta_initial[-(1:nxcol)]) }
     if( length(beta_initial) != nxzcol ){
@@ -370,7 +371,6 @@ QICDz <- function( y, nyrow, x, nxcol, z, nzcol, beta, tau, intercept, pentype, 
   xbeta1 <- x%*%beta1
 
   while( (i < maxout) & (distance >= thresh) ){
-
     iter <- 0
     distance.inner <- thresh + 1
     beta0 <- beta1
@@ -381,11 +381,13 @@ QICDz <- function( y, nyrow, x, nxcol, z, nzcol, beta, tau, intercept, pentype, 
       beta0in <- beta1
       betazin <- betaz
       y.aug <- y - z%*%betazin
+
       out <- .C("QCD", as.double(y.aug), as.double(x), as.double(beta0), as.double(beta1), as.double(xbeta1),
                      nyrow, nxcol, as.integer(0), as.double(tau),
                      as.double(lambda), as.double(a), as.integer(pentype),
                      as.double(thresh), as.integer(1))
       beta1 <- out[[4]]
+
       xbeta1 <- x%*%beta1
       y.aug <- y - xbeta1
 
