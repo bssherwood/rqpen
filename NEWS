@@ -1,3 +1,18 @@
+rqPen 1.4 (Release date: 2016-04-20)
+==============
+Changes: 
+
+* Introduced penVars, which allows users to select a subset of variables to be penalized.
+* QICD algorithm implemented for rq.nc.fit and is default if p > 50. 
+* QICD algorithm has not been implemented for group penalties, yet. 
+
+rqPen 1.3 (Release date: 2016-02-08)
+==============
+Changes:
+
+* Fixed bug that caused cv.rq.pen to be doing k-folds cross validation incorrectly.  
+* QICD approach should be considered in work. Future updates will include a more vetted and faster algorithm.
+
 rqPen 1.2 (Release date: 2015-10-13)
 ==============
 Changes:

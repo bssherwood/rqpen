@@ -187,6 +187,14 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,penalty
 		z <- x[,-penVars]
 		return_val <- QICD.nonpen(x_pen, z, y, tau,lambda, weights, intercept=intercept,penalty=penalty,a=a, 
 								converge_criteria=converge_criteria,...)
+		final_coefs <- rep(0,p)
+		penTotal <- length(penVars)
+		final_coefs[penVars] <- return_val$coefficients[seq(1+intercept,penTotal+intercept)]
+		final_coefs[-penVars] <- return_val$coefficients[seq(penTotal+intercept+1,p+intercept)]
+		if(intercept){
+			final_coefs <- c(coefficients(return_val)[1],final_coefs)
+		}
+		return_val$coefficients <- final_coefs
 	 }
 	} else{
 	   if(penalty=="SCAD"){

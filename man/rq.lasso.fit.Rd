@@ -15,7 +15,7 @@ rq.lasso.fit(x,y,tau=.5,lambda=NULL,weights=NULL,
   \item{intercept}{ Whether model should include an intercept. Constant does not need to be included in "x".}
   \item{coef.cutoff}{ Coefficients below this value will be set to zero.}
   \item{method}{Use method "br" or "fn" as outlined in quantreg package. Method "fn" better for large n or p.} 
-  \item{penVars}{Vector containing 1s for penalized coefficients and 0s for nonpenalized coefficients.}
+  \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
   \item{...}{Additional items to be sent to rq. Note this will have to be done carefully as rq is run on the augmented data to account for penalization and could provide strange results if this is not taken into account.}
 }
 \value{

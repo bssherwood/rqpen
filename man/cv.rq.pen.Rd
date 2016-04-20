@@ -21,7 +21,7 @@ cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
   \item{nlambda}{ Number of lambdas for which models are fit.}
   \item{eps}{ Smallest lambda used.}
   \item{init.lambda}{ Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
-  \item{penVars}{Vector containing 1s for penalized coefficients and 0s for nonpenalized coefficients.}
+  \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
   \item{...}{Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.}   
 }
 \value{
@@ -42,7 +42,7 @@ cv_model <- cv.rq.pen(x,y)
 }
 }
 \references{
-[1] Wang, L., Wu, Y. and Li, R. \emph{J. Am. Statist. Ass}, \bold{107}, 214--222.
+[1] Wang, L., Wu, Y. and Li, R. Quantile regression of analyzing heterogeneity in ultra-high dimension. \emph{J. Am. Statist. Ass}, \bold{107}, 214--222.
 
 [2] Wu, Y. and Liu, Y. (2009). Variable selection in quantile regression. \emph{Statistica Sinica}, \bold{19}, 801--817.
 
