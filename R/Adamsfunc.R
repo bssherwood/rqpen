@@ -552,3 +552,146 @@ QICDz <- function( y, nyrow, x, nxcol, z, nzcol, beta, tau, intercept, pentype, 
 
   return( c(beta1, betaz) )
 }
+
+
+QICDgroup <- function( y, nyrow, x, nxcol, beta, tau, intercept, pentype, lambda, a,
+                    thresh, maxin, maxout, groups, ... ){
+
+  beta1 <- beta
+  i=0
+  distance <- thresh+1
+  groupl1 <- rep(0, nxcol)
+  y <- as.double(y)
+
+
+  while( (i < maxout) & (distance >= thresh) ){
+
+    beta0 <- beta1
+    xbeta1 <- x%*%beta1
+    for(grps in unique(groups)){
+      groupl1[groups==grps] <- sum( abs(beta0[groups==groups]) )
+    }
+    groupl1 <- as.double(groupl1)
+
+    out <- .C("QCDgroup", y, as.double(x), as.double(beta0), as.double(beta1), as.double(xbeta1),
+                     nyrow, nxcol, intercept, tau, lambda, a, pentype, thresh, maxin, groupl1)
+    beta1 <- out[[4]]
+    i <- i+1
+    distance <- sqrt( sum((beta1 - beta0)^2) )
+  }
+
+  if(i == maxout & distance > thresh){
+      warning(paste("did not converge after ", maxout, " iterations", sep=""))
+    }
+
+  return( beta1 )
+}
+
+
+
+
+
+groupQICD2 <- function(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
+    maxin = 100, maxout=20, eps = 1e-05, penalty = "SCAD", a = 3.7, coef.cutoff = 1e-08, 
+    initial_beta = NULL, ...) 
+#x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
+#y: response variable, length n vector
+#groups: numeric vector of length ncol(x) with the group number of the coefficient (can be unique)
+#lambda is the tuning parameter (numeric value > 0)
+#tau is the quantile value
+#beta_intial: initial value for x-covariates, the default value is NULL (lasso estimates will be used)
+#intercept is a logical value,should intercept(s) be fitted (default=TRUE) or set to zero(FALSE)
+#a is scale parameter, the default value is 3.7 for SCAD
+#penalty is the name of nonconvex penalty function, could be "SCAD" and "MCP", the default
+#value is "SCAD"
+#converge_criteria is the convergence threshold for coordinate descent and majorization minimization step.
+#Default value is 1E-6
+#maxin: maximum number of iterations for inside coordinate descent,default value is 100
+#maxout: maximum number of iterations for outside MM step,default value is 20
+{
+#######################################################
+
+  # Get some basic info
+  nyrow  <- as.integer( length(y) )
+  nxcol  <- as.integer( ncol(x) )
+  p      <- as.integer( nxcol+intercept ) # Number of covariates (not intercept)
+
+  if( is.null(initial_beta) ){
+    # Put intercept as last value
+    initial_beta <- rep(0, p)
+  } else {
+    if(intercept){ initial_beta <- c(initial_beta,0) }
+    if( length(initial_beta) != p ){
+      stop("initial_beta does not have length ncol(x)")
+  }
+  }
+  if(dim(x)[1] != nyrow){
+      stop("length of y and rows of x do not match")
+  }
+
+
+
+  # Check penalty functions
+  if(penalty == "SCAD"){
+      pentype <- as.integer(0)  
+  } else if (penalty == "MCP"){
+      pentype <- as.integer(1)
+  } else if (penalty == "LASSO"){
+      pentype <- as.integer(2)
+  } else {
+    stop("wrong penalty function")
+  }
+
+
+
+  # Create design matrix (Penalized, Intercept, Nonpenalized)
+  xdes <- x
+  if( intercept ){
+      xdes <- cbind(xdes,1)
+  }
+
+
+  lambda <- lambda/nyrow
+
+  y         <- as.double(y)
+  xdescol   <- as.integer( ncol(xdes) )
+  tau       <- as.double(tau)
+  int       <- as.integer(intercept)
+  a         <- as.double(a)
+  thresh    <- as.double(eps)
+  maxin     <- as.integer(maxin)
+  lambda    <- as.double(lambda)
+
+  beta1 <- initial_beta
+  i=0
+  distance <- thresh+1
+  groupl1 <- rep(0, nxcol)
+
+  while( (i < maxout) & (distance >= thresh) ){
+
+    beta0 <- beta1
+    xbeta1 <- xdes%*%beta1
+    for(grps in unique(groups)){
+      groupl1[groups==grps] <- sum( abs(beta0[groups==grps]) )
+    }
+
+    out <- .C("QCDgroup", y, as.double(xdes), as.double(beta0), as.double(beta1), as.double(xbeta1),
+                     nyrow, nxcol, intercept, tau, lambda, a, pentype, thresh, maxin, as.double(groupl1))
+    beta1 <- out[[4]]
+    i <- i+1
+    distance <- sqrt( sum((beta1 - beta0)^2) )
+  }
+
+  if(i == maxout & distance > thresh){
+      warning(paste("did not converge after ", maxout, " iterations", sep=""))
+    }    
+  #final beta coefficients, Order of coefficients is linear,intercept
+
+  if(intercept){ 
+    coefficients <- c(beta1[ c( p, 1:nxcol )])
+  } else {
+    coefficients <- c(beta1)
+  }
+
+  return( coefficients )
+}

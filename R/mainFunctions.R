@@ -423,14 +423,24 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                 penalty = "LASSO",alg="QICD", ...) 
 {
+    ### Some cleaning/checking before getting to the algorithms
     p <- dim(x)[2]
     if (!penalty %in% c("LASSO", "SCAD", "MCP")) {
         stop("Penalty must be LASSO, SCAD or MCP")
     }
+    if(is.null(dim(x))){ stop("x must be matrix with at least 1 column") }
+    if(length(groups)!=ncol(x)){
+      stop("length(groups) must be equal to ncol(x)")
+    }
+    if( lambda <= 0 ){ stop("lambda must be positive")}
+
     if (alg == "QICD") {
-        coefs <- groupQICD(x = x, y = y, groups = groups, lambda = lambda, 
-            tau = tau, intercept = intercept, penalty = penalty, 
-            ...)
+        # coefs <- groupQICD(x = x, y = y, groups = groups, lambda = lambda, 
+        #     tau = tau, intercept = intercept, penalty = penalty, 
+        #     ...)
+        coefs <- groupQICD2(x=x, y=y, groups=groups, tau = tau, 
+                lambda=lambda, intercept = intercept, 
+                penalty = penalty, a = 3.7, ...)
         return_val <- list()
         return_val$coefficients <- coefs
         if (is.null(colnames(x))) {
@@ -452,8 +462,7 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
         return_val$n <- dim(x)[1]
         return_val$intercept <- intercept
         class(return_val) <- c("rq.group.pen", "rq.pen", "rqNC")
-    }
-    else {
+    } else {
         group_num <- length(unique(groups))
         if (length(lambda) == 1) {
             lambda <- rep(lambda, group_num)
