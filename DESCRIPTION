@@ -1,8 +1,8 @@
 Package: rqPen
 Type: Package
 Title: Penalized Quantile Regression
-Version: 1.5
-Date: 2016-10-21
+Version: 1.51
+Date: 2016-11-03
 Author: Ben Sherwood [aut, cre], Adam Maidman [ctb] 
 Depends: R (>= 3.0.0), quantreg, regpro
 Maintainer: Ben Sherwood <ben.sherwood@ku.edu>
