@@ -39,4 +39,4 @@ cv_model <- rq.group.fit(x,y,groups=c(rep(1,4),rep(2,4)),lambda=1,penalty="SCAD"
 [2] Peng, B. and Wang, L. (2015). An Iterative Coordinate Descent Algorithm for High-Dimensional Nonconvex Penalized Quantile Regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694.
 
 }
-\author{Ben Sherwood}
+\author{Ben Sherwood; Adam Maidman}

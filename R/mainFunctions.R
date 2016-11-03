@@ -26,7 +26,7 @@ model_eval <- function(model, test_x, test_y, func="check",...){
   }
   fits <- test_x %*% coefficients(model)
   eval_func <- switch(which(c("check","SqErr","AE")==func), check, square, abs)
-  mean(eval_func(fits-test_y,...)) 
+  mean(eval_func(test_y-fits,...)) 
 }
 
 
