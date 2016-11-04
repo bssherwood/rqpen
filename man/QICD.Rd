@@ -12,7 +12,7 @@ QICD(y, x, tau = 0.5, lambda = NULL, weights=NULL, beta_initial = NULL,
   \item{tau}{Conditional quantile being modelled}
   \item{lambda}{Tuning parameter.}
   \item{weights}{Weights for the objective function.}
-  \item{beta_initial}{Vector of values for coefficients (and intercept) to initialize algorithm.  If NULL, the LASSO model is fit and used as initializing values.}
+  \item{beta_initial}{Vector of values for coefficients (not intercept) to initialize algorithm.  If NULL, the LASSO model is fit and used as initializing values.}
   \item{intercept}{Whether model should include an intercept. Constant does not need to be included in "x".  Takes values "TRUE" or "FALSE".}
   \item{penalty}{MCP or SCAD.  Takes values "MCP" or "SCAD".}
   \item{a}{Second tuning parameter.}
