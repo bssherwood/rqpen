@@ -136,10 +136,14 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if( sum(lambda < 0) > 0){
       stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
    }
-   if(is.null(penVars) !=TRUE & length(lambda) == 1){
-      mult_lambda <- rep(0,p)
-      mult_lambda[penVars] <- lambda
-      lambda <- mult_lambda
+   if(is.null(penVars) !=TRUE){# & length(lambda) == 1){
+      if(length(lambda)==1){
+		  mult_lambda <- rep(0,p)
+		  mult_lambda[penVars] <- lambda
+		  lambda <- mult_lambda
+	  } else{
+		lambda[-penVars] <- 0
+	  }
    }
    lambda <- lambda*n # need this to account for the fact that rq does not normalize the objective function
    if(length(lambda)==1){

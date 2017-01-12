@@ -338,8 +338,16 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
                 searching <- FALSE
             }
             else {
-                 lambda_star = max((inter_only_rho-init_fit$rho)/ sum(sapply(init_fit$coefficients[p_range],pen_func, 1)),
-                                    lambda_star+1)
+				option_1 <- (inter_only_rho-init_fit$rho)/ sum(sapply(init_fit$coefficients[p_range],pen_func, 1))
+				option_2 <- lambda_star*search_num
+				if(option_1 >= option_2){
+					lambda_star <- option_1
+				} else{
+					lambda_star <- option_2
+					search_num <- search_num + 1
+				}
+                # lambda_star = max((inter_only_rho-init_fit$rho)/ sum(sapply(init_fit$coefficients[p_range],pen_func, 1)),
+                #                    lambda_star+1)
                  #this is sort of a hack, need to think of a better way to pick lambda_star
                 #lambda_star = inter_only_rho/sum(sapply(init_fit$coefficients[p_range], 
                 #  pen_func, 1))
