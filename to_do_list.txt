@@ -2,4 +2,4 @@
    not invariant to scale so best if all penalized variables are on the same scale. 
 2. Smarter way to choose lambdas for cv.rq.pen
 3. Allow users to specify a vector of lambdas for cv.rq.pen function. 
-4. 
+4. Get QICD and Linear programming lambda on the same scale. 

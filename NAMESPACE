@@ -2,6 +2,7 @@ useDynLib("rqPen")
 
 import(quantreg) 
 import(regpro)
+import(splines)
 importFrom("graphics", "lines", "plot")
 importFrom("stats", "coefficients", "predict", "quantile", "residuals",
              "sd", "xtabs")
@@ -43,3 +44,4 @@ S3method("nonzero","cv.rq.group.pen")
 export(QICD)
 export(print.cv.rq.pen)
 export(print.rq.pen)
+export(qaSIS)

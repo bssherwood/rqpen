@@ -422,7 +422,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
     for (lam in lambda) {
         return_val[[pos]] <- rq.group.fit(x = x, y = y, groups = groups, 
             tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, 
-            method="br",...)
+            ...)
         #initial_beta <- return_val[[pos]]$coefficients
         pos <- pos + 1
     }

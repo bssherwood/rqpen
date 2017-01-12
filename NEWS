@@ -1,3 +1,7 @@
+rqPen 1.6 (Release date: )
+* Added function qaSIS, for quantile adaptive screening. 
+* Fixed bugs in rq.group.fit and cv.rq.group.pen
+
 rqPen 1.5.1 (Release date: 2016-11-03)
 * Fixed bug in model_eval function, replaced fits-test_y with test_y-fits. The order matters for the check function, because it is not symmetric. 
 
