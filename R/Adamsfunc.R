@@ -620,7 +620,8 @@ groupQICD2 <- function(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
     # Put intercept as last value
     initial_beta <- rep(0, p)
   } else {
-    if(intercept){ initial_beta <- c(initial_beta,0) }
+    #if(intercept){ initial_beta <- c(initial_beta,0) } commented out by Ben on 1/12/2017
+	if(intercept){ initial_beta <- c(initial_beta[-1],initial_beta[1])} #assume intercept is specified and move it to the back, as that is how qicd code reads in the intercept. 
     if( length(initial_beta) != p ){
       stop("initial_beta does not have length ncol(x)")
   }
