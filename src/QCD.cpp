@@ -28,16 +28,15 @@ void quicksort(double *x, double *w, int *n){
 
 }
 
-void QCD( double *y,  double *x, double *beta, double *intval, double *penweight, double *residuals,
+void QCD( double *x, double *beta, double *intval, double *penweight, double *residuals,
 		  	  int *n, int *p, int *intercept, double *tau, double *eps, int *maxin)
-// y is the response variable; vector of length n
 // x is the design matrix (just covariates, no column of ones); n x p matrix (converted to vector)
 // beta is the initial (and will be the final) value of coefficients; vector of length p
 // intval is the initial (and will be the final) value of the intercept; can be anything if no intercept in model
 // penweight is the penalty weight for each coefficient; vector of length p
 // residuals is the vector of residuals from current value of betas; vector of length n ( = y - x%*%beta )
-// n is the length of y
-// p is the number of coefficients
+// n is the number of observations
+// p is the number of coefficients (not including intercept)
 // intercept is the intercept indicator, 1 is intercept, 0 is no intercept
 // tau is the quantile of interest
 // thresh is the convergence threshold

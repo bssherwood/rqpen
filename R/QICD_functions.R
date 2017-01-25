@@ -122,11 +122,11 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
     out <- .C("penderiv", as.double(beta), p, a, lambda, pentype)
     penweight <- as.double( n*out[[1]] )
 
-    out <- .C("QCD", y, xdoub, as.double(beta), as.double(intval), penweight, residuals,
+    out <- .C("QCD", xdoub, as.double(beta), as.double(intval), penweight, residuals,
                          nint, p, int, tau, eps, maxin)
-    beta <- out[[3]]
-    intval <- out[[4]]
-    residuals <- as.double( out[[6]] )
+    beta <- out[[2]]
+    intval <- out[[3]]
+    residuals <- as.double( out[[5]] )
     i <- i+1
     distance <- sqrt( sum((beta - beta0)^2) + (intval0 - intval)^2 )
     beta0 <- beta
@@ -225,7 +225,6 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
   zbeta <- zreg(zmat, xresiduals, tau = tau)
   zbeta0 <- zbeta00 <- zbeta
   zb <- zmat%*%zbeta
-  zresiduals <- as.double(y - zb)
   residuals <- as.double(y - xb - zb)
 
   while( (i < maxout) & (distance >= eps) ){
@@ -237,15 +236,14 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
     while( (ii < maxin) & distance.inner >= thresh ){
 
 
-      out <- .C("QCD", zresiduals, xdoub, as.double(beta), as.double(0), penweight, residuals,
+      out <- .C("QCD", xdoub, as.double(beta), as.double(0), penweight, residuals,
                        nint, p, as.integer(0), tau, eps, as.integer(1))
-      beta <- out[[3]]
+      beta <- out[[2]]
 
       xb <- x%*%beta
       xresiduals <- y - xb
       zbeta <- zreg(zmat, xresiduals, tau = tau)
       zb <- zmat%*%zbeta
-      zresiduals <- as.double(y - zb)
       residuals <- as.double(y - xb - zb)
 
       ii <- ii+1
@@ -343,11 +341,11 @@ QICD.group <- function(y, x, groups, tau = 0.5, lambda, intercept = TRUE,
     out <- .C("penderiv", as.double(groupl1), p, a, lambda, pentype)
     penweight <- as.double( n*out[[1]] )
 
-    out <- .C("QCD", y, xdoub, as.double(beta), as.double(intval), penweight, residuals,
+    out <- .C("QCD", xdoub, as.double(beta), as.double(intval), penweight, residuals,
                          nint, p, int, tau, eps, maxin)
-    beta <- out[[3]]
-    intval <- out[[4]]
-    residuals <- as.double( out[[6]] )
+    beta <- out[[2]]
+    intval <- out[[3]]
+    residuals <- as.double( out[[5]] )
     i <- i+1
     distance <- sqrt( sum((beta - beta0)^2) + (intval0 - intval)^2 )
     beta0 <- beta
