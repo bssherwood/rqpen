@@ -671,7 +671,7 @@ groupQICD2 <- function(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
   while( (i < maxout) & (distance >= thresh) ){
 
     beta0 <- beta1
-    xbeta1 <- xdes%*%beta1
+    xbeta1 <- xdes %*% beta1
     for(grps in unique(groups)){
       groupl1[groups==grps] <- sum( abs(beta0[groups==grps]) )
     }

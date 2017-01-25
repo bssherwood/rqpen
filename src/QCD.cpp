@@ -16,524 +16,240 @@ return the vector prebeta for caculating the weighted median
 // y is the responses, x is the predictors, beta1 is the parameters, nyrow is the row length 
 // of y, nxcol is the column length of x, tau is the quantile parameter.
 extern "C"{
-void F77_NAME(xssort)(double*, double*, int*, int*);
+// void F77_NAME(xssort)(double*, double*, int*, int*);
+void xssort_ (double*, double*, int*, int*);
 
 // C WRAPPER FUNCTION FOR xssort SUBROUTINE
 void quicksort(double *x, double *w, int *n){
 	int kflag = 2;
 //  CALLING FORTRAN	FUNCTION FROM C
-	F77_CALL(xssort)(x, w, n, &kflag);
+	// F77_CALL(xssort)(x, w, n, &kflag);
+	xssort_ (x, w, n, &kflag);
+
 }
 
-void QCD( double *y,  double *x,    double *beta0,  double *beta1, double *xbeta1,
-		  int *nyrow, int *nxcol,   int *intercept, double *tau,  double *lambda,
-		  double *a,  int *pentype, double *thresh, int *maxin)
+void QCD( double *y,  double *x, double *beta, double *intval, double *penweight, double *residuals,
+		  	  int *n, int *p, int *intercept, double *tau, double *eps, int *maxin)
 // y is the response variable; vector of length n
-// x is the design matrix (with intercept included at end if needed); n x p matrix (converted to vector)
-// beta0 is the initial value of coefficients; vector of length p
-// beta1 will be the final value of coefficients; vector of length p
-// xbeta1 is the vector to calculate the weighted median; vector of length n ( = x%*%beta )
-// nyrow is the length of y, which is n
-// nxcol is the number of columns of x, which is p
-// intercept is the intercept indicator, 1 for intercept, 0 for no intercept
-// tau is the quantile
-// lambda is the tuning parameter
-// a is another tuning parameter for SCAD and MCP penalties
-// pentype is the indicator for penalty types, 0 = SCAD, 1 = MCP.
+// x is the design matrix (just covariates, no column of ones); n x p matrix (converted to vector)
+// beta is the initial (and will be the final) value of coefficients; vector of length p
+// intval is the initial (and will be the final) value of the intercept; can be anything if no intercept in model
+// penweight is the penalty weight for each coefficient; vector of length p
+// residuals is the vector of residuals from current value of betas; vector of length n ( = y - x%*%beta )
+// n is the length of y
+// p is the number of coefficients
+// intercept is the intercept indicator, 1 is intercept, 0 is no intercept
+// tau is the quantile of interest
 // thresh is the convergence threshold
-// maxin is maximal iteration numbers
+// maxin is maximum number of iterations
 {	
 	int iter = 0;                 // Iteration count
-	int col = 0;                  // Column index (Do intercept last)
+	int col;                  // Column index (p columns in x and then do intercept last)
 	int row, rowcol, nonzerox;    // Row index, (row, col) entry of x, keep track of nonzero x entries for each column
-	double nrow = double(*nyrow); // Turn *nyrow into double (from int)
 
-	double *weight = new double[*nyrow + 1]; // Weight vector
-	int length_weight;                       // Length of weight vector
+	double *weight = new double[*n + 1]; // Weight vector
+	int length_weight;                   // Length of weight vector
 
-	double *pre_value_final=new double[*nyrow+1]; // pre_value_final is the vector to save the weighted median vector
+	double *pre_value_final=new double[*n+1]; // pre_value_final is the vector to save the weighted median vector
 
 	// Used for computing weighted median
 	int count3;
 	double weight_sum, temp1;
 
 	// Keep track whether beta vector has converged
-	double betavecDiff=0;
-	double betaDiff=0;
+	double betavecDiff;
+	double betaDiff;
 	double newBeta; // placeholder for new beta
 
 
 	while( (iter < *maxin) ) //number of inside iterations
 	{	
-
-		temp1=0;
-		// Used for calculation of weighted median
-		
-		weight_sum=0;
-		// sum of the weight vector
-		row = 0;
-		nonzerox = -1;
-		rowcol = (*nyrow)*col;
-		while( row < *nyrow )
-		// loop through the entries in x of column number col
-		{	
-
-			if( betaDiff != 0 ){
-				if(col > 0)
-					xbeta1[row] += betaDiff*x[rowcol - *nyrow];
-				else
-					xbeta1[row] += betaDiff*x[rowcol + (*nxcol-1)*(*nyrow)];
-			}
-
-			if( x[rowcol] != 0 )
-			{
-				nonzerox++;
-				pre_value_final[nonzerox] = y[row] - xbeta1[row];
-
-				if( pre_value_final[nonzerox] > 0 )
-					weight[nonzerox] = fabs(x[rowcol])*(*tau)/nrow;
-				else
-					weight[nonzerox] = fabs(x[rowcol])*(1 - *tau)/nrow;
-				// update the weight_i
-
-				if ( *tau >= 0.5 )
-					pre_value_final[nonzerox] = -( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-				else
-					pre_value_final[nonzerox] =  ( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-
-				weight_sum += weight[nonzerox];
-			}
-
-			row++;	
-			rowcol++;
-		}
-		if ( (col < (*nxcol -1)) || (*intercept == 0) ) // Not Intercept coefficient
+		col = 0;
+		betavecDiff = 0;
+		while( col < *p ) // This is the loop for the coefficients, do the intercept last
 		{
+			temp1=0;  // Used for calculation of weighted median
+			weight_sum=0;  // sum of the weight vector
+			row = 0;
+			nonzerox = -1;
+			rowcol = (*n)*col;
+			while( row < *n )  // loop through the entries in x of column number col
+			{	
+				if( x[rowcol] != 0 )
+				{
+					nonzerox++;
+					pre_value_final[nonzerox] = residuals[row];
+
+					if( pre_value_final[nonzerox] > 0 )
+						weight[nonzerox] = fabs(x[rowcol])*(*tau);
+					else
+						weight[nonzerox] = fabs(x[rowcol])*(1 - *tau);
+
+					pre_value_final[nonzerox] = ( pre_value_final[nonzerox] + x[rowcol]*beta[col] )/( x[rowcol] );
+					if ( *tau >= 0.5 )
+						pre_value_final[nonzerox] =  -( pre_value_final[nonzerox] );
+
+					weight_sum += weight[nonzerox];
+				}
+
+				row++;	
+				rowcol++;
+			}
+
+			// Compute the extra pseudo-observation (penalty for the coefficient)
 			nonzerox++;
 			pre_value_final[nonzerox] = 0;
 
-			/////////////////////////////////////////////////SCAD
-			if ( *pentype == 0 )
-			{
-      			if ( fabs(beta0[col]) < *lambda )
-					weight[nonzerox] = *lambda;
-				else if ( fabs(beta0[col]) < (*a)*(*lambda) )
-					weight[nonzerox] = ( (*a)*(*lambda) - fabs(beta0[col]) )/(double(*a-1));
-				else
-					weight[nonzerox] = 0;
-			}
-			/////////////////////////////////////////////////
-			/////////////////////////////////////////////////MCP
-			else if ( *pentype == 1 )
-			{
-				if ( fabs(beta0[col]) < (*a)*(*lambda) )
-					weight[nonzerox] = *lambda - fabs(beta0[col])/ *a;
-				else
-					weight[nonzerox] = 0;
-			/////////////////////////////////////////////////
-			}
+			weight[nonzerox] = penweight[col];
 			weight_sum += weight[nonzerox];
+
+			// Compute the weighted median
 			length_weight = nonzerox+1;
 			quicksort( pre_value_final, weight, &length_weight );
-			for (count3=0 ; count3 <= nonzerox; count3++)
+			count3 = -1;
+			temp1 = 0;
+			weight_sum = weight_sum/2; // Don't need sum anymore, just need sum/2
+			while( temp1 < weight_sum )
 			{
-				temp1 += weight[count3];
-				if ( temp1 > weight_sum/2 )
+				count3++;
+				temp1 = temp1 + weight[count3];
+			}
+
+			// Update the coefficient
+			newBeta = pre_value_final[count3];
+			if ( *tau >= 0.5)
+				newBeta = -newBeta;
+
+			betaDiff = beta[col] - newBeta;
+			betavecDiff = betavecDiff + betaDiff*betaDiff;
+			beta[col] = newBeta;
+
+			// Update the residual vector if newBeta has changed
+			if( betaDiff != 0 )
+			{
+				row = 0;
+				rowcol = (*n)*col;
+				while( row < *n )
 				{
-					break;
+					residuals[row] = residuals[row] + x[rowcol]*betaDiff;
+					row++;
+					rowcol++;
 				}
 			}
+
+			col++; // Next coefficient and repeat
 		}
-		else // Intercept coefficient
+
+		if( *intercept == 1) // If intercept, update the intercept
 		{
-			length_weight = nonzerox+1;
-			quicksort( pre_value_final, weight, &length_weight );
-			for ( count3=0; count3 <= nonzerox; count3++ )
-			{
-				temp1 += weight[count3];
-				if (temp1> weight_sum/2)
-				{
-					break;
-				}
-			}
-		}
-
-		if ( *tau >= 0.5)
-			newBeta = -pre_value_final[count3];
-		else
-			newBeta =  pre_value_final[count3];
-		//change from current beta1 to new beta1
-
-		if( (fabs(newBeta) < *thresh) && ( (col < (*nxcol -1)) || (*intercept == 0) ) )
-		{
-			newBeta = 0;
-		}
-
-		betaDiff = newBeta - beta1[col];
-		beta1[col] = newBeta;
-
-
-		betavecDiff += fabs(betaDiff);
-		col++;
-
-		if( col == *nxcol )
-		{
-			if( sqrt(betavecDiff) < *thresh )
-			{
-				break;
-			}
-
-			iter++;
-			col = 0;
-			betavecDiff = 0;
-		}
-
-		
-	}
-	
-		delete [] pre_value_final;
-		delete [] weight;
-}
-
-
-
-
-
-
-
-void QCDgroup( double *y,  double *x,    double *beta0,  double *beta1, double *xbeta1,
-		  int *nyrow, int *nxcol,   int *intercept, double *tau, double *lambda,
-		  double *a,  int *pentype, double *thresh, int *maxin, double *groupl1)
-// y is the response variable; vector of length n
-// x is the design matrix (with intercept included at end if needed); n x p matrix (converted to vector)
-// beta0 is the initial value of coefficients; vector of length p
-// beta1 will be the final value of coefficients; vector of length p
-// xbeta1 is the vector to calculate the weighted median; vector of length n ( = x%*%beta )
-// nyrow is the length of y, which is n
-// nxcol is the number of columns of x, which is p
-// intercept is the intercept indicator, 1 for intercept, 0 for no intercept
-// tau is the quantile
-// lambda is the tuning parameter
-// a is another tuning parameter for SCAD and MCP penalties
-// pentype is the indicator for penalty types, 0 = SCAD, 1 = MCP, 2 = LASSO.
-// thresh is the convergence threshold
-// maxin is maximal iteration numbers
-// groupl1 is vector of length p of group l1 norm for each covariate (not unique as each member of a group has the same group l1 norm)
-{	
-	int iter = 0;                 // Iteration count
-	int col = 0;                  // Column index (Do intercept last)
-	int row, rowcol, nonzerox;    // Row index, (row, col) entry of x, keep track of nonzero x entries for each column
-	double nrow = double(*nyrow); // Turn *nyrow into double (from int)
-
-	double *weight = new double[*nyrow + 1]; // Weight vector
-	int length_weight;                       // Length of weight vector
-
-	double *pre_value_final=new double[*nyrow+1]; // pre_value_final is the vector to save the weighted median vector
-
-	// Used for computing weighted median
-	int count3;
-	double weight_sum, temp1;
-
-	// Keep track whether beta vector has converged
-	double betavecDiff=0;
-	double betaDiff=0;
-	double newBeta; // placeholder for new beta
-
-
-	while( (iter < *maxin) ) //number of inside iterations
-	{	
-
-		temp1=0;
-		// Used for calculation of weighted median
-		
-		weight_sum=0;
-		// sum of the weight vector
-		row = 0;
-		nonzerox = -1;
-		rowcol = (*nyrow)*col;
-		while( row < *nyrow )
-		// loop through the entries in x of column number col
-		{	
-
-			if( betaDiff != 0 ){
-				if(col > 0)
-					xbeta1[row] += betaDiff*x[rowcol - *nyrow];
-				else
-					xbeta1[row] += betaDiff*x[rowcol + (*nxcol-1)*(*nyrow)];
-			}
-
-			if( x[rowcol] != 0 )
-			{
+			temp1 = 0;  // Used for calculation of univariate tauth quantile
+			weight_sum = 0;  // sum of the weight vector (for the intercept, everything has weight of 1)
+			row = 0;
+			nonzerox = -1;
+			while( row < *n )  // loop through the entries in x of column number col
+			{	
 				nonzerox++;
-				pre_value_final[nonzerox] = y[row] - xbeta1[row];
-
-				if( pre_value_final[nonzerox] > 0 )
-					weight[nonzerox] = fabs(x[rowcol])*(*tau)/nrow;
-				else
-					weight[nonzerox] = fabs(x[rowcol])*(1 - *tau)/nrow;
-				// update the weight_i
-
-				if ( *tau >= 0.5 )
-					pre_value_final[nonzerox] = -( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-				else
-					pre_value_final[nonzerox] =  ( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-
-				weight_sum += weight[nonzerox];
+				pre_value_final[nonzerox] = residuals[row] + intval[0];
+				weight[nonzerox] = 1;
+				row++;	
+				weight_sum = weight_sum + weight[nonzerox];
 			}
 
-			row++;	
-			rowcol++;
-		}
-		if ( (col < (*nxcol -1)) || (*intercept == 0) ) // Not Intercept coefficient
-		{
-			nonzerox++;
-			pre_value_final[nonzerox] = 0;
-
-			/////////////////////////////////////////////////SCAD
-			if ( *pentype == 0 )
-			{
-      			if ( fabs(beta0[col]) < *lambda )
-					weight[nonzerox] = *lambda;
-				else if ( fabs(beta0[col]) < (*a)*(*lambda) )
-					weight[nonzerox] = ( (*a)*(*lambda) - groupl1[col] )/(double(*a-1));
-				else
-					weight[nonzerox] = 0;
-			}
-			/////////////////////////////////////////////////
-			/////////////////////////////////////////////////MCP
-			else if ( *pentype == 1 )
-			{
-				if ( fabs(beta0[col]) < (*a)*(*lambda) )
-					weight[nonzerox] = *lambda - groupl1[col]/ *a;
-				else
-					weight[nonzerox] = 0;
-			/////////////////////////////////////////////////
-			}
-			/////////////////////////////////////////////////LASSO
-			else if ( *pentype == 2 )
-			{
-				weight[nonzerox] = *lambda;
-			}
-			/////////////////////////////////////////////////
-
-			weight_sum += weight[nonzerox];
+			// Compute the univariate tauth quantile
 			length_weight = nonzerox+1;
 			quicksort( pre_value_final, weight, &length_weight );
-			for (count3=0 ; count3 <= nonzerox; count3++)
+			count3 = -1;
+			temp1 = 0;
+			weight_sum = weight_sum*(*tau); // Don't need sum anymore, just need sum*tau
+			while( temp1 < weight_sum )
 			{
-				temp1 += weight[count3];
-				if ( temp1 > weight_sum/2 )
+				count3++;
+				temp1 = temp1 + weight[count3];
+			}
+
+			// Update the coefficient
+			newBeta = pre_value_final[count3];
+
+			betaDiff = intval[0] - newBeta;
+			betavecDiff = betavecDiff + betaDiff*betaDiff;
+			intval[0] = newBeta;
+
+			// Update the residual vector if newBeta has changed
+			if( betaDiff != 0 )
+			{
+				row = 0;
+				while( row < *n )
 				{
-					break;
+					residuals[row] = residuals[row] + betaDiff;
+					row++;
 				}
 			}
+
 		}
-		else // Intercept coefficient
+
+
+		if( sqrt(betavecDiff) < *eps ) // Check for convergence
 		{
-			length_weight = nonzerox+1;
-			quicksort( pre_value_final, weight, &length_weight );
-			for ( count3=0; count3 <= nonzerox; count3++ )
-			{
-				temp1 += weight[count3];
-				if (temp1> weight_sum/2)
-				{
-					break;
-				}
-			}
+			break;
 		}
 
-		if ( *tau >= 0.5)
-			newBeta = -pre_value_final[count3];
-		else
-			newBeta =  pre_value_final[count3];
-		//change from current beta1 to new beta1
-
-		if( (fabs(newBeta) < *thresh) && ( (col < (*nxcol -1)) || (*intercept == 0) ) )
-		{
-			newBeta = 0;
-		}
-
-		betaDiff = newBeta - beta1[col];
-		beta1[col] = newBeta;
-
-
-		betavecDiff += fabs(betaDiff);
-		col++;
-
-		if( col == *nxcol )
-		{
-			if( sqrt(betavecDiff) < *thresh )
-			{
-				break;
-			}
-
-			iter++;
-			col = 0;
-			betavecDiff = 0;
-		}
-
-		
+		iter++; // Next iteration (col resets to 0 at the top)
 	}
-	
+
+		// Final clean up
 		delete [] pre_value_final;
 		delete [] weight;
+
+		
 }
 
 
 
+void penderiv( double *beta, int *p, double *a, double *lambda, int *pentype)
+// beta is the vector of coefficients and will return the value of the derivative of the penalties
+// n is the number of observations
+// p is the number of coefficients
+// a is a parameter for SCAD and MCP
+// lambda is a parameter for SCAD, MCP, and LASSO
+// pentype is the penalty (0 for SCAD, 1 for MCP, 2 for LASSO)
+{
+	int count = 0;
+	double temp;
+	while( count < *p )
+	{
+		if( *pentype == 0 ) // SCAD
+		{
+			if( fabs(beta[count]) < *lambda )
+				temp = *lambda;
+			else if ( fabs(beta[count]) < (*a)*(*lambda) )
+				temp = ( (*a)*(*lambda) - fabs(beta[count]) )/( *a - 1.0 );
+			else 
+				temp = 0;
+		}
+		else if( *pentype == 1 ) // MCP
+		{
+			if ( fabs(beta[count]) < (*a)*(*lambda) )
+				temp = ( *lambda - fabs(beta[count]) )/( *a );
+			else 
+				temp = 0;
+		}
+		else // LASSO
+		{
+			temp = *lambda;
+		}
 
+		beta[count] = temp;
+		count++;
+	}
 }
-
-
-// void QCDgrouplasso( double *y,  double *x,    double *beta0,  double *beta1, double *xbeta1,
-// 		  int *nyrow, int *nxcol,   int *intercept, double *tau, double *lambda,
-// 		  double *thresh, int *maxin, double *groupl1)
-// // y is the response variable; vector of length n
-// // x is the design matrix (with intercept included at end if needed); n x p matrix (converted to vector)
-// // beta0 is the initial value of coefficients; vector of length p
-// // beta1 will be the final value of coefficients; vector of length p
-// // xbeta1 is the vector to calculate the weighted median; vector of length n ( = x%*%beta )
-// // nyrow is the length of y, which is n
-// // nxcol is the number of columns of x, which is p
-// // intercept is the intercept indicator, 1 for intercept, 0 for no intercept
-// // tau is the quantile
-// // lambda is the tuning parameter
-// // pentype is the indicator for penalty types, 0 = SCAD, 1 = MCP.
-// // thresh is the convergence threshold
-// // maxin is maximal iteration numbers
-// // groupl1 is vector of length p of group l1 norm for each covariate (not unique as each member of a group has the same group l1 norm)
-// {	
-// 	int iter = 0;                 // Iteration count
-// 	int col = 0;                  // Column index (Do intercept last)
-// 	int row, rowcol, nonzerox;    // Row index, (row, col) entry of x, keep track of nonzero x entries for each column
-// 	double nrow = double(*nyrow); // Turn *nyrow into double (from int)
-
-// 	double *weight = new double[*nyrow + 1]; // Weight vector
-// 	int length_weight;                       // Length of weight vector
-
-// 	double *pre_value_final=new double[*nyrow+1]; // pre_value_final is the vector to save the weighted median vector
-
-// 	// Used for computing weighted median
-// 	int count3;
-// 	double weight_sum, temp1;
-
-// 	// Keep track whether beta vector has converged
-// 	double betavecDiff=0;
-// 	double betaDiff=0;
-// 	double newBeta; // placeholder for new beta
-
-
-// 	while( (iter < *maxin) ) //number of inside iterations
-// 	{	
-
-// 		temp1=0;
-// 		// Used for calculation of weighted median
-		
-// 		weight_sum=0;
-// 		// sum of the weight vector
-// 		row = 0;
-// 		nonzerox = -1;
-// 		rowcol = (*nyrow)*col;
-// 		while( row < *nyrow )
-// 		// loop through the entries in x of column number col
-// 		{	
-
-// 			if( betaDiff != 0 ){
-// 				if(col > 0)
-// 					xbeta1[row] += betaDiff*x[rowcol - *nyrow];
-// 				else
-// 					xbeta1[row] += betaDiff*x[rowcol + (*nxcol-1)*(*nyrow)];
-// 			}
-
-// 			if( x[rowcol] != 0 )
-// 			{
-// 				nonzerox++;
-// 				pre_value_final[nonzerox] = y[row] - xbeta1[row];
-
-// 				if( pre_value_final[nonzerox] > 0 )
-// 					weight[nonzerox] = fabs(x[rowcol])*(*tau)/nrow;
-// 				else
-// 					weight[nonzerox] = fabs(x[rowcol])*(1 - *tau)/nrow;
-// 				// update the weight_i
-
-// 				if ( *tau >= 0.5 )
-// 					pre_value_final[nonzerox] = -( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-// 				else
-// 					pre_value_final[nonzerox] =  ( pre_value_final[nonzerox] + x[rowcol]*beta1[col] )/double( x[rowcol] );
-
-// 				weight_sum += weight[nonzerox];
-// 			}
-
-// 			row++;	
-// 			rowcol++;
-// 		}
-// 		if ( (col < (*nxcol -1)) || (*intercept == 0) ) // Not Intercept coefficient
-// 		{
-// 			nonzerox++;
-// 			pre_value_final[nonzerox] = 0;
-
-// 			/////////////////////////////////////////////////LASSO
-// 			weight[nonzerox] = *lambda;
-// 			/////////////////////////////////////////////////
-// 			weight_sum += weight[nonzerox];
-// 			length_weight = nonzerox+1;
-// 			quicksort( pre_value_final, weight, &length_weight );
-// 			for (count3=0 ; count3 <= nonzerox; count3++)
-// 			{
-// 				temp1 += weight[count3];
-// 				if ( temp1 > weight_sum/2 )
-// 				{
-// 					break;
-// 				}
-// 			}
-// 		}
-// 		else // Intercept coefficient
-// 		{
-// 			length_weight = nonzerox+1;
-// 			quicksort( pre_value_final, weight, &length_weight );
-// 			for ( count3=0; count3 <= nonzerox; count3++ )
-// 			{
-// 				temp1 += weight[count3];
-// 				if (temp1> weight_sum/2)
-// 				{
-// 					break;
-// 				}
-// 			}
-// 		}
-
-// 		if ( *tau >= 0.5)
-// 			newBeta = -pre_value_final[count3];
-// 		else
-// 			newBeta =  pre_value_final[count3];
-// 		//change from current beta1 to new beta1
-
-// 		if( (fabs(newBeta) < *thresh) && ( (col < (*nxcol -1)) || (*intercept == 0) ) )
-// 		{
-// 			newBeta = 0;
-// 		}
-
-// 		betaDiff = newBeta - beta1[col];
-// 		beta1[col] = newBeta;
-
-
-// 		betavecDiff += fabs(betaDiff);
-// 		col++;
-
-// 		if( col == *nxcol )
-// 		{
-// 			if( sqrt(betavecDiff) < *thresh )
-// 			{
-// 				break;
-// 			}
-
-// 			iter++;
-// 			col = 0;
-// 			betavecDiff = 0;
-// 		}
-
-		
-// 	}
 	
-// 		delete [] pre_value_final;
-// 		delete [] weight;
-// }
+}
+
+
+
+
+
+
+
+
+
