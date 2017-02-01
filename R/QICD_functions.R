@@ -28,8 +28,8 @@ shortrq.fit.br <- function (x, y, tau = 0.5)
         lsol = as.integer(0), h = integer(p * nsol), qn = as.double(qn),
         cutoff = as.double(cutoff), ci = double(4 * p), tnmat = double(4 *
             p), as.double(big), as.logical(lci1))
-    if (z$flag != 0)
-        warning(switch(z$flag, "Solution may be nonunique", "Premature end - possible conditioning problem in x"))
+    # if (z$flag != 0)
+    #     warning(switch(z$flag, "Solution may be nonunique", "Premature end - possible conditioning problem in x"))
     coef <- z$coef
     coef
 }
@@ -61,9 +61,9 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 
 
 
-QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
-                eps = 1e-05, penalty="SCAD", a=3.7, coef.cutoff=1e-08, 
-                initial_beta=NULL, ...)
+QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #tau is the quantile value
@@ -90,6 +90,9 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
       pentype <- as.integer(2)
   }
 
+  if( is.null(initial_beta) )
+    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff)
+
   if( intercept ){
     beta <- initial_beta[-1]
     intval <- initial_beta[1]
@@ -99,6 +102,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
   }
 
 
+  n         <- length(y)
   y         <- as.double(y)
   xdoub     <- as.double(x)
   p         <- as.integer( ncol(x) )
@@ -147,9 +151,9 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
 
 
 
-QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxout=20,
-                eps = 1e-05, penalty="SCAD", a=3.7, coef.cutoff=1e-08, 
-                initial_beta=NULL, method="br", ...)
+QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, method="br", ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector.
 #z is nxq matrix of bases; the coefficients for these columns will be unpenalized
@@ -168,7 +172,7 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
 ### will be initialized to rq( y-x%*%beta ~ z ).
 #method for quantile regression: can be "br" or "fn", see top for description.
 {
-  cleanInputs(y, x, lambda, initial_beta, intercept, penalty, a)
+  cleanInputs(y, x, lambda, initial_beta[ 1:(intercept+ncol(x)) ], intercept, penalty, a)
 
   if( class(z)!="matrix" ){                                                                                    
     stop('z needs to be a matrix')
@@ -195,18 +199,31 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
       pentype <- as.integer(2)
   }
 
-  if( intercept ){
-    beta <- initial_beta[-1]
+  zmat <- z
+  if( intercept )
     zmat <- cbind(1,z)
-  } else{
-    beta <- initial_beta
-    zmat <- z
-  }
 
   # Check for Singularity of X since br fortran isn't very reliable about this
   if (qr(zmat)$rank < ncol(zmat))
-      stop("z is a singular matrix (make sure intercept column is not included)")
+      stop("z is a singular matrix (make sure intercept column is not included)")  
 
+  if( is.null(initial_beta) ){
+    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff) 
+    initial_beta <- initial_beta[ 1:(intercept+ncol(x)) ] ### Only keep the coefficients for x 
+  } else {
+    initial_beta <- initial_beta[ 1:(intercept+ncol(x)) ] ### Only keep the coefficients for x 
+  }
+
+ if( intercept ){
+    beta <- initial_beta[-1]
+    beta <- beta
+  } else{
+    beta <- initial_beta
+  }
+
+
+
+  n         <- length(y)
   xdoub     <- as.double(x)
   p         <- as.integer( ncol(x) )
   tau       <- as.double(tau)
@@ -233,7 +250,7 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
     out <- .C("penderiv", as.double(beta), p, a, lambda, pentype)
     penweight <- as.double( n*out[[1]] )
 
-    while( (ii < maxin) & distance.inner >= thresh ){
+    while( (ii < maxin) & distance.inner >= eps ){
 
 
       out <- .C("QCD", xdoub, as.double(beta), as.double(0), penweight, residuals,
@@ -276,9 +293,9 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, maxin=100, maxo
 
 
 
-QICD.group <- function(y, x, groups, tau = 0.5, lambda, intercept = TRUE, 
-    maxin = 100, maxout=20, eps = 1e-05, penalty = "SCAD", a = 3.7, coef.cutoff = 1e-08, 
-    initial_beta = NULL, ...) 
+QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #groups: numeric vector of length ncol(x) with the group number of the coefficient (can be unique)
@@ -306,6 +323,10 @@ QICD.group <- function(y, x, groups, tau = 0.5, lambda, intercept = TRUE,
       pentype <- as.integer(2)
   }
 
+  if( is.null(initial_beta) ){
+    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff) 
+  }
+
   if( intercept ){
     beta <- initial_beta[-1]
     intval <- initial_beta[1]
@@ -315,6 +336,7 @@ QICD.group <- function(y, x, groups, tau = 0.5, lambda, intercept = TRUE,
   }
 
 
+  n         <- length(y)
   y         <- as.double(y)
   xdoub     <- as.double(x)
   p         <- as.integer( ncol(x) )
@@ -365,10 +387,126 @@ QICD.group <- function(y, x, groups, tau = 0.5, lambda, intercept = TRUE,
 }
 
 
+### Can fit models for many different lambdas using warm start.  
+## If no intial_beta is provided, QICD.master will find an appropriate starting value and fit the model for each lambda
+QICD.master <- function(y, x, z=NULL, groups=NULL, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta, maxin=100, maxout=20, 
+                 eps = 1e-05, coef.cutoff=1e-08, a=3.7, ...){
+  if( !is.null(z) & !is.null(groups) )
+    stop("Currently not supporting group penalty and some nonpenalized variables \n  z or groups (or both) must be NULL")
+
+  lambda <- sort( unique(lambda) )
+  if( lambda[1] <= 0)
+    stop("lambda must be positive")
+  nlam <- length(lambda)
+  p <- ncol(x)
+  q <- ifelse( is.null(z), 0, ncol(z) )
+  penVars <- intercept + 1:p ### Keep track of penalized coefficients
+
+  ### Get names of output correct
+  out <- matrix(0, nrow=intercept+p+q, ncol=nlam) ### Each column is coefficients for 1 lambda
+  rnms <- paste("x",1:p, sep="")
+  if( intercept )
+    rnms <- c("(Intercept)", rnms)
+  if( !is.null(z) )
+    rnms <- c(rnms, paste("z",1:q, sep=""))
+
+  rownames(out) <- rnms
+  colnames(out) <- 1:nlam
+
+  ### Set correct QICD function
+  QF <- match.call()
+  if( is.null(z) & is.null(groups) ){ ### QICD
+    QF[[1]] <- as.name("QICD")
+  } else if (is.null(z) ){            ### QICD.group
+    QF[[1]] <- as.name("QICD.group")
+  } else {                            ### QICD.nonpen
+    QF[[1]] <- as.name("QICD.nonpen")
+  }
+  
+  #####################################
+  ### Don't do warm start (for now) ###
+  #####################################
+  ### Do first iteration
+  QF$lambda <- lambda[1]
+  # if( penalty == "LASSO" & is.null(groups) & !is.null(initial_beta) ){     ### Use initial_beta as coefficients for smallest lambda when LASSO with no group penalty
+  #     out[,1] <- initial_beta
+  # } else if (penalty == "LASSO" & is.null(groups) & is.null(initial_beta)) {                                        ### SCAD, MCP, group LASSO penalty use initial_beta as starting values
+  #     QF$maxout <- -1 
+  #     out[,1] <- eval.parent(QF)
+  # } else {
+  #     out[,1] <- eval.parent(QF)
+  # }
+  
+  # QF$maxout <- maxout
+  #####################################
+  out[,1] <- eval.parent(QF)
+
+  ibeta <- out[,1]
+  if( nlam > 1 ){
+    for( i in 2:nlam ){
+
+      if( max( abs(ibeta[penVars]) ) == 0 ){ ### If all penalized betas are 0, then we are done 
+        out[,i:nlam] <- matrix(ibeta, nrow=length(ibeta), ncol=nlam-i+1) ### Assign coefficients for remaining lambdas to current value 
+        break ### End the for loop
+      }
+
+      QF$lambda <- lambda[i]
+      # QF$initial_beta <- ibeta # For now, use initial_beta as starting values for all lambda
+      out[,i] <- eval.parent(QF)
+      ibeta <- out[,i]
+    }
+  }
+
+  return(list( coefficients=out, lambda=lambda ))
+}
 
 
 
+### LASSO estimates for initial values in QICD and QICD.group functions when initial_beta = NULL
+LASSO.initial <- function(y, x, tau, lambda, intercept, coef.cutoff)
+{
+  p <- ncol(x)
+  n <- nrow(x)
+  ynew <- c( y, rep(0, 2*p) )
+  xnew <- rbind( x, diag(n*lambda, p), -diag(n*lambda, p) )
+  if( intercept )
+    xnew <- cbind( c( rep(1,n), rep(rep(0, 2*p)) ), xnew )
 
+  if( n + 2*p < 500 ){ ### If problem is small, use "br" method
+    out <- shortrq.fit.br(xnew, ynew, tau)
+  } else {             ### Else use "fn" method
+    out <- shortrq.fit.fnb(xnew, ynew, tau)
+  }
+
+  out[ abs(out) < coef.cutoff ] <- 0
+  return(out)
+}
+
+
+### LASSO estimates for initial values in QICD.nonpen function when initial_beta = NULL
+LASSO.nonpen.initial <- function(y, x, z, tau, lambda, intercept, coef.cutoff)
+{
+  p <- ncol(x)
+  pxz <- ncol(z) + p
+  n <- nrow(x)
+  ynew <- c( y, rep(0, 2*p) )
+  xz <- cbind( x, z )
+  xz <- rbind( xz, diag(n*lambda, p, pxz), -diag(n*lambda, p, pxz) )
+  if( intercept )
+    xz <- cbind( c( rep(1,n), rep(rep(0, 2*p)) ), xz )
+
+  if( n + 2*p < 500 ){ ### If problem is small, use "br" method
+    out <- shortrq.fit.br(xz, ynew, tau)
+  } else {             ### Else use "fn" method
+    out <- shortrq.fit.fnb(xz, ynew, tau)
+  }
+
+  out <- out
+
+  out[ abs(out) < coef.cutoff ] <- 0
+  return(out)
+}
 
 
 
@@ -387,7 +525,7 @@ cleanInputs <- function(y, x, lambda, initial_beta=NULL, intercept=TRUE,
     stop('x needs to be a matrix')
   }
 
-  if( lambda <= 0){
+  if( min(lambda) <= 0){
     stop("lambda must be positive")
   }
 
@@ -400,7 +538,7 @@ cleanInputs <- function(y, x, lambda, initial_beta=NULL, intercept=TRUE,
     stop('length of y and rows of x do not match')
   }
 
-  if( !is.null(initial_beta) & (length(initial_beta) != (ncol(x) + intercept)) ){
+  if( !is.null(initial_beta) & (length(initial_beta) < (ncol(x) + intercept)) ){
     stop("initial_beta must contain initial value for intercept (if TRUE) and each coefficient")
   }
 

@@ -48,4 +48,4 @@ scadModel <- rq.nc.fit(x,y,lambda=1)
 
 [4] Peng, B. and Wang, L. (2015). An iterative coordinate-descent algorithm for high-dimensional nonconvex penalized quantile regression. \emph{J. Comp. Graph.}, \bold{24}, 676--694.
 }
-\author{Ben Sherwood}
+\author{Ben Sherwood; Adam Maidman}

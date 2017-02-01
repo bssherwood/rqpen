@@ -1,0 +1,74 @@
+The functions below call the fitting functions
+cv.rq.pen
+rq.nc.fit
+cv.rq.group.pen
+rq.group.fit
+
+
+
+
+#########################
+### FITTING FUNCTIONS ###
+#########################
+
+rq.lasso.fit
+In: x, y, tau=.5, lambda=NULL, weights=NULL, intercept=TRUE,
+    coef.cutoff=1e-08, method="br", penVars=NULL, ...
+Out: named coefficients, PenRho, residuals, rho, tau, n
+Notes: Can accept different values of lambda and weights for each observation (thus it can be used for SCAD and MCP and the group versions)
+       penVars allows for some coefficients to not be penalized (similar to QICD.nonpen and LASSO.nonpen)
+       Gets called by rq.nc.fit when SCAD or MCP penalty is used.
+
+QICD.master
+In: y, x, z=NULL, groups=NULL, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, ...
+Out: Matrix of named coefficients where each column corresponds to estimates for 1 value of lambda, 
+      unique, ascending values of lambda
+Notes: This is the master QICD function.  It requires an initial_beta estimate.  The LASSO solution should be used.  It can handle any number of lambdas, and will use warm starts to obtain estimates for all lambdas.  Based on inputs of z and groups, it will choose the correct QICD algorithm to use and will automatically select appropriate starting values (if initial_beta=NULL).
+
+QICD
+In: y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, ...
+Out: coefficients (unnamed)
+Notes: Only accepts 1 lambda
+
+
+QICD.nonpen
+In: y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, method="br", ...
+Out: coefficients (unnamed)
+Notes: Only accepts 1 lambda
+
+
+QICD.group
+In: y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
+                 a=3.7, ...
+Out: coefficients (unnamed)
+Notes: Only accepts 1 lambda
+
+
+LASSO.initial
+In: y, x, tau, lambda, intercept, coef.cutoff
+Out: coefficients (unnamed)
+Notes: lasso function used to obtain initial values when initial_beta for QICD and QICD.group are NULL
+
+
+LASSO.nonpen.initial
+In: y, x, z, tau, lambda, intercept, coef.cutoff
+Out: coefficients (unnamed)
+Notes: lasso function used to obtain initial values when initial_beta for QICD.nonpen is NULL
+
+
+
+
+
+
+
+
+
+
+
