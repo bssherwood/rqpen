@@ -136,6 +136,32 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if( sum(lambda < 0) > 0){
       stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
    }
+
+   # ##############################################################################################
+   # ### This uses the LASSO.fit or LASSO.fit.nonpen functions to obtain coefficient estimates. ###
+   # ### Note that the coefficients might need to be reordered to match x.                      ###
+   # ##############################################################################################
+   # if( !is.null(weights) & length(weights) != n )
+   #    stop("Length of weights does not match length of y")
+
+   # ### Find indices of penalized and nonpenalized coefficients
+   # nonpenVars <-     ### indices of nonpenalized coefficients (lambdas of 0 or not included in penVars), NULL if no nonpenalized oefficients
+   # penVars    <-     ### indices of penalized coefficients
+
+   # xnew <- as.matrix( x[,penVars] )
+   # if( is.null(nonpenVars) ){
+   #   coefs <- LASSO.fit(y, xnew, tau, intercept, coef.cutoff, weights)
+   # } else {
+   #   znew <- as.matrix( x[,nonpenVars] )
+   #   coefs <- LASSO.fit.nonpen(y, xnew, znew, tau, intercept, coef.cutoff, weights)
+   #   coefs[ intercept + 1:p ] <- coefs[ intercept + order(c(penVars, nonpenVars)) ]
+   # }
+
+   # ### coefs are the coefficients in the correct order with the intercept first
+   # ##############################################################################################
+   # ##############################################################################################
+   # ##############################################################################################
+
    if(is.null(penVars) !=TRUE){# & length(lambda) == 1){
       if(length(lambda)==1){
 		  mult_lambda <- rep(0,p)

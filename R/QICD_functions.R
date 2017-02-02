@@ -91,7 +91,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   }
 
   if( is.null(initial_beta) )
-    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff)
+    initial_beta <- LASSO.fit(y, x, tau, lambda, intercept, coef.cutoff)
 
   if( intercept ){
     beta <- initial_beta[-1]
@@ -112,8 +112,14 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   a         <- as.double(a)
   eps    <- as.double(eps)
   maxin     <- as.integer(maxin)
-  lambda    <- as.double(lambda)
 
+  if( length(lambda) == 1 ){
+  	lambda <- rep( lambda, p)
+  } else if ( length(lambda) != p ){
+  	stop("lambda must be of length 1 or p")
+  }
+  lambda    <- as.double(lambda)
+  
   i=0
   distance <- eps+1
   groupl1 <- rep(0, p)
@@ -208,7 +214,7 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
       stop("z is a singular matrix (make sure intercept column is not included)")  
 
   if( is.null(initial_beta) ){
-    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff) 
+    initial_beta <- LASSO.fit.nonpen(y, x, z, tau, lambda, intercept, coef.cutoff) 
     initial_beta <- initial_beta[ 1:(intercept+ncol(x)) ] ### Only keep the coefficients for x 
   } else {
     initial_beta <- initial_beta[ 1:(intercept+ncol(x)) ] ### Only keep the coefficients for x 
@@ -231,6 +237,12 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   a         <- as.double(a)
   eps       <- as.double(eps)
   maxin     <- as.integer(maxin)
+
+  if( length(lambda) == 1 ){
+  	lambda <- rep( lambda, p)
+  } else if ( length(lambda) != p ){
+  	stop("lambda must be of length 1 or p")
+  }
   lambda    <- as.double(lambda)
 
   i=0
@@ -324,7 +336,7 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
   }
 
   if( is.null(initial_beta) ){
-    initial_beta <- LASSO.initial(y, x, tau, lambda, intercept, coef.cutoff) 
+    initial_beta <- LASSO.fit(y, x, tau, lambda, intercept, coef.cutoff) 
   }
 
   if( intercept ){
@@ -346,6 +358,12 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
   a         <- as.double(a)
   eps    <- as.double(eps)
   maxin     <- as.integer(maxin)
+
+  if( length(lambda) == 1 ){
+  	lambda <- rep( lambda, p)
+  } else if ( length(lambda) != p ){
+  	stop("lambda must be of length 1 or p")
+  }
   lambda    <- as.double(lambda)
 
   i=0
@@ -464,7 +482,7 @@ QICD.master <- function(y, x, z=NULL, groups=NULL, tau=.5, lambda, intercept=TRU
 
 
 ### LASSO estimates for initial values in QICD and QICD.group functions when initial_beta = NULL
-LASSO.initial <- function(y, x, tau, lambda, intercept, coef.cutoff)
+LASSO.fit <- function(y, x, tau, lambda, intercept, coef.cutoff, weights=NULL)
 {
   p <- ncol(x)
   n <- nrow(x)
@@ -472,6 +490,11 @@ LASSO.initial <- function(y, x, tau, lambda, intercept, coef.cutoff)
   xnew <- rbind( x, diag(n*lambda, p), -diag(n*lambda, p) )
   if( intercept )
     xnew <- cbind( c( rep(1,n), rep(rep(0, 2*p)) ), xnew )
+
+  if( !is.null(weights) ){
+  	xnew[1:n,] <- xnew[1:n,] * weights
+  	ynew[1:n]  <-  ynew[1:n] * weights
+  }
 
   if( n + 2*p < 500 ){ ### If problem is small, use "br" method
     out <- shortrq.fit.br(xnew, ynew, tau)
@@ -485,7 +508,7 @@ LASSO.initial <- function(y, x, tau, lambda, intercept, coef.cutoff)
 
 
 ### LASSO estimates for initial values in QICD.nonpen function when initial_beta = NULL
-LASSO.nonpen.initial <- function(y, x, z, tau, lambda, intercept, coef.cutoff)
+LASSO.fit.nonpen <- function(y, x, z, tau, lambda, intercept, coef.cutoff, weights=NULL)
 {
   p <- ncol(x)
   pxz <- ncol(z) + p
@@ -495,6 +518,11 @@ LASSO.nonpen.initial <- function(y, x, z, tau, lambda, intercept, coef.cutoff)
   xz <- rbind( xz, diag(n*lambda, p, pxz), -diag(n*lambda, p, pxz) )
   if( intercept )
     xz <- cbind( c( rep(1,n), rep(rep(0, 2*p)) ), xz )
+
+  if( !is.null(weights) ){
+  	xz[1:n,]   <-   xz[1:n,] * weights
+  	ynew[1:n]  <-  ynew[1:n] * weights
+  }
 
   if( n + 2*p < 500 ){ ### If problem is small, use "br" method
     out <- shortrq.fit.br(xz, ynew, tau)
@@ -525,7 +553,7 @@ cleanInputs <- function(y, x, lambda, initial_beta=NULL, intercept=TRUE,
     stop('x needs to be a matrix')
   }
 
-  if( min(lambda) <= 0){
+  if( any(lambda) <= 0){
     stop("lambda must be positive")
   }
 

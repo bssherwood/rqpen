@@ -32,7 +32,7 @@ In: y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, ...
 Out: coefficients (unnamed)
-Notes: Only accepts 1 lambda
+Notes: Can accept different lambdas for each coefficient
 
 
 QICD.nonpen
@@ -40,7 +40,7 @@ In: y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, method="br", ...
 Out: coefficients (unnamed)
-Notes: Only accepts 1 lambda
+Notes: Can accept different lambdas for each coefficient
 
 
 QICD.group
@@ -48,20 +48,26 @@ In: y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, ...
 Out: coefficients (unnamed)
-Notes: Only accepts 1 lambda
+Notes: Can accept different lambdas for each coefficient
 
 
-LASSO.initial
-In: y, x, tau, lambda, intercept, coef.cutoff
+LASSO.fit
+In: y, x, tau, lambda, intercept, coef.cutoff, weights=NULL
 Out: coefficients (unnamed)
-Notes: lasso function used to obtain initial values when initial_beta for QICD and QICD.group are NULL
+Notes: lasso function used to obtain initial values when initial_beta for QICD and QICD.group are NULL.
+       Uses the stripped down quantile regression fit so it should be more efficient than a call to rq.
+       Minimizes the objective function 1/n * sum rho(y - xb) + sum lambda*|b|.
+       weights can be included so this function can be used for LP solution to SCAD/MCP.
+       Can accept different lambdas for each coefficient
 
-
-LASSO.nonpen.initial
-In: y, x, z, tau, lambda, intercept, coef.cutoff
+LASSO.fit.nonpen
+In: y, x, z, tau, lambda, intercept, coef.cutoff, weights=NULL
 Out: coefficients (unnamed)
-Notes: lasso function used to obtain initial values when initial_beta for QICD.nonpen is NULL
-
+Notes: lasso function used to obtain initial values when initial_beta for QICD.nonpen is NULL.
+       Uses the stripped down quantile regression fit so it should be more efficient than a call to rq.
+       Minimizes the objective function 1/n * sum rho(y - xb - zgamma) + sum lambda*|b|.
+       weights can be included so this function can be used for LP solution to SCAD/MCP.
+       Can accept different lambdas for each coefficient
 
 
 

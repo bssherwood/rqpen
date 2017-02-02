@@ -218,23 +218,23 @@ void penderiv( double *beta, int *p, double *a, double *lambda, int *pentype)
 	{
 		if( *pentype == 0 ) // SCAD
 		{
-			if( fabs(beta[count]) < *lambda )
+			if( fabs(beta[count]) < lambda[count] )
 				temp = *lambda;
-			else if ( fabs(beta[count]) < (*a)*(*lambda) )
-				temp = ( (*a)*(*lambda) - fabs(beta[count]) )/( *a - 1.0 );
+			else if ( fabs(beta[count]) < (*a)*lambda[count] )
+				temp = ( (*a)*lambda[count] - fabs(beta[count]) )/( *a - 1.0 );
 			else 
 				temp = 0;
 		}
 		else if( *pentype == 1 ) // MCP
 		{
-			if ( fabs(beta[count]) < (*a)*(*lambda) )
-				temp = ( *lambda - fabs(beta[count]) )/( *a );
+			if ( fabs(beta[count]) < (*a)*lambda[count] )
+				temp = ( lambda[count] - fabs(beta[count]) )/( *a );
 			else 
 				temp = 0;
 		}
 		else // LASSO
 		{
-			temp = *lambda;
+			temp = lambda[count];
 		}
 
 		beta[count] = temp;
