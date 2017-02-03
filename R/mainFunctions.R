@@ -462,6 +462,16 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
     stop("length(groups) must be equal to ncol(x)")
   }
   if( lambda <= 0 ){ stop("lambda must be positive")}
+  
+  if(penalty=="LASSO"){
+	pen_func <- lasso
+  }
+  if(penalty=="SCAD"){
+	pen_func <- scad
+  }
+  if(penalty=="MCP"){
+	pen_func <- mcp
+  }
 
   if (alg == "QICD") {
   ### QICD Algorithm ###
@@ -477,12 +487,19 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
     names(coefs) <- coefnames
     if( intercept ){ ### Residuals
       residuals <- c( y - x%*%(coefs[-1]) - coefs[1] )
+	  pen_vars <- coefs[-1]
     } else {
       residuals <- c( y - x%*%coefs )
+	  pen_vars <- coefs
     }
-    rho <- 1/n*sum( check(residuals) ) ### rho
+	pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda,...))
+	
+    rho <- sum( check(residuals) ) # rho (similiar to quantreg)
+		#1/n*sum( check(residuals) ) ### rho
+	PenRho <- rho+pen_val
 
-    sub_fit <- list( coefficients=coefs, residuals=residuals, rho=rho, tau=tau, n=n )
+    return_val <- list( coefficients=coefs, PenRho=PenRho, residuals=residuals, rho=rho, tau=tau, n=n, intercept=intercept, penalty=penalty)
+	class(return_val) <- c("rq.group.pen", "rq.pen")
   ######################
   } else {
         group_num <- length(unique(groups))
