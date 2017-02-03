@@ -553,7 +553,7 @@ cleanInputs <- function(y, x, lambda, initial_beta=NULL, intercept=TRUE,
     stop('x needs to be a matrix')
   }
 
-  if( any(lambda) <= 0){
+  if( any(lambda <= 0)){
     stop("lambda must be positive")
   }
 
