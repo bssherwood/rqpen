@@ -449,7 +449,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 }
 
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "LASSO", alg="QICD", ...) 
+                penalty = "LASSO", alg="QICD", a=3.7, ...) 
 {
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
@@ -492,7 +492,11 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
       residuals <- c( y - x%*%coefs )
 	  pen_vars <- coefs
     }
-	pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda,...))
+	if(penalty=="LASSO"){
+		pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda))
+	} else{
+		pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda,a=a))
+	}
 	
     rho <- sum( check(residuals) ) # rho (similiar to quantreg)
 		#1/n*sum( check(residuals) ) ### rho
