@@ -181,7 +181,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
       stop( "QICD Algorithm only allows 1 lambda value")
 
     ### Check if we are using QICD or QICD.nonpen
-    if( is.null(penVars) ){ ### No unpenalized coefficients
+    if( is.null(penVars) | length(penVars) == p){ ### No unpenalized coefficients
       coefnames <- paste("x",1:p, sep="") ### Coefficient names
       coefs <- QICD(y, x, tau, lambda, intercept, penalty, eps=converge_criteria, a=a, ...)
       penbeta <- intercept + 1:p ### Use later to calculate objective function
