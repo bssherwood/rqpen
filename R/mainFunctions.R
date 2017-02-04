@@ -195,11 +195,13 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
     }
 
     ### Add extra information to QICD output
-    names(coefs) <- coefnames
+    
     if( intercept ){ ### Residuals
       residuals <- c( y - x%*%(coefs[-1]) - coefs[1] )
+	  names(coefs) <- c("intercept",coefnames)
     } else {
       residuals <- c( y - x%*%coefs )
+	  names(coefs) <- coefnames
     }
     rho <- sum( check(residuals) )
 	#1/n*sum( check(residuals) ) ### rho
