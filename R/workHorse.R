@@ -185,14 +185,14 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    }
    aug_y <- c(y, rep(0,aug_n))
    if(is.null(weights)){
-     model <- rq(aug_y ~ aug_x+0, tau=tau, method=method,...)
+     model <- rq(aug_y ~ aug_x+0, tau=tau, method=method)
    } else{
      if(length(weights) != n){
        stop("Length of weights does not match length of y")
      }
      orig_weights <- weights
      weights <- c(weights, rep(1,aug_n))
-     model <- rq(aug_y ~ aug_x+0, tau=tau, weights=weights, method=method,...)
+     model <- rq(aug_y ~ aug_x+0, tau=tau, weights=weights, method=method)
    }
    p_star <- p+intercept
    coefs <- coefficients(model)[1:p_star]
