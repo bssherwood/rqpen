@@ -203,11 +203,11 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
     }
     rho <- 1/n*sum( check(residuals) ) ### rho
     if( penalty == "LASSO" ){ ### PenRho for LASSO
-      PenRho <- abs( coefs[penbeta] )*lambda
+      PenRho <- sum( abs( coefs[penbeta] )*lambda )
     } else if( penalty == "SCAD" ){ ### PenRho for SCAD
-      PenRho <- scad( coefs[penbeta], lambda, a )
+      PenRho <- sum( scad( coefs[penbeta], lambda, a ))
     } else { ### PenRho for MCP
-      PenRho <- mcp( coefs[penbeta], lambda, a )
+      PenRho <- sum( mcp( coefs[penbeta], lambda, a ))
     }
     PenRho <- rho + PenRho
 
