@@ -201,7 +201,8 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
     } else {
       residuals <- c( y - x%*%coefs )
     }
-    rho <- 1/n*sum( check(residuals) ) ### rho
+    rho <- sum( check(residuals) )
+	#1/n*sum( check(residuals) ) ### rho
     if( penalty == "LASSO" ){ ### PenRho for LASSO
       PenRho <- sum( abs( coefs[penbeta] )*lambda )
     } else if( penalty == "SCAD" ){ ### PenRho for SCAD
