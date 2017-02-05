@@ -214,8 +214,8 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
     }
     PenRho <- rho + PenRho
 
-    sub_fit <- list( coefficients=coefs, residuals=residuals, PenRho=PenRho,
-                     rho=rho, tau=tau, n=n )
+    sub_fit <- list( coefficients=coefs,  PenRho=PenRho, residuals=residuals,
+                     rho=rho, tau=tau, n=n , intercept=intercept)
   ######################
   } else {  
   ###  LP Algorithm  ###
