@@ -522,13 +522,13 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
         if (dim(x)[2] != length(groups)) {
            stop("length of groups must be equal to number of columns in x")
         }
-        new_lambda <- NULL
-        group_count <- xtabs(~groups)
-        for (g in 1:group_num) {
-             new_lambda <- c(new_lambda, rep(lambda[g], each = group_count[g]))
-        }
           
-        if (penalty == "LASSO") {
+        if (penalty == "LASSO") {			
+			new_lambda <- NULL
+			group_count <- xtabs(~groups)
+			for (g in 1:group_num) {
+				 new_lambda <- c(new_lambda, rep(lambda[g], each = group_count[g]))
+			}
             return_val <- rq.lasso.fit(x, y, tau, new_lambda, 
                 intercept = intercept, ...)
             class(return_val) <- c("rq.group.pen", "rq.pen", 
