@@ -228,7 +228,8 @@ void penderiv( double *beta, int *p, double *a, double *lambda, int *pentype)
 		else if( *pentype == 1 ) // MCP
 		{
 			if ( fabs(beta[count]) < (*a)*lambda[count] )
-				temp = ( lambda[count] - fabs(beta[count]) )/( *a );
+				temp = fabs( lambda[count] - ( fabs(beta[count])/ *a) );
+		//old	( lambda[count] - fabs(beta[count]) )/( *a );
 			else 
 				temp = 0;
 		}
