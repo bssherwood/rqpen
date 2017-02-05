@@ -293,7 +293,7 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
         new_lambda <- c(new_lambda, rep(lambda[g], each = group_count[g]))
     }
     if(is.null(initial_beta)){
-       initial_beta <- rq.lasso.fit(x,y,tau,new_lambda, intercept=intercept, coef.cutoff=coef.cutoff,method="br",...)$coefficients
+       initial_beta <- rq.lasso.fit(x,y,tau,new_lambda, intercept=intercept, coef.cutoff=coef.cutoff,...)$coefficients
     }
     
     coef_by_group_deriv <- group_derivs(deriv_func, groups, initial_beta,lambda,a)
