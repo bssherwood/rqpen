@@ -50,6 +50,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
   coefficients(object$models[[target_model]])
 }
 
+
+
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
@@ -380,7 +382,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
        }
           
        lambda_min <- eps * lambda_star
-       lambda <- exp(seq(log(lambda_min), log(lambda_star), length.out = nlambda))
+       lambda <- exp(seq(log(lambda_star), log(lambda_min),  length.out = nlambda))
        fine_tune <- TRUE
        fine_tune_pos <- length(lambda)-1
        while(fine_tune){
@@ -395,7 +397,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
        if(fine_tune_pos != (length(lambda)-1)){
          lambda_star <- lambda[fine_tune_pos+1]
          lambda_min <- eps*lambda_star
-         lambda <- exp(seq(log(lambda_min), log(lambda_star), length.out = nlambda))
+         lambda <- exp(seq(log(lambda_star), log(lambda_min),  length.out = nlambda))
        }
     }
     

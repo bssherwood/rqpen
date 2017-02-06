@@ -331,20 +331,47 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
 
 groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, penalty="LASSO", 
     #initial_beta = NULL,
-    alg="QICD", ...) 
+    alg="QICD_warm", ...) 
 {
-    return_val <- list()
-    #if (is.null(initial_beta)) {
-    #    initial_beta <- rep(0, dim(x)[2] + intercept)
-    #}
-    pos <- 1
-    for (lam in lambda) {
-        return_val[[pos]] <- rq.group.fit(x = x, y = y, groups = groups, 
-            tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, 
-            ...)
-        #initial_beta <- return_val[[pos]]$coefficients
-        pos <- pos + 1
-    }
+    if(alg != "QICD_warm"){
+		#don't know how to do warm start with linear programming approach 
+		return_val <- list()
+		pos <- 1
+		for (lam in lambda) {
+			return_val[[pos]] <- rq.group.fit(x = x, y = y, groups = groups, 
+				tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, 
+				...)
+			#initial_beta <- return_val[[pos]]$coefficients
+			pos <- pos + 1
+		}
+	} else{
+		p <- dim(x)[2]
+		pos <- 1
+		alg = "QICD"
+		
+		return_val <- list()
+		if(intercept){
+			initial_beta <- c(quantile(y,tau), rep(0,p))
+		} else{
+			initial_beta <- rep(0,p)
+		}
+		
+		for(l_val in lambda){
+			return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty="LASSO", alg=alg, initial_beta=initial_beta)
+			initial_beta <- coefficients(return_val[[pos]])
+			pos <- pos + 1
+		}
+		
+		#if penalty is not lasso then update those initial estimates
+		if(penalty != "LASSO"){
+			pos <- 1
+			for(l_val in lambda){
+				initial_beta <- coefficients(return_val[[pos]]) #use lasso estimate as initial estimate
+				return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty=penalty, alg=alg, initial_beta=initial_beta)
+				pos <- pos + 1
+			}
+		}
+	}
     return_val
 }
 
