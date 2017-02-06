@@ -129,10 +129,10 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 
   while( (i < maxout) & (distance >= eps) ){
 
-	lambda <- lambda*n
+	#lambda <- lambda*n
     out <- .C("penderiv", as.double(beta), p, a, lambda, pentype)
-	penweight <- as.double(out[[1]])
-   # penweight <- as.double( n*out[[1]] )
+	#penweight <- as.double(out[[1]])
+    penweight <- as.double( n*out[[1]] )
 
     out <- .C("QCD", xdoub, as.double(beta), as.double(intval), penweight, residuals,
                          nint, p, int, tau, eps, maxin)
@@ -380,10 +380,10 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
     for(grps in unique(groups)){
       groupl1[groups==grps] <- sum( abs(beta[groups==grps]) )
     }
-	lambda <- n*lambda
+	#lambda <- n*lambda
     out <- .C("penderiv", as.double(groupl1), p, a, lambda, pentype)
-	penweight <- as.double(out[[1]])
-   # penweight <- as.double( n*out[[1]] )
+	#penweight <- as.double(out[[1]])
+    penweight <- as.double( n*out[[1]] )
 
     out <- .C("QCD", xdoub, as.double(beta), as.double(intval), penweight, residuals,
                          nint, p, int, tau, eps, maxin)
