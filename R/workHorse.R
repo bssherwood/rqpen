@@ -356,7 +356,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
 			initial_beta <- rep(0,p)
 		}
 		
-		for(l_val in lambda){
+		for(lam in lambda){
 			return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty="LASSO", alg=alg, initial_beta=initial_beta)
 			initial_beta <- coefficients(return_val[[pos]])
 			pos <- pos + 1
@@ -365,7 +365,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
 		#if penalty is not lasso then update those initial estimates
 		if(penalty != "LASSO"){
 			pos <- 1
-			for(l_val in lambda){
+			for(lam in lambda){
 				initial_beta <- coefficients(return_val[[pos]]) #use lasso estimate as initial estimate
 				return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty=penalty, alg=alg, initial_beta=initial_beta)
 				pos <- pos + 1
