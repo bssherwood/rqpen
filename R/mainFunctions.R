@@ -549,28 +549,28 @@ plot.cv.rq.group.pen <- function (x,y=NULL,...)
     plot(x$cv[, 1], x$cv[, 2])
 }
 
-# qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
-# 	if(linear){
-# 		eval_function<- function(x,y,tau){ 
-# 							q1 <- rq(y ~ x, tau)
-# 							sum((fitted(q1)-quantile(y,tau))^2)
-# 						}
-# 	} else{
-# 		eval_function <- function(x,y,tau,...){ 
-# 							 b <- bs(x,...)
-# 							 q1 <- rq(y ~ b, tau)
-# 							 sum((fitted(q1)-quantile(y,tau))^2)
-# 						 }
-# 	}
-# 	#if(n.cores==1){
-# 		eval_results <- apply(x,2,eval_function,y,tau,...)
-# 	#} else{
-# 	#	p <- dim(x)[2]
-# 	#	mc_func <- function(idx,...){ eval_function(x[,idx],y,...)}
-# 	#	mc_results <- mclapply(1:p, mc_func, mc.cores=n.cores, ...)
-# 	#	eval_results <- do.call(c,mc_results)
-# 	#}
-# 	order( eval_results, decreasing=TRUE)
-# }
+qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
+	if(linear){
+		eval_function<- function(x,y,tau){ 
+							q1 <- rq(y ~ x, tau)
+							sum((fitted(q1)-quantile(y,tau))^2)
+						}
+	} else{
+		eval_function <- function(x,y,tau,...){ 
+							 b <- bs(x,...)
+							 q1 <- rq(y ~ b, tau)
+							 sum((fitted(q1)-quantile(y,tau))^2)
+						 }
+	}
+	#if(n.cores==1){
+		eval_results <- apply(x,2,eval_function,y,tau,...)
+	#} else{
+	#	p <- dim(x)[2]
+	#	mc_func <- function(idx,...){ eval_function(x[,idx],y,...)}
+	#	mc_results <- mclapply(1:p, mc_func, mc.cores=n.cores, ...)
+	#	eval_results <- do.call(c,mc_results)
+	#}
+	order( eval_results, decreasing=TRUE)
+}
 
 

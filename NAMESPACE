@@ -2,6 +2,7 @@ useDynLib("rqPen")
 
 import(quantreg) 
 import(regpro)
+import(splines)
 importFrom("graphics", "lines", "plot")
 importFrom("stats", "coefficients", "predict", "quantile", "residuals",
              "sd", "xtabs")
