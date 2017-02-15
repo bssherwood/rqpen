@@ -165,6 +165,20 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 }
 
 
+re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
+	p <- length(nonpen_coefs)
+	new_coefs <- rep(NA,p)
+	if(intercept){
+		penVars <- penVars+1
+		pen_output <- 2:(length(penVars)+1)
+	} else{
+		pen_output <- 1:length(penVars)
+	}
+	new_coefs[penVars] <- nonpen_coefs[pen_output]
+	new_coefs[-penVars] <- nonpen_coefs[-pen_output]
+	new_coefs
+}
+
 
 rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                       penalty="SCAD",a=3.7,iterations=10,converge_criteria=1e-06,
@@ -179,21 +193,22 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 
   if( alg=="QICD" ){
   ### QICD Algorithm ###
+	coefnames <- paste("x",1:p, sep="") ### Coefficient names
     if( length(lambda) != 1 )
-      stop( "QICD Algorithm only allows 1 lambda value")
-
+      stop( "QICD Algorithm only allows 1 lambda value")	
     ### Check if we are using QICD or QICD.nonpen
     if( is.null(penVars) | length(penVars) == p){ ### No unpenalized coefficients
-      coefnames <- paste("x",1:p, sep="") ### Coefficient names
+      
       coefs <- QICD(y, x, tau, lambda, intercept, penalty, eps=converge_criteria, a=a, ...)
       penbeta <- intercept + 1:p ### Use later to calculate objective function
     } else { ### Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
       xpen <- as.matrix(x[,penVars])
-      coefnames <- paste("x",1:ncol(xpen), sep="") ### Coefficient names
-      coefnames <- c( coefnames, paste("z",1:ncol(z), sep="") )
+      #coefnames <- paste("x",1:ncol(xpen), sep="") ### Coefficient names
+      #coefnames <- c( coefnames, paste("z",1:ncol(z), sep="") )
       penbeta <- intercept + penVars ### Use later to calculate objective function
       coefs <- QICD.nonpen(y, xpen, z, tau, lambda, intercept, penalty, eps=converge_criteria, a=a, ...)
+	  coefs <- re_order_nonpen_coefs(coefs, penVars, intercept)
     }
 
     ### Add extra information to QICD output
