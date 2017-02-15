@@ -1,0 +1,14 @@
+Adam 
+  Include qicd implementation of lasso so it can be used with warm starts from the cross validation function (Done, though I’m holding off on figuring out how to implement warm starts as the easy approaches I’ve tried are not working”
+  Update qicd programs for weighted regression?  
+  Delete Ben’s R QICD function 
+  Push updates to githup so that the package will compile (update namespace, etc)
+  If compiling is getting stuck because of problems with incorporating qicd function let me know and I can work on incorporating the qicd functions into the “master” functions
+ 
+Ben
+1.       Wait for new pushes to github with program that compiles
+2.       Update rq.lasso.fit to use shortrq functions
+3.       Update rq.nc.fit to include an initial beta as an argument. 
+a.       If initial beta is not set than qicd algorithm will get the initial value from the lasso algorithm
+4.       Incorporate qicd implementation into rq.lasso.fit for warm starts with cross validation function
+5.       Check if lambdas are on the same scale for the linear programming and qicd implementation. 
