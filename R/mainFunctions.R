@@ -352,7 +352,11 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
-    p_range <- 1:dim(x)[2] + intercept
+	if(is.null(penGroups)){
+		p_range <- 1:dim(x)[2] + intercept
+    } else{
+		p_range <- which(groups %in% penGroups) + intercept
+	}
     n <- dim(x)[1]
     pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
         lasso, scad, mcp)
