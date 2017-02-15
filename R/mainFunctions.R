@@ -469,11 +469,12 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 }
 
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "LASSO", alg="QICD", a=3.7, ...) 
+                penalty = "LASSO", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
   n <- nrow(x)
+  #if(is.null(penGroups) & max(penGroups) > max(groups)){ stop("penalize groups not coefficients")}  
   if (!penalty %in% c("LASSO", "SCAD", "MCP")) {
       stop("Penalty must be LASSO, SCAD or MCP")
   }
@@ -546,13 +547,16 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 			for (g in 1:group_num) {
 				 new_lambda <- c(new_lambda, rep(lambda[g], each = group_count[g]))
 			}
+			if(is.null(penGroups)==FALSE){
+				new_lambda[-which(groups %in% penGroups)] <- 0
+			}
             return_val <- rq.lasso.fit(x, y, tau, new_lambda, 
                 intercept = intercept, ...)
             class(return_val) <- c("rq.group.pen", "rq.pen", 
                 "rqLASSO")
         }
         else {
-            return_val <- rq.group.lin.prog(x,y,groups,tau,lambda,intercept=intercept,penalty=penalty,...)
+            return_val <- rq.group.lin.prog(x,y,groups,tau,lambda,intercept=intercept,penalty=penalty,penGroups=penGroups,...)
             class(return_val) <- c("rq.group.pen", "rq.pen")
         }
     }

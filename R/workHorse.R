@@ -120,7 +120,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # Choose the method used to estimate the coefficients ("br" or "fn")
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
-# penVars - variables to be penalized, doesn't work if lambda has multiple entries
+# penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
 
    if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
@@ -273,7 +273,7 @@ group_derivs <- function(deriv_func,groups,coefs,lambda,a=3.7){
 }
 
 rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,penalty="SCAD", a=3.7, coef.cutoff=1e-08,
-                                initial_beta=NULL,iterations=10,converge_criteria=.0001,...){
+                                initial_beta=NULL,iterations=10,converge_criteria=.0001,penGroups=NULL,...){
     group_num <- length(unique(groups))
     if(length(lambda) == 1){
        lambda <- rep(lambda,group_num)
@@ -299,6 +299,10 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
     for (g in 1:group_num) {
         new_lambda <- c(new_lambda, rep(lambda[g], each = group_count[g]))
     }
+	if(is.null(penGroups)==FALSE){
+		zero_pen_spots <- which(!groups %in% penGroups)
+		new_lambda[zero_pen_spots] <- 0
+	}
     if(is.null(initial_beta)){
        initial_beta <- rq.lasso.fit(x,y,tau,new_lambda, intercept=intercept, coef.cutoff=coef.cutoff,...)$coefficients
     }
@@ -317,6 +321,9 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
       sub_fit <- rq.lasso.fit(x=x,y=y,tau=tau,lambda=lambda_update,intercept=intercept,...)
       coef_by_group_deriv <- group_derivs(deriv_func,groups,sub_fit$coefficients[coef_range],lambda,a)
       lambda_update <- coef_by_group_deriv[groups]
+	  if(is.null(penGroups)==FALSE){
+		lambda_update[zero_pen_spots] <- 0
+	  }
       iter_num <- 1
       new_beta <- sub_fit$coefficients
       beta_diff <- sum( (old_beta - new_beta)^2)
