@@ -112,7 +112,7 @@ rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=
 }
 
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
-                         coef.cutoff=1e-08, method="br",penVars=NULL, ...){
+                         coef.cutoff=1e-08, method=NULL,penVars=NULL, ...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
@@ -135,6 +135,13 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    }
    if( sum(lambda < 0) > 0){
       stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
+   }
+   if(is.null(method)){
+	 if(n + 2*p < 500){
+		method <- "br"
+	 } else{
+		method <- "fn"
+	 }
    }
 
    # ##############################################################################################
