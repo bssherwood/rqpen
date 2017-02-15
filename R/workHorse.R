@@ -345,7 +345,7 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
 
 groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, penalty="LASSO", 
     #initial_beta = NULL,
-    alg="QICD_warm", ...) 
+    alg="QICD_warm",penGroups=NULL, ...) 
 {
     if(alg != "QICD_warm"){
 		#don't know how to do warm start with linear programming approach 
@@ -353,7 +353,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
 		pos <- 1
 		for (lam in lambda) {
 			return_val[[pos]] <- rq.group.fit(x = x, y = y, groups = groups, 
-				tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, 
+				tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, penGroups=penGroups,
 				...)
 			#initial_beta <- return_val[[pos]]$coefficients
 			pos <- pos + 1
@@ -371,7 +371,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
 		}
 		
 		for(lam in lambda){
-			return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty="LASSO", alg=alg, initial_beta=initial_beta)
+			return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty="LASSO", alg=alg, initial_beta=initial_beta, penGroups=penGroups, ...)
 			initial_beta <- coefficients(return_val[[pos]])
 			pos <- pos + 1
 		}
@@ -381,7 +381,7 @@ groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
 			pos <- 1
 			for(lam in lambda){
 				initial_beta <- coefficients(return_val[[pos]]) #use lasso estimate as initial estimate
-				return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty=penalty, alg=alg, initial_beta=initial_beta)
+				return_val[[pos]] <- rq.group.fit(x=x, y=y, groups=groups, tau=tau, lambda= lam, intercept=intercept, penalty=penalty, alg=alg, initial_beta=initial_beta, penGroups=penGroups, ...)
 				pos <- pos + 1
 			}
 		}

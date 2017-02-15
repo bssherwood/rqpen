@@ -349,7 +349,7 @@ getRho <- function(model){
 
 cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
-    foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD", 
+    foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
     p_range <- 1:dim(x)[2] + intercept
@@ -365,12 +365,12 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
         while(searching){
             if (search_num == 1) {
                 init_fit <- rq.group.fit(x, y, groups, tau, lambda_star, 
-                  intercept, penalty,alg, ...)
+                  intercept, penalty,alg,penGroups=penGroups, ...)
                 search_num <- 2
             }
             else {
                 init_fit <- rq.group.fit(x, y, groups, tau, lambda_star, 
-                  intercept, penalty,alg, initial_beta = beta_update, 
+                  intercept, penalty,alg, initial_beta = beta_update, penGroups=penGroups,
                   ...)
             }
             beta_update <- init_fit$coefficients
@@ -401,7 +401,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
        fine_tune <- TRUE
        fine_tune_pos <- length(lambda)-1
        while(fine_tune){
-         test_fit <- rq.group.fit(x,y,groups,tau,lambda[fine_tune_pos],intercept,penalty,alg,...)
+         test_fit <- rq.group.fit(x,y,groups,tau,lambda[fine_tune_pos],intercept,penalty,alg,penGroups=penGroups,...)
          if (sum(test_fit$coefficients[p_range]) != 0) {
          #want only one intercept only model
                   fine_tune <- FALSE
@@ -417,7 +417,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     }
     
     models <- groupMultLambda(x = x, y = y, groups = groups, 
-        tau = tau, lambda = lambda, intercept = intercept, penalty=penalty,alg=alg, ...)
+        tau = tau, lambda = lambda, intercept = intercept, penalty=penalty,alg=alg,penGroups=penGroups, ...)
     model_coefs  <- sapply(models,coefficients)
     model_resids <- sapply(models,residuals)
     model_rhos <- sapply(models, getRho)
@@ -434,7 +434,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
             test_y <- y[foldid == i]
             cv_models <- groupMultLambda(x = train_x, y = train_y, 
                 groups = groups, tau = tau, lambda = lambda, 
-                intercept = intercept,penalty=penalty,alg=alg, ...)
+                intercept = intercept,penalty=penalty,alg=alg,penGroups=penGroups, ...)
             if (cvFunc == "check") {
                 cv_results <- cbind(cv_results, sapply(cv_models, 
                   model_eval, test_x, test_y, tau = tau))
