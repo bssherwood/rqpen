@@ -1,10 +1,11 @@
 \name{QICD.nonpen}
 \alias{QICD.nonpen}
-\title{Penalized Quantile Regression with some nonpenalized coefficients with QICD Algorithm}
+\title{Penalized Quantile Regression with some nonpenalized coefficients 
+with QICD Algorithm}
 \usage{
 QICD.nonpen(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
-                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, method="br", ...)
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, 
+				 coef.cutoff=1e-08, a=3.7, method="br", ...)
 }
 \arguments{
   \item{y}{ Vector of response values.}

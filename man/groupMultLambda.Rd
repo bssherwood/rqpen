@@ -3,7 +3,7 @@
 \title{Quantile Regression with Group Penalty for multiple lambdas}
 \usage{
 groupMultLambda(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-	penalty="LASSO", alg="QICD",penGroups=NULL, ...) 
+	penalty="LASSO", alg="QICD_warm",penGroups=NULL, ...) 
 }
 \arguments{
   \item{x}{ Matrix of predictors.}

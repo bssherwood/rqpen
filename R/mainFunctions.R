@@ -579,15 +579,17 @@ qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
 							q1 <- rq(y ~ x, tau)
 							sum((fitted(q1)-quantile(y,tau))^2)
 						}
+		eval_results <- apply(x,2,eval_function,y,tau,...)
 	} else{
-		eval_function <- function(x,y,tau,...){ 
+		eval_function2 <- function(x,y,tau,...){ 
 							 b <- bs(x,...)
 							 q1 <- rq(y ~ b, tau)
 							 sum((fitted(q1)-quantile(y,tau))^2)
 						 }
+		eval_results <- apply(x,2,eval_function2,y,tau,...)
 	}
 	#if(n.cores==1){
-		eval_results <- apply(x,2,eval_function,y,tau,...)
+		
 	#} else{
 	#	p <- dim(x)[2]
 	#	mc_func <- function(idx,...){ eval_function(x[,idx],y,...)}

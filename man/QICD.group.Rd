@@ -3,33 +3,50 @@
 \title{Group Penalized Quantile Regression with QICD Algorithm}
 \usage{
 QICD.group(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
-                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, ...)
+                 initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, 
+				 coef.cutoff=1e-08, a=3.7, ...)
 }
 \arguments{
   \item{y}{ Vector of response values.}
-  \item{x}{ n x p matrix of observations with each row corresponding to one observation. Do not include column of 1's; set intercept=TRUE, if intercept is desired.}
-  \item{groups}{ Vector of length p with the group number of the corresponding coefficient.  Coefficients in the same group will either all be 0, or none will be 0.}
+  \item{x}{ n x p matrix of observations with each row corresponding to one observation. 
+				Do not include column of 1's; set intercept=TRUE, 
+				if intercept is desired.}
+  \item{groups}{ Vector of length p with the group number of the corresponding 
+  coefficient. Coefficients in the same group will either all be 0, or none will be 0.}
   \item{tau}{ Conditional quantile being modelled.}
   \item{lambda}{ Tuning parameter for LASSO, SCAD, and MCP penalties. Must be positive.}
-  \item{intercept}{ If TRUE, an intercept is included in the model.  If FALSE, no intercept is included.}
-  \item{penalty}{ Penalty function for the coefficients.  Either "SCAD", "MCP", or "LASSO". See details for description of penalties.}
-  \item{initial_beta}{ Vector of initial values for QICD algorithm. The vector should contain the intercept first (if intercept=TRUE) and then the p coefficients. If NULL, exact LASSO estimates will be computed and used as initial values.}
-  \item{maxin}{ Maximum number of iterations on the minimization step of the QICD algorithm.}
-  \item{maxout}{ Maximum number of iterations on the majorization step of the QICD algorithm.}
+  \item{intercept}{ If TRUE, an intercept is included in the model.  
+	If FALSE, no intercept is included.}
+  \item{penalty}{ Penalty function for the coefficients.  
+	Either "SCAD", "MCP", or "LASSO". See details for description of penalties.}
+  \item{initial_beta}{ Vector of initial values for QICD algorithm. 
+	The vector should contain the intercept first (if intercept=TRUE) and then the p 
+	coefficients. If NULL, exact LASSO estimates will be computed and used as 
+	initial values.}
+  \item{maxin}{ Maximum number of iterations on the minimization step of the 
+  QICD algorithm.}
+  \item{maxout}{ Maximum number of iterations on the majorization step of the 
+  QICD algorithm.}
   \item{eps}{ Threshold for convergence of algorithm.}
   \item{coef.cutoff}{ Coefficients with magnitude less than this value are set to 0.}
-  \item{a}{ Second tuning parameter for SCAD and MCP penalties.  Must be greater than 2 for SCAD and greater than 1 for MCP.}
+  \item{a}{ Second tuning parameter for SCAD and MCP penalties.  
+	Must be greater than 2 for SCAD and greater than 1 for MCP.}
   \item{...}{ The extra arguments will not be used.}
 }
 \value{
-Returns a vector containing the intercept (if intercept=TRUE) and the estimated coefficients for each column in x.
+Returns a vector containing the intercept (if intercept=TRUE) and the estimated 
+coefficients for each column in x.
 }
 \description{
-QICD.group produces group penalized quantile regression estimates using the QICD algorithm.  If no initial values are given, LASSO estimates will be used.  This function can handle the LASSO, SCAD, and MCP penalties. 
+QICD.group produces group penalized quantile regression estimates using the QICD 
+algorithm. If no initial values are given, LASSO estimates will be used. This 
+function can handle the LASSO, SCAD, and MCP penalties. 
 }
 \details{
-The QICD algorithm should only be used for the LASSO penalty if initial_beta can be set to LASSO estimates with a similar lambda (similar to a "warm start").  Otherwise, exact LASSO estimates will be used as initial values for the QICD algorithm: this will cause unnecessary computations and could lead to less accurate estimates.
+The QICD algorithm should only be used for the LASSO penalty if initial_beta can be set 
+to LASSO estimates with a similar lambda (similar to a "warm start").  Otherwise, 
+exact LASSO estimates will be used as initial values for the QICD algorithm: this will 
+cause unnecessary computations and could lead to less accurate estimates.
 }
 \examples{
 library(splines)
