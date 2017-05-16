@@ -5,6 +5,7 @@
 cv.rq.group.pen(x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD", 
+	penGroups=NULL,
     ...)
 }
 \arguments{
@@ -23,6 +24,7 @@ cv.rq.group.pen(x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO",
   \item{eps}{ Smallest lambda used.}
   \item{init.lambda}{ Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
   \item{alg}{Algorithm used for fit. "QICD" or "LP".}
+  \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
   \item{...}{Additional arguments to be sent to rq.group.fit or groupQICDMultLambda.}   
 }
 \value{

@@ -4,7 +4,7 @@
 \usage{
 rq.group.lin.prog(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,
      penalty="SCAD", a=3.7, coef.cutoff=1e-08, initial_beta=NULL,
-     iterations=10,converge_criteria=.0001,...)
+     iterations=10,converge_criteria=.0001,penGroups=NULL,...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -20,6 +20,7 @@ rq.group.lin.prog(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,
   \item{initial_beta}{Initial beta estimate.}
   \item{iterations}{Maximum number of iterations.}
   \item{converge_criteria}{Convergence criteria}
+  \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
   \item{...}{Additional arguments to be sent to rq.lasso.fit.}   
 }
 \value{

@@ -3,7 +3,7 @@
 \title{Quantile Regression with Group Penalty for multiple lambdas}
 \usage{
 groupMultLambda(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-	penalty="LASSO", alg="QICD", ...) 
+	penalty="LASSO", alg="QICD",penGroups=NULL, ...) 
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -16,6 +16,7 @@ groupMultLambda(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 					need to be included in "x".}
   \item{penalty}{ Type of penalty: "LASSO", "SCAD" or "MCP".}   
   \item{alg}{"QICD" for QICD implementation. Otherwise linear programming approach is implemented.}
+  \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
   \item{...}{Additional parameters to be sent to rq.group.fit.}
 }
 \value{

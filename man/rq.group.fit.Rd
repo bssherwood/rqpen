@@ -3,7 +3,7 @@
 \title{Quantile Regresion with Group Penalty}
 \usage{
 rq.group.fit(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "LASSO", alg = "QICD", ...)
+                penalty = "LASSO", alg = "QICD", a=3.7, penGroups=NULL, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -14,6 +14,8 @@ rq.group.fit(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
   \item{intercept}{ Whether model should include an intercept. Constant does not need to be included in "x".}
   \item{penalty}{ Type of penalty: "LASSO", "SCAD" or "MCP".}     
   \item{alg}{If set to QICD algorithm will use coordinate descent algorithm. Otherwise, will use a linear programming algorithm, which is an extension of algorithm used in rq.lasso.fit.}
+  \item{a}{The additional tuning parameter for SCAD and MCP.}
+  \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
   \item{...}{Additional arguments to be sent to rq.lasso.fit or groupQICD.}   
 }
 \value{

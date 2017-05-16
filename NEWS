@@ -1,6 +1,8 @@
 rqPen 2.0 (Release date: 2017-05-16)
 * Added function qaSIS, for quantile adaptive screening. 
 * Major changes to fix bugs in rq.group.fit and cv.rq.group.pen
+* Added option (penGroups) to penalize only a subset of groups. 
+* Updated rq.lasso.fit to choose method of "br" or "fn" based on combination of n and p. 
 * Fixed bug so you can now use weights with cv.rq.pen. Thanks to Matt Goldman for finding the bug. 
 
 rqPen 1.5.1 (Release date: 2016-11-03)
