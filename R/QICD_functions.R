@@ -500,11 +500,12 @@ LASSO.fit <- function(y, x, tau, lambda, intercept, coef.cutoff, weights=NULL)
   	ynew[1:n]  <-  ynew[1:n] * weights
   }
 
-  if( n + 2*p < 500 ){ ### If problem is small, use "br" method
+  #Ben: had some problems with fnb, setting all to use br for now
+  #if( n + 2*p < 500 ){ ### If problem is small, use "br" method
     out <- shortrq.fit.br(xnew, ynew, tau)
-  } else {             ### Else use "fn" method
-    out <- shortrq.fit.fnb(xnew, ynew, tau)
-  }
+  #} else {             ### Else use "fn" method
+  #  out <- shortrq.fit.fnb(xnew, ynew, tau)
+  #}
 
   out[ abs(out) < coef.cutoff ] <- 0
   return(out)
@@ -528,11 +529,12 @@ LASSO.fit.nonpen <- function(y, x, z, tau, lambda, intercept, coef.cutoff, weigh
   	ynew[1:n]  <-  ynew[1:n] * weights
   }
 
-  if( n + 2*p < 500 ){ ### If problem is small, use "br" method
+  #Ben: had some problems with fnb, setting all to use br for now
+  #if( n + 2*p < 500 ){ ### If problem is small, use "br" method
     out <- shortrq.fit.br(xz, ynew, tau)
-  } else {             ### Else use "fn" method
-    out <- shortrq.fit.fnb(xz, ynew, tau)
-  }
+  #} else {             ### Else use "fn" method
+  #  out <- shortrq.fit.fnb(xz, ynew, tau)
+  #}
 
   out <- out
 
