@@ -19,14 +19,18 @@ kernel_estimates <- function(x,y,h,...){
 
 
 
-model_eval <- function(model, test_x, test_y, func="check",...){
+model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
 #func: "check" (Quantile Check), "SqErr" (Squared Error), "AE" (Absolute Value)
   if(model$intercept){
     test_x <- cbind(1,test_x)
   }
   fits <- test_x %*% coefficients(model)
   eval_func <- switch(which(c("check","SqErr","AE")==func), check, square, abs)
-  mean(eval_func(test_y-fits,...)) 
+  if(is.null(test_w)){
+	mean(eval_func(test_y-fits,...)) 
+  } else{
+	weighted.mean(eval_func(test_y-fits,...), test_w)
+  }
 }
 
 
@@ -132,18 +136,24 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     for(i in 1:nfolds){
       train_x <- x[foldid!=i,]
       train_y <- y[foldid!=i]
-      test_x <- x[foldid==i,]
+      test_x <- x[foldid==i,,drop=FALSE]
       test_y <- y[foldid==i]
 	  train_weights <- weights[foldid!=i]
+	  if(is.null(weights)){
+		train_weights <- test_weights <- NULL
+	  } else{
+	    train_weights <- weights[foldid!=i]
+		test_weights <- weights[foldid!=i]
+	  }
       if(penalty=="LASSO"){
          cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)
       } else{
          cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
       }
       if(cvFunc=="check"){
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, tau=tau))
+         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, tau=tau))
       } else{
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, func=cvFunc))
+         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, func=cvFunc))
       } 
     }
     cv_results <- apply(cv_results,1,mean)
@@ -435,7 +445,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
         for (i in 1:nfolds) {
             train_x <- x[foldid != i, ]
             train_y <- y[foldid != i]
-            test_x <- x[foldid == i, ]
+            #test_x <- x[foldid == i, ]
+			test_x <- x[foldid==i,,drop=FALSE]
             test_y <- y[foldid == i]
             cv_models <- groupMultLambda(x = train_x, y = train_y, 
                 groups = groups, tau = tau, lambda = lambda, 
