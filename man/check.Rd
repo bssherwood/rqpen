@@ -9,7 +9,7 @@ check(x, tau)
   \item{tau}{Number between 0 and 1 for quantile of interest.}
 }
 \value{
-x*(tau-I(x < 0)
+x*(tau-I(x < 0))
 }
 \description{
 Evaluates the check function for quantile tau at value x. Check function is the objective function defined
