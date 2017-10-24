@@ -126,6 +126,9 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
       stop('x needs to be a matrix with more than 1 column')
    }
    p <- dim(x)[2]
+   if(p == 1){
+	  stop('x needs to be a matrix with more than 1 column')
+   }
    n <- dim(x)[1]
    if(n != length(y)){
       stop('length of y and rows of x do not match')
