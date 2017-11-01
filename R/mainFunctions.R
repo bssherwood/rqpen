@@ -128,7 +128,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
       if( all(coefs[p_range,i] != 0) )
         break()
     }
-    
+
     #### Remove the NA columns from coefs and corresponding lambdas
     lambdas.keep <- which( !is.na(coefs[1,]) )
     lambdas <- lambdas[lambdas.keep]
@@ -140,8 +140,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
     residuals <- y - XB
     rho <- colSums( check(residuals, tau=tau) )
-    if( is.null(arguments$a) )
-      a <- 3.7
+    a <- ifelse( is.null(arguments$a), 3.7, arguments$a )
     PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
                     function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
 
