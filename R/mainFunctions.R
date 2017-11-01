@@ -77,17 +77,20 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
   ### QICD ###
   if( alg=="QICD" & penalty!="LASSO" ){
+    m.c[["alg"]] <- "LP"
+    penname <- penalty
 
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
       xpen <- as.matrix(x[,penVars])
-      QICD_func <- QICD.nonpen
+      QICD_func <- "QICD.nonpen"
       mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
       if( intercept )
         mapback <- c(1, 1+mapback)
     } else { # All penalized coefficients
       z <- NULL
-      QICD_func <- QICD
+      xpen <- x
+      QICD_func <- "QICD"
       mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
       if( intercept )
         mapback <- c(1, 1+mapback)
@@ -96,32 +99,47 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     # The QICD algorithm needs good starting values, use LASSO solution 
     ## Speed things up using BIC, not k-fold, to select lambda for LASSO
     ## Can skip this part if starting values are provided
-    if( is.null(m.c$initial_beta) ){
+    if( is.null(m.c[["initial_beta"]]) ){
+      m.c[["penalty"]] <- "LASSO"
+      m.c[["criteria"]] <- "BIC"
       suppressWarnings(
-        QICD.start <- coefficients( cv.rq.pen(x,y,tau=tau,lambda=lambda,penalty="LASSO",intercept=intercept,criteria="BIC",nlambda=nlambda,eps=eps,init.lambda=init.lambda,penVars=penVars,...) ) # Use the LASSO with BIC
+        m.c[["initial_beta"]] <- coefficients( eval.parent(m.c) )
+        # QICD.start <- coefficients( cv.rq.pen(x,y,tau=tau,lambda=lambda,penalty="LASSO",intercept=intercept,criteria="BIC",nlambda=nlambda,eps=eps,init.lambda=lambda,penVars=penVars,...) ) # Use the LASSO with BIC
       )
-    } else {
-      QICD.start <- initial_beta
     }
 
     # Start in middle of lambda vector
     ## Increase lambda until intercept only model (or all penlized coefficients are zero)
     ## Decrease lambda until full model (Sparsity assumption => full model is bad)
-    lambdas <- exp( seq(-7, 1, length=100) ) 
+    m.c[[1]] <- as.name(QICD_func)
+    m.c[["penalty"]] <- penalty
+    m.c[["x"]] <- xpen
+    m.c$z <- z
+
+    if( is.null(lambda) ){
+      lambdas <- exp( seq(-7, 1, length=100) ) 
+    } else {
+      lambdas <- lambda
+    }
+    
     coefs <- matrix(NA, p+intercept, length(lambdas))
 
     ### Loop for increasing lambda
     for( i in floor(length(lambdas)/2):length(lambdas) ){
-      coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
-                            penalty=penalty, initial_beta=QICD.start, ... )[mapback]
+      m.c[["lambda"]] <- lambdas[i]
+      coefs[,i] <- eval.parent( m.c )[mapback]
+      # coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
+      #                       penalty=penalty, initial_beta=QICD.start, ... )[mapback]
       if( all(coefs[p_range,i] == 0) )
         break()
     }
 
     ### Loop for decreasing lambda
     for( i in floor(length(lambdas)/2):2 -1 ){
-      coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
-                            penalty=penalty, initial_beta=QICD.start, ... )[mapback]
+      m.c[["lambda"]] <- lambdas[i]
+      coefs[,i] <- eval.parent( m.c )[mapback]
+      # coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
+      #                       penalty=penalty, initial_beta=QICD.start, ... )[mapback]
       if( all(coefs[p_range,i] != 0) )
         break()
     }
@@ -130,20 +148,15 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     lambdas.keep <- which( !is.na(coefs[1,]) )
     lambdas <- lambdas[lambdas.keep]
     coefs <- coefs[,lambdas.keep]
-    rownames(coefs) <- names(QICD.start)
+    rownames(coefs) <- names( m.c[["initial_beta"]] )
     XB <- x%*%coefs[p_range,]
     if( intercept )
       XB <- XB + matrix(coefs[1,], n, ncol(coefs), byrow=TRUE)
 
     residuals <- y - XB
     rho <- colSums( check(residuals, tau=tau) )
-
-    if( is.null(m.c$a) )
+    if( is.null(m.c[["a"]]) )
       a <- 3.7
-
-    print(class(a))
-    print(a)
-
     PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
                     function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
 
