@@ -56,13 +56,17 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(p<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
 # nfolds: number of folds for cross validation
 # foldid: preset id of folds
 # penVar: variables to be penalized, default is all non-intercept terms
+
+  # Pre-algorithm setup/ get convenient values
+  arguments <- match.call() # This stores all the arguments in the function call as a list
+
   p <- dim(x)[2]
   if(is.null(penVars)){
     penVars <- 1:p
@@ -70,6 +74,110 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   p_range <- penVars + intercept
   n <- dim(x)[1]
   pen_func <- switch(which(c("LASSO","SCAD","MCP")==penalty), lasso, scad, mcp)
+
+  ### QICD ###
+  if( alg=="QICD" & penalty!="LASSO" ){
+
+    if( !all(penVars==1:p) ){ # Some unpenalized coefficients
+      z    <- as.matrix(x[,-penVars])
+      xpen <- as.matrix(x[,penVars])
+      QICD_func <- QICD.nonpen
+      mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
+      if( intercept )
+        mapback <- c(1, 1+mapback)
+    } else { # All penalized coefficients
+      z <- NULL
+      QICD_func <- QICD
+      mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
+      if( intercept )
+        mapback <- c(1, 1+mapback)
+    }
+
+    # The QICD algorithm needs good starting values, use LASSO solution 
+    ## Speed things up using BIC, not k-fold, to select lambda for LASSO
+    ## Can skip this part if starting values are provided
+    if( is.null(arguments$initial_beta) ){
+      arguments$penalty <- "LASSO"
+      arguments$criteria <- "BIC"
+      suppressWarnings(
+        QICD.start <- coefficients( eval.parent(arguments) ) # Use the LASSO with BIC
+      )
+    } else {
+      QICD.start <- arguments$initial_beta
+    }
+
+    # Start in middle of lambda vector
+    ## Increase lambda until intercept only model (or all penlized coefficients are zero)
+    ## Decrease lambda until full model (Sparsity assumption => full model is bad)
+    lambdas <- exp( seq(-7, 1, length=100) ) 
+    coefs <- matrix(NA, p+intercept, length(lambdas))
+
+    ### Loop for increasing lambda
+    for( i in floor(length(lambdas)/2):length(lambdas) ){
+      coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
+                            penalty=penalty, initial_beta=QICD.start, ... )[mapback]
+      if( all(coefs[p_range,i] == 0) )
+        break()
+    }
+
+    ### Loop for decreasing lambda
+    for( i in floor(length(lambdas)/2):2 -1 ){
+      coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
+                            penalty=penalty, initial_beta=QICD.start, ... )[mapback]
+      if( all(coefs[p_range,i] != 0) )
+        break()
+    }
+    
+    #### Remove the NA columns from coefs and corresponding lambdas
+    lambdas.keep <- which( !is.na(coefs[1,]) )
+    lambdas <- lambdas[lambdas.keep]
+    coefs <- coefs[,lambdas.keep]
+    rownames(coefs) <- names(QICD.start)
+    XB <- x%*%coefs[p_range,]
+    if( intercept )
+      XB <- XB + matrix(coefs[1,], n, ncol(coefs), byrow=TRUE)
+
+    residuals <- y - XB
+    rho <- colSums( check(residuals, tau=tau) )
+    if( is.null(arguments$a) )
+      a <- 3.7
+    PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
+                    function(xx) pen_func( xx[1+p_range], lambda=xx[1],a=a)))
+
+    cv <- data.frame(lambda=lambdas, cve=NA)
+    if( criteria=="BIC" ){
+      cv$cve <- log(rho) + colSums(coefs!=0)*log(n)/(2*n)
+      names(cv)[2] <- "BIC"
+    } else { # PBIC
+      cv$cve <- log(rho) + colSums(coefs!=0)*log(n)*log(nrow(coefs))/(2*n)
+      names(cv)[2] <- "PBIC"
+    }
+
+    lambda.min <- lambdas[which.min(cv[,2])]
+
+    # Final cleanup for QICD
+    ## First get models for each lambda
+    models <- vector( "list", length(lambdas) )
+    for( j in 1:length(models) ){
+      models[[j]]$coefficients <- coefs[,j]
+      models[[j]]$PenRho <- PenRho[j]
+      models[[j]]$residuals <- residuals[,j]
+      models[[j]]$rho <- rho[j]
+      models[[j]]$tau <- tau
+      models[[j]]$n <- n
+      models[[j]]$intercept <- intercept
+      models[[j]]$penalty <- penalty
+      class(models[[j]]) <- c("rq.pen", "rqNC")
+    }
+
+    return_val <- list( models=models, cv=cv, lambda.min=lambda.min, penalty=penalty )
+    class(return_val) <- "cv.rq.pen"
+  } else{
+  ############
+
+
+
+  # If no lambdas provided, find reasonable lambdas to use
   if(is.null(lambda)){
   # find a lambda that sets all coefficients to zero. 
   # Strategy is to get \lambda \sum p_\lambda(|\beta_j}) >= \sum \rho_\tau(y-quantile(y,tau)
@@ -79,7 +187,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
      inter_only_rho <- sum(check(y-sample_q,tau))
      #lambda_star <- rep(0,p)
      #lambda_star[penVars] <- init.lambda
-	 lambda_star <- init.lambda
+	   lambda_star <- init.lambda
      searching <- TRUE
      while(searching){
        if(penalty=="LASSO"){
@@ -98,6 +206,8 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
      lambda <- exp(seq(log(max(lambda_min)),log(max(lambda_star)),length.out=nlambda))#max is included to handle cases where
      # some variables are unpenalized and thus lambda is a multivalued vector with some zeros
   }
+  # lambda is the vector of reasonable choices of lambda to use in the penalty
+
   models <- list()
   fit_models <- TRUE
   lam_pos <- 1
@@ -172,6 +282,8 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   return_val$lambda.min <- lambda.min
   return_val$penalty <- penalty
   class(return_val) <- "cv.rq.pen"
+  }
+  
   return_val
 }
 
