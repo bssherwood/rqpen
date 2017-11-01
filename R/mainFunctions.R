@@ -102,6 +102,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     if( is.null(m.c[["initial_beta"]]) ){
       m.c[["penalty"]] <- "LASSO"
       m.c[["criteria"]] <- "BIC"
+      m.c[["lambda"]] <- NULL
       suppressWarnings(
         m.c[["initial_beta"]] <- coefficients( eval.parent(m.c) )
         # QICD.start <- coefficients( cv.rq.pen(x,y,tau=tau,lambda=lambda,penalty="LASSO",intercept=intercept,criteria="BIC",nlambda=nlambda,eps=eps,init.lambda=lambda,penVars=penVars,...) ) # Use the LASSO with BIC
