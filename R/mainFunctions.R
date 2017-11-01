@@ -77,7 +77,6 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
   ### QICD ###
   if( alg=="QICD" & penalty!="LASSO" ){
-    arguments$alg <- "LP"
 
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
