@@ -77,6 +77,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
   ### QICD ###
   if( alg=="QICD" & penalty!="LASSO" ){
+    arguments$alg <- "LP"
 
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
@@ -142,7 +143,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     if( is.null(arguments$a) )
       a <- 3.7
     PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
-                    function(xx) pen_func( xx[1+p_range], lambda=xx[1],a=a)))
+                    function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
 
     cv <- data.frame(lambda=lambdas, cve=NA)
     if( criteria=="BIC" ){
@@ -283,7 +284,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   return_val$penalty <- penalty
   class(return_val) <- "cv.rq.pen"
   }
-  
+
   return_val
 }
 
