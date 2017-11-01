@@ -56,7 +56,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(p<50,"LP","QICD"),...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -65,7 +65,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
-  arguments <- match.call() # This stores all the arguments in the function call as a list
+  m.c <- match.call() # This stores all the arguments in the function call as a list
 
   p <- dim(x)[2]
   if(is.null(penVars)){
@@ -97,14 +97,12 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     # The QICD algorithm needs good starting values, use LASSO solution 
     ## Speed things up using BIC, not k-fold, to select lambda for LASSO
     ## Can skip this part if starting values are provided
-    if( is.null(arguments$initial_beta) ){
-      arguments$penalty <- "LASSO"
-      arguments$criteria <- "BIC"
+    if( is.null(m.c$initial_beta) ){
       suppressWarnings(
-        QICD.start <- coefficients( eval.parent(arguments) ) # Use the LASSO with BIC
+        QICD.start <- coefficients( cv.rq.pen(x,y,tau=tau,lambda=lambda,penalty="LASSO",intercept=intercept,criteria="BIC",nlambda=nlambda,eps=eps,init.lambda=lambda,penVars=penVars,...) ) # Use the LASSO with BIC
       )
     } else {
-      QICD.start <- arguments$initial_beta
+      QICD.start <- initial_beta
     }
 
     # Start in middle of lambda vector
@@ -140,7 +138,13 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
     residuals <- y - XB
     rho <- colSums( check(residuals, tau=tau) )
-    a <- ifelse( is.null(arguments$a), 3.7, arguments$a )
+
+    if( is.null(m.c$a) )
+      a <- 3.7
+
+    print(class(a))
+    print(a)
+
     PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
                     function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
 
