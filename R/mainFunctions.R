@@ -506,6 +506,46 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
   n <- dim(x)[1]
   pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
         lasso, scad, mcp)
+  if(alg=="QICD" & penalty != "LASSO"){
+    if(criteria= "CV"){
+       stop("QICD algorithm wtih non-convext penalties setup only to use BIC or PBIC as the criteria")
+    }
+    #start with lasso fit
+    lasso_fit <- cv.rq.group.pen(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
+                                   nlambda, eps, init.lambda,alg="LP",penGroups,...)
+    #then iterate through lasso models to get new models
+    model_coefs <- NULL
+    lambda_vals <- lasso_fit$cv$lambda
+    lasso_beta <- lasso_fit$beta
+    for(model_num in 1:length(lasso_fit$models)){
+       model_coefs <- cbind(model_coefs, QICD.group(y, x, groups, tau, lambda_vals[model_num], intercept, penalty, 
+                 initial_beta=lasso_beta[,model_num], eps = eps,...)
+    }
+    return_val <- NULL
+    return_val$beta <- model_coefs
+    if(intercept){
+       fits <- cbind(1,x) %*% model_coefs
+    } else{
+       fits <- x %*% model_coefs
+    }
+    return_val$residuals <- y - fits
+    return_val$rho <- apply(check(return_val$residuals,tau),2,sum)
+    non_zero_count <- apply(model_coefs!=0,2,sum)
+    if( criteria=="BIC" ){
+      cve <- log(return_val$rho) + non_zero_count*log(n)/(2*n)
+    } else { # PBIC
+      cve <- log(return_val$rho) + non_zero_count*log(n)*log(nrow(model_coefs))/(2*n)
+    }
+       
+    return_val$cv <- data.frame(lambda = lambda_vals, cve = cve)
+    colnames(return_val$cv)[2] <- criteria
+    return_val$lambda.min <- lambda_vals[which.min(cve)]
+    return_val$penalty <- penalty
+    return_val$intercept <- intercept
+    return_val$groups <- groups
+    class(return_val) <- c("cv.rq.group.pen", "cv.rq.pen")    
+  }      
+  else{
     if (is.null(lambda)) {
         sample_q <- quantile(y, tau)
         inter_only_rho <- sum(check(y - sample_q, tau))
@@ -616,7 +656,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     return_val$intercept <- intercept
     return_val$groups <- groups
     class(return_val) <- c("cv.rq.group.pen", "cv.rq.pen")
-    return_val
+  }
+  return_val
 }
 
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
