@@ -77,6 +77,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 
   ### QICD ###
   if( alg=="QICD" & penalty!="LASSO" ){
+    if(criteria=="CV"){
+      stop("CV criteria not implemented for QICD algorithm with nonconvex penalties. Please use BIC or PBIC instead")
+    }
     m.c[["alg"]] <- "LP" #maybe this should be moved inside the is.null initial beta if statement. I don't think it matters, but might be cleaner code
     penname <- penalty
 
@@ -164,6 +167,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
                     function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
 
     cv <- data.frame(lambda=lambdas, cve=NA)
+    
     if( criteria=="BIC" ){
       cv$cve <- log(rho) + colSums(coefs!=0)*log(n)/(2*n)
       names(cv)[2] <- "BIC"
@@ -499,8 +503,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     } else{
 		p_range <- which(groups %in% penGroups) + intercept
 	}
-    n <- dim(x)[1]
-    pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
+  n <- dim(x)[1]
+  pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
         lasso, scad, mcp)
     if (is.null(lambda)) {
         sample_q <- quantile(y, tau)
