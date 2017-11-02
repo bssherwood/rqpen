@@ -507,7 +507,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
   pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
         lasso, scad, mcp)
   if(alg=="QICD" & penalty != "LASSO"){
-    if(criteria= "CV"){
+    if(criteria== "CV"){
        stop("QICD algorithm wtih non-convext penalties setup only to use BIC or PBIC as the criteria")
     }
     #start with lasso fit
