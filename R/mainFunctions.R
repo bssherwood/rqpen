@@ -517,7 +517,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     model_coefs <- NULL
     lambda_vals <- lasso_fit$cv$lambda
     lasso_beta <- lasso_fit$beta
-    for(model_num in 1:length(lasso_fit$models)){
+    for(model_num in 1:dim(lasso_beta)[2]){
        model_coefs <- cbind(model_coefs, QICD.group(y, x, groups, tau, lambda_vals[model_num], intercept, penalty, 
                  initial_beta=lasso_beta[,model_num], eps = eps,...))
     }
