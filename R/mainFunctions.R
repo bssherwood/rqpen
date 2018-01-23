@@ -450,18 +450,27 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
-  betas <- t(sapply(model$models, coefficients))
-  if(is.null(voi)==FALSE){
-    betas <- betas[,voi]
+  if( "cv.rq.group.pen" %in% class(q_group)){
+	betas <- t( model$beta)
+	if(model$intercept){
+		betas <- betas[,-1]
+	}
   }
-  if(colnames(betas)[1]=="intercept"){
-    betas <- betas[,-1]
+  else{
+	betas <- t(sapply(model$models, coefficients))
+	if(is.null(voi)==FALSE){
+		betas <- betas[,voi]
+	}
+	if(colnames(betas)[1]=="intercept"){
+		betas <- betas[,-1]
+	}
   }
   if(logLambda){
-     lambdas <- log(model$cv$lambda)
+	lambdas <- log(model$cv$lambda)
   } else{
-     lambdas <- model$cv$lambda
+	lambdas <- model$cv$lambda
   }
+  
   if(is.null(loi)==FALSE){
      lambdas <- lambdas[loi]
   }                                    
