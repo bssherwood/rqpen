@@ -378,6 +378,8 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
   intval0 <- intval
   residuals <- as.double(y - x%*%beta - intval)
 
+  badValues <- FALSE
+
   while( (i < maxout) & (distance >= eps) ){
 
     for(grps in unique(groups)){
@@ -397,6 +399,15 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
     distance <- sqrt( sum((beta - beta0)^2) + (intval0 - intval)^2 )
     beta0 <- beta
     intval0 <- intval
+
+    if( max(abs(beta)) > 1e10 ){
+      badValues <- TRUE
+      break
+    }
+  }
+
+  if( badValues ){
+      warning("Some coefficients diverged to infinity (bad results)")    
   }
 
   if(i == maxout & distance > eps){
