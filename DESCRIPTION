@@ -2,7 +2,7 @@ Package: rqPen
 Type: Package
 Title: Penalized Quantile Regression
 Version: 2.1
-Date: 2018-1-23
+Date: 2019-5-1
 Author: Ben Sherwood [aut, cre], Adam Maidman [ctb] 
 Depends: R (>= 3.0.0), quantreg, regpro
 Suggests: splines

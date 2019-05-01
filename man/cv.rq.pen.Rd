@@ -23,7 +23,7 @@ cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
   \item{eps}{ Smallest lambda used.}
   \item{init.lambda}{ Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
   \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
-  item{alg}{Algorithm that will be used, either linear programming (LP) or coordinate descent (QICD) algorithm from Peng and Wang (2015).}
+  \item{alg}{Algorithm that will be used, either linear programming (LP) or coordinate descent (QICD) algorithm from Peng and Wang (2015).}
   \item{...}{Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.}   
 }
 \value{
