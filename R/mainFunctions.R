@@ -517,7 +517,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
         lasso, scad, mcp)
   if(alg=="QICD" & penalty != "LASSO"){
     if(criteria== "CV"){
-       stop("QICD algorithm wtih non-convext penalties setup only to use BIC or PBIC as the criteria")
+       stop("QICD algorithm wtih non-convex penalties setup only to use BIC or PBIC as the criteria")
     }
     #start with lasso fit
     lasso_fit <- cv.rq.group.pen(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,

@@ -1,3 +1,11 @@
+rqPen 2.1 (Release date: 2019-05-01)
+* Fixed bug in the lp algorithm for group penalties.
+* Switched from using fnb to br algorithm as the default for big data problems.
+* Updated rq.lasso.fit to give an error message if only one predictor is provided. 
+* Updated cross-validation to correctly use weights. 
+* Made changes to improve performance of QICD algorithm.
+* Updated cv.rq.pen to work with QICD algorithm. 
+
 rqPen 2.0 (Release date: 2017-05-16)
 * Added function qaSIS, for quantile adaptive screening. 
 * Major changes to fix bugs in rq.group.fit and cv.rq.group.pen
