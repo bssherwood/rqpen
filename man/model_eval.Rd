@@ -2,12 +2,13 @@
 \alias{model_eval}
 \title{Model Evaluation}
 \usage{
-model_eval(model, test_x, test_y, func="check",...)
+model_eval(model, test_x, test_y, test_w=NULL, func="check",...)
 }
 \arguments{
   \item{model}{ Model of class "rqPen".}
   \item{test_x}{ Covariates used for prediction.}
   \item{test_y}{ Response to compare predictions against.}
+  \item{test_w}{ Weights for a weighted mean, typically used if weights were used to fit the model.}
   \item{func}{ Function used for evaluation. Options: "check" (Quantile Check), "SqErr" (Squared Error), "AE" (Absolute Value)}
   \item{...}{Additional arguments to be sent to evaluation function. For instance check requires tau which is not part of the model_eval function.}
 }

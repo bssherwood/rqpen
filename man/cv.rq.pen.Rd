@@ -4,7 +4,8 @@
 \usage{
 cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
           intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,
-          foldid=NULL,nlambda=100,eps=.0001,init.lambda=1, penVars=NULL,...)
+          foldid=NULL,nlambda=100,eps=.0001,init.lambda=1, penVars=NULL,
+		  alg = ifelse(ncol(x) < 50, "LP", "QICD"),...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -22,6 +23,7 @@ cv.rq.pen(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
   \item{eps}{ Smallest lambda used.}
   \item{init.lambda}{ Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
   \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
+  item{alg}{Algorithm that will be used, either linear programming (LP) or coordinate descent (QICD) algorithm from Peng and Wang (2015).}
   \item{...}{Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.}   
 }
 \value{
@@ -42,10 +44,12 @@ cv_model <- cv.rq.pen(x,y)
 }
 }
 \references{
-[1] Wang, L., Wu, Y. and Li, R. Quantile regression of analyzing heterogeneity in ultra-high dimension. \emph{J. Am. Statist. Ass}, \bold{107}, 214--222.
+[1] Peng, B. and Wang, L. An iterative coordinate descent algorithm for high-dimensional nonconvex penalized quantile regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694. 
 
-[2] Wu, Y. and Liu, Y. (2009). Variable selection in quantile regression. \emph{Statistica Sinica}, \bold{19}, 801--817.
+[2] Wang, L., Wu, Y. and Li, R. Quantile regression of analyzing heterogeneity in ultra-high dimension. \emph{J. Am. Statist. Ass}, \bold{107}, 214--222.
 
-[3] Zou, H. and Li, R. (2008). One-step sparse estimates in nonconcave penalized likelihood models. \emph{Ann. Statist.}, \bold{36}, 1509--1533.
+[3] Wu, Y. and Liu, Y. (2009). Variable selection in quantile regression. \emph{Statistica Sinica}, \bold{19}, 801--817.
+
+[4] Zou, H. and Li, R. (2008). One-step sparse estimates in nonconcave penalized likelihood models. \emph{Ann. Statist.}, \bold{36}, 1509--1533.
 }
 \author{Ben Sherwood}
