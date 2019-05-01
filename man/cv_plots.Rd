@@ -18,8 +18,8 @@ Slightly misnamed as user could choose BIC as a criteria for "cv.rq.pen" object.
 types of evaluation criteria and provides appropriate labels for the plot.  
 }
 \examples{
-x <- matrix(rnorm(800),nrow=100)
-y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+x <- matrix(rnorm(100),nrow=20)
+y <- 1 + x[,1] - 3*x[,5] + rnorm(20)
 lassoModels <- cv.rq.pen(x,y)
 cv_plot <- cv_plots(lassoModels)
 }

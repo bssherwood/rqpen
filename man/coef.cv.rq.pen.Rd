@@ -16,8 +16,8 @@ Coefficients for selected value of lambda.
 Returns coefficients for a cv.rq.pen object with default values being coefficients associated with minimum cross-validation value. 
 }
 \examples{
-x <- matrix(rnorm(800),nrow=100)
-y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+x <- matrix(rnorm(100),nrow=20)
+y <- 1 + x[,1] - 3*x[,5] + rnorm(20)
 cv_model <- cv.rq.pen(x,y)
 coefficients(cv_model)
 }
