@@ -2,9 +2,9 @@
 \alias{QICD.master}
 \title{Master QICD Function for Regular QICD, group QICD, and Partially Penalized QICD with Multiple Lambdas}
 \usage{
-QICD.master(y, x, z=NULL, groups=NULL, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
-                 initial_beta, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, ...)
+QICD.master(y, x, z=NULL, groups=NULL, tau=.5, lambda, intercept=TRUE, 
+			penalty="SCAD", initial_beta, maxin=100, maxout=20, 
+			eps = 1e-05, coef.cutoff=1e-08, a=3.7, ...)
 }
 \arguments{
   \item{y}{ Vector of response values.}

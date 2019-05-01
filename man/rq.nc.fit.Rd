@@ -4,7 +4,8 @@
 \usage{
 rq.nc.fit(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
           penalty="SCAD",a=3.7,iterations=10,
-          converge_criteria=1e-06,alg=ifelse(p<50,"LP","QICD"),penVars=NULL, ...)
+          converge_criteria=1e-06,alg=ifelse(p<50,"LP","QICD"),
+		  penVars=NULL, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}

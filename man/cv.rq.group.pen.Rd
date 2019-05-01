@@ -5,8 +5,7 @@
 cv.rq.group.pen(x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD", 
-	penGroups=NULL,
-    ...)
+	penGroups=NULL, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
