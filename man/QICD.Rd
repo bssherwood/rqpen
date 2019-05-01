@@ -32,7 +32,7 @@ The QICD algorithm should only be used for the LASSO penalty if initial_beta can
 }
 \examples{
 n = 50
-p = 100
+p = 5
 x <- matrix(rnorm(n*p),nrow=n)
 y <- 0 + x[,1] - 3*x[,5] + rnorm(n)
 fit1 <- QICD(y,x, tau=.5, lambda=1, intercept=TRUE, penalty="SCAD")
