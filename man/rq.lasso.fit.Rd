@@ -4,7 +4,7 @@
 \usage{
 rq.lasso.fit(x,y,tau=.5,lambda=NULL,weights=NULL,
              intercept=TRUE,coef.cutoff=.00000001,
-             method="br", penVars=NULL, ...)
+             method="br", penVars=NULL,scalex=TRUE, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -16,6 +16,7 @@ rq.lasso.fit(x,y,tau=.5,lambda=NULL,weights=NULL,
   \item{coef.cutoff}{ Coefficients below this value will be set to zero.}
   \item{method}{Use method "br" or "fn" as outlined in quantreg package. We have found "br" to be more stable for penalized regression problems.} 
   \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
+  \item{scalex}{If set to true the predictors will be scaled to have mean zero and standard deviation of one before fitting the model. The output returned will be on the original scale of the data.}
   \item{...}{Additional items to be sent to rq. Note this will have to be done carefully as rq is run on the augmented data to account for penalization and could provide strange results if this is not taken into account.}
 }
 \value{

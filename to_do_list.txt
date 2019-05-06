@@ -3,3 +3,4 @@
    not invariant to scale so best if all penalized variables are on the same scale. 
 2. Smarter way to choose lambdas for cv.rq.pen
 3. Warm starts in cv functions
+4. Need to look into penVar 

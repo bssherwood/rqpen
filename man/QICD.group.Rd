@@ -4,7 +4,7 @@
 \usage{
 QICD.group(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, 
-				 coef.cutoff=1e-08, a=3.7, ...)
+				 coef.cutoff=1e-08, a=3.7, scalex, ...)
 }
 \arguments{
   \item{y}{ Vector of response values.}
@@ -31,6 +31,7 @@ QICD.group(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   \item{coef.cutoff}{ Coefficients with magnitude less than this value are set to 0.}
   \item{a}{ Second tuning parameter for SCAD and MCP penalties.  
 	Must be greater than 2 for SCAD and greater than 1 for MCP.}
+  \item{scalex}{If set to true the predictors will be scaled to have mean zero and standard deviation of one before fitting the model. The output returned will be on the original scale of the data.}
   \item{...}{ The extra arguments will not be used.}
 }
 \value{

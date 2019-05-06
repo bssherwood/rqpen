@@ -111,8 +111,37 @@ rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=
    model_list
 }
 
+transform_coefs <- function(coefs,mu_x,sigma_x,intercept=TRUE){
+  new_coefs <- coefs
+  if(intercept){
+	  intercept <- coefs[1]
+	  for(j in 2:length(coefs)){
+		new_coefs[j] <- coefs[j]/sigma_x[j-1]
+		intercept <- intercept - coefs[j]*mu_x[j-1]/sigma_x[j-1]
+	  }
+	  new_coefs[1] <- intercept
+  } else{
+  	for(j in 1:length(coefs)){
+		new_coefs[j] <- coefs[j]/sigma_x[j]
+	}
+  }
+  new_coefs
+}
+
+get_coef_pen <- function(coefs,lambda,intercept,penVars,penalty="LASSO"){
+	if(intercept){
+		coefs <- coefs[-1]
+	}
+	if(is.null(penVars)==FALSE){
+		coefs <- coefs[penVars]
+	}
+	if(penalty=="LASSO"){
+		sum(abs(coefs))*lambda
+	}
+}
+
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
-                         coef.cutoff=1e-08, method="br",penVars=NULL, ...){
+                         coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE, ...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
@@ -138,6 +167,12 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    }
    if( sum(lambda < 0) > 0){
       stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
+   }
+   if(scalex){
+	  original_x <- x
+	  x <- scale(x)
+	  mu_x <- attributes(x)$`scaled:center`
+	  sigma_x <- attributes(x)$`scaled:scale`
    }
    #if(is.null(method)){
    # if(n + 2*p < 500){
@@ -218,8 +253,20 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    }
    attributes(return_val$coefficients)$names <- x_names
    return_val$coefficients[abs(return_val$coefficients) < coef.cutoff] <- 0
-   return_val$PenRho <- model$rho
-   return_val$residuals <- model$residuals[1:n]   
+   if(scalex){
+   #need to update for penVars
+	 return_val$coefficients <- transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
+	 if(intercept){
+		fits <- cbind(1,original_x) %*% return_val$coefficients
+	 } else{
+		fits <- original_x %*% return_val$coefficients
+	 }
+	 return_val$residuals <- y - fits
+	 return_val$PenRho <- sum(sapply(return_val$residuals,check,tau))+get_coef_pen(return_val$coefficients,lambda,intercept,penVars)	 
+   } else{
+	 return_val$PenRho <- model$rho
+	 return_val$residuals <- model$residuals[1:n]   
+   }
    if(is.null(weights)){   
      return_val$rho <- sum(sapply(return_val$residuals,check,tau))
    } else{
