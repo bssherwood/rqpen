@@ -63,7 +63,7 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 
 QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, ...)
+                 a=3.7, scalex=TRUE, ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #tau is the quantile value
@@ -80,6 +80,12 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 ### Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE
 {
   cleanInputs(y, x, lambda, initial_beta, intercept, penalty, a)
+  
+  if(scalex){
+	x <- scale(x)
+	mu_x <- attributes(x)$`scaled:center`
+	sigma_x <- attributes(x)$`scaled:scale`
+  }
 
   # Set penalty function
   if(penalty == "SCAD"){
@@ -154,9 +160,12 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 
   beta[ abs(beta) < coef.cutoff ] <- 0
   coefficients <- beta
-  if(intercept)
+  if(intercept){
     coefficients <- c(intval, beta)
-
+  }
+  if(scalex){
+	coefficients <- transform_coefs(coefficients,mu_x,sigma_x,intercept)
+  }
   return( coefficients )
 }
 
@@ -164,7 +173,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 
 QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, method="br", ...)
+                 a=3.7, method="br", scalex=TRUE, ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector.
 #z is nxq matrix of bases; the coefficients for these columns will be unpenalized
@@ -184,6 +193,11 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 #method for quantile regression: can be "br" or "fn", see top for description.
 {
   cleanInputs(y, x, lambda, initial_beta[ 1:(intercept+ncol(x)) ], intercept, penalty, a)
+  if(scalex){
+	x <- scale(x)
+	mu_x <- attributes(x)$`scaled:center`
+	sigma_x <- attributes(x)$`scaled:scale`
+  }
 
   if( class(z)!="matrix" ){                                                                                    
     stop('z needs to be a matrix')
@@ -297,9 +311,14 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   }    
 
   beta[ abs(beta) < coef.cutoff ] <- 0
+  if(scalex){
+	beta <- transform_coefs(beta,mu_x,sigma_x,intercept)
+  }
+  
   coefficients <- c(beta, zbeta)
-  if(intercept)
+  if(intercept){
     coefficients <- c(zbeta[1], beta, zbeta[-1])
+  }
 
   return( coefficients )
 }
