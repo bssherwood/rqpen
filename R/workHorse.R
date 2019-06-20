@@ -162,7 +162,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if(n != length(y)){
       stop('length of y and rows of x do not match')
    }
-   if(is.null(lambda)==TRUE & (length(lambda) != 1 & length(lambda) != dim(x)[2])){
+   if(is.null(lambda)==FALSE & (length(lambda) != 1 ! length(lambda) != dim(x)[2])){
       stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
    }
    if( sum(lambda < 0) > 0){
