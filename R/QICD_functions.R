@@ -600,7 +600,7 @@ LASSO.fit.nonpen <- function(y, x, z, tau, lambda, intercept, coef.cutoff, weigh
 # Easier to create this function to include in each QICD function
 cleanInputs <- function(y, x, lambda, initial_beta=NULL, intercept=TRUE,
                         penalty, a, ...){
-  if( is(x,"matrix")){                                                                                    
+  if( is(x,"matrix") == FALSE){                                                                                    
     stop('x needs to be a matrix')
   }
 
