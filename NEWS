@@ -1,7 +1,8 @@
-rqPen 2.2 ()
+rqPen 2.2 (Release date: 2019-12-4)
 ==============
 Changes: 
 * Adding scale variable to rq.lasso.fit. Where the default is true. Coefficients are returned on the original scale of the predictors. 
+* Fixed bug due to matrix objects also being inherited from class array starting in R 4.0.0.
 
 rqPen 2.1 (Release date: 2019-05-01)
 ==============
