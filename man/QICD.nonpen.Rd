@@ -5,7 +5,7 @@ with QICD Algorithm}
 \usage{
 QICD.nonpen(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, 
-				 coef.cutoff=1e-08, a=3.7, method="br", ...)
+				 coef.cutoff=1e-08, a=3.7, method="br", scalex=TRUE, ...)
 }
 \arguments{
   \item{y}{ Vector of response values.}
@@ -22,6 +22,7 @@ QICD.nonpen(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   \item{coef.cutoff}{ Coefficients with magnitude less than this value are set to 0.}
   \item{a}{ Second tuning parameter for SCAD and MCP penalties.  Must be greater than 2 for SCAD and greater than 1 for MCP.}
   \item{method}{ Method used in QICD algorithm. Default is "br" method. When sample size is several thousand, method "fn" should be used for increased speed. See quantreg package for more details.}
+  \item{scalex}{ If TRUE the x predictors are transformed to have mean zero and standard deviation one before fitting the model. Output is returned on the original scale of the data.}
   \item{...}{ The extra arguments will not be used.}
 }
 \value{

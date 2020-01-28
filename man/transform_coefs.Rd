@@ -2,12 +2,13 @@
 \alias{transform_coefs}
 \title{Transform coefficients back to original scale}
 \usage{
-transform_coefs(coefs,mu_x,sigma_x)
+transform_coefs(coefs,mu_x,sigma_x, intercept=TRUE)
 }
 \arguments{
   \item{coefs}{Coefficients to be transformed.}
   \item{mu_x}{Means of the original predictors.}
   \item{sigma_x}{Standard deviations of the original predictors.}
+  \item{intercept}{Whether an intercept is included in the model.}
 }
 \description{
 Takes the coefficients fit after scaling the predictors to have mean zero and a standard 

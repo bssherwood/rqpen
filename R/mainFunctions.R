@@ -271,12 +271,12 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
       train_y <- y[foldid!=i]
       test_x <- x[foldid==i,,drop=FALSE]
       test_y <- y[foldid==i]
-	  train_weights <- weights[foldid!=i]
+	  train_weights <- weights[foldid!=i] #not sure this line is needed
 	  if(is.null(weights)){
 		train_weights <- test_weights <- NULL
 	  } else{
 	    train_weights <- weights[foldid!=i]
-		test_weights <- weights[foldid!=i]
+		test_weights <- weights[foldid==i]
 	  }
       if(penalty=="LASSO"){
          cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)

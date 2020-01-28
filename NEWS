@@ -1,3 +1,8 @@
+rqPen 2.2.1 (Release date: 2020-01-28)
+=============
+Changes:
+* Fixed bug about how weights were assigned to training and testing sets. Thanks to Zhen Liu for finding the bug.  
+
 rqPen 2.2 (Release date: 2019-12-4)
 ==============
 Changes: 

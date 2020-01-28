@@ -199,7 +199,7 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 	sigma_x <- attributes(x)$`scaled:scale`
   }
 
-  if( class(z)!="matrix" ){                                                                                    
+  if(is(z,"matrix") == FALSE ){                                                                                    
     stop('z needs to be a matrix')
   }
 

@@ -18,6 +18,7 @@ Plot of how beta estimates change with lambda.
 Plots how the beta estimates changes with the different values of lambda.  
 }
 \examples{
+set.seed(1)
 x <- matrix(rnorm(800),nrow=100)
 y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 lassoModels <- cv.rq.pen(x,y)

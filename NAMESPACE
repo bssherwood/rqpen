@@ -6,6 +6,7 @@ importFrom(splines, bs)
 importFrom("graphics", "lines", "plot")
 importFrom("stats", "coefficients", "predict", "quantile", "residuals",
              "sd", "xtabs", "fitted","weighted.mean")
+importFrom("methods", "is")
 export(kernel_estimates)
 export(kernel_weights)
 export(check)

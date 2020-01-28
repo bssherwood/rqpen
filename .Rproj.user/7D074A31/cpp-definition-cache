@@ -1,0 +1,23 @@
+[
+    {
+        "definitions" : [
+        ],
+        "file" : "C:/Users/BSherwood/Documents/RPackage/rqpen/src/QCD.cpp",
+        "file_last_write" : 1486331697
+    },
+    {
+        "definitions" : [
+            {
+                "column" : 6,
+                "file" : "C:/Users/BSherwood/Documents/RPackage/rqpen/src/rqPen_init.c",
+                "kind" : 6,
+                "line" : 29,
+                "name" : "R_init_rqPen(DllInfo *)",
+                "parent_name" : "",
+                "usr" : "c:@F@R_init_rqPen"
+            }
+        ],
+        "file" : "C:/Users/BSherwood/Documents/RPackage/rqpen/src/rqPen_init.c",
+        "file_last_write" : 1494970087
+    }
+]

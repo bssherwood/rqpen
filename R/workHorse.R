@@ -150,7 +150,6 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
-
    if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
    }
@@ -162,7 +161,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    if(n != length(y)){
       stop('length of y and rows of x do not match')
    }
-   if(is.null(lambda)==TRUE | (length(lambda) != 1 | length(lambda) != dim(x)[2])){
+   if(is.null(lambda)==TRUE | (length(lambda) != 1 & length(lambda) != dim(x)[2])){
       stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
    }
    if( sum(lambda < 0) > 0){
