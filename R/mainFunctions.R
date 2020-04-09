@@ -56,7 +56,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="SCAD",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
