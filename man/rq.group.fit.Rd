@@ -3,7 +3,7 @@
 \title{Quantile Regresion with Group Penalty}
 \usage{
 rq.group.fit(x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "LASSO", alg = "QICD", a=3.7, penGroups=NULL, ...)
+                penalty = "SCAD", alg = "QICD", a=3.7, penGroups=NULL, ...)
 }
 \arguments{
   \item{x}{ Matrix of predictors.}
@@ -12,7 +12,7 @@ rq.group.fit(x, y, groups, tau = 0.5, lambda, intercept = TRUE,
   \item{tau}{ Conditional quantile being modelled.}            
   \item{lambda}{ Vector of lambdas. Default is for lambdas to be automatically generated.}   
   \item{intercept}{ Whether model should include an intercept. Constant does not need to be included in "x".}
-  \item{penalty}{ Type of penalty: "LASSO", "SCAD" or "MCP".}     
+  \item{penalty}{ Type of penalty: "SCAD" or "MCP".}     
   \item{alg}{If set to QICD algorithm will use coordinate descent algorithm. Otherwise, will use a linear programming algorithm, which is an extension of algorithm used in rq.lasso.fit.}
   \item{a}{The additional tuning parameter for SCAD and MCP.}
   \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
@@ -23,12 +23,12 @@ Returns the following:
 \item{coefficients}{Coefficients of the model.}
 \item{residuals}{ Residuals from the fitted model.}
 \item{rho}{Unpenalized portion of the objective function.}
-\item{tau}{ Quantile being modelled.}
+\item{tau}{ Quantile being modeled.}
 \item{n}{Sample size.}
 \item{intercept}{Whether intercept was included in model.}
 }
 \description{
-Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
+Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
 }
 \examples{
 x <- matrix(rnorm(800),nrow=100)

@@ -2,7 +2,7 @@
 \alias{cv.rq.group.pen}
 \title{Cross Validated quantile regression with group penalty}
 \usage{
-cv.rq.group.pen(x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO", 
+cv.rq.group.pen(x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD", 
 	penGroups=NULL, ...)
@@ -38,7 +38,7 @@ Returns the following:
 \item{groups}{Group structure for penalty function.}
 }
 \description{
-Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. QICD is a group penalty extension of the algorithm presented by Peng and Wang (2015). LP does a linear programming version of the group penalty. 
+Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is needed for the SCAD and MCP algorithm. QICD is a group penalty extension of the algorithm presented by Peng and Wang (2015). LP does a linear programming version of the group penalty. 
 }
 \examples{                           
 \dontrun{

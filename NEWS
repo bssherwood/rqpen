@@ -1,7 +1,7 @@
 rqPen 2.2.2 (Release date: 2020-04-08)
 =============
 Changes:
-* Adding warning to group lasso approaches that group penalty uses the L1 norm and thus group lasso is the same as regular lasso.  
+* Adding warning to group lasso approaches that group penalty uses the L1 norm and thus group lasso is the same as regular lasso. Added more text to the rq.group.fit and cv.rq.group.pen help files to make clear. In addition, changed default penalty to SCAD for the group penalty functions.  
 * Updated rq.group.fit so "a" tuning parameter for SCAD and MCP gets passed correctly to the QICD or linear programming functions. Thanks to Eric Dunipace for finding this bug. 
 
 rqPen 2.2.1 (Release date: 2020-01-28)

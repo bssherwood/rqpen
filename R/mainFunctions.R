@@ -56,7 +56,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="SCAD",intercept=TRUE,criteria="CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -502,13 +502,13 @@ getRho <- function(model){
     model$rho
 }
 
-cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "LASSO", 
+cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
   if(penalty=="LASSO"){
-	warning("Group penalties use the L1 norm and the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure")
+	warning("Group penalties use the L1 norm and the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
 	if(is.null(penGroups)){
 		p_range <- 1:dim(x)[2] + intercept
@@ -673,7 +673,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 }
 
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "LASSO", alg="QICD", a=3.7,penGroups=NULL, ...) 
+                penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
@@ -683,7 +683,7 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
       stop("Penalty must be LASSO, SCAD or MCP")
   }
   if(penalty=="LASSO"){
-	warning("Group penalties use the L1 norm and the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure")
+	warning("Group penalties use the L1 norm and the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
   if(is.null(dim(x))){ stop("x must be matrix with at least 1 column") }
   if(length(groups)!=ncol(x)){
