@@ -9,7 +9,7 @@ rq.lasso.fit(x,y,tau=.5,lambda=NULL,weights=NULL,
 \arguments{
   \item{x}{ Matrix of predictors.}
   \item{y}{ Vector of response values.}
-  \item{tau}{ Conditional quantile being modelled.}   
+  \item{tau}{ Conditional quantile being modeled.}   
   \item{lambda}{ Tuning parameter.}
   \item{weights}{ Weights for the objective function.}
   \item{intercept}{ Whether model should include an intercept. Constant does not need to be included in "x".}
@@ -25,7 +25,7 @@ Returns the following:
 \item{PenRho}{ Penalized objective function value.}
 \item{residuals}{ Residuals from the model.}
 \item{rho}{ Objective function evaluation without the penalty.}
-\item{tau}{ Conditional quantile being modelled.}
+\item{tau}{ Conditional quantile being modeled.}
 \item{n}{ Sample size.}  
 }
 \description{
@@ -34,7 +34,7 @@ Fits a quantile regression model with the LASSO penalty. Algorithm is similar to
 \examples{
 x <- matrix(rnorm(800),nrow=100)
 y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-lassoModel <- rq.lasso.fit(x,y,lambda=1)
+lassoModel <- rq.lasso.fit(x,y,lambda=.1)
 }
 \references{
 [1] Koenker, R. and Mizera, I. (2014). Convex optimization in R. \emph{Journal of Statistical Software}, \bold{60}, 1--23.  

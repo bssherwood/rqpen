@@ -1,3 +1,7 @@
+rqPen 2.2.3 (Release date: TBD)
+Changes:
+* Updated code for get_coef_pen() to a fix a bug where it was returning multiple values. Thank you to Jingyi Kenneth Tay for noticing this issue. 
+
 rqPen 2.2.2 (Release date: 2020-04-08)
 =============
 Changes:
@@ -21,7 +25,7 @@ Changes:
 * Fixed bug in the lp algorithm for group penalties.
 * Switched from using fnb to br algorithm as the default for big data problems.
 * Updated rq.lasso.fit to give an error message if only one predictor is provided. 
-* Updated cross-validation to correctly use weights. 
+* Updated cross-validation to correctly use weights. Thanks to Benda Xu for finding this bug. 
 * Made changes to improve performance of QICD algorithm.
 * Updated cv.rq.pen to work with QICD algorithm. 
 

@@ -2,3 +2,4 @@
 2. Smarter way to choose lambdas for cv.rq.pen
 3. Warm starts in cv functions
 4. Need to look into penVar 
+5. Allow multiple tau vals to be passed to the fitting functions. 

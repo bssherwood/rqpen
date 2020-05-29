@@ -128,16 +128,20 @@ transform_coefs <- function(coefs,mu_x,sigma_x,intercept=TRUE){
   new_coefs
 }
 
-get_coef_pen <- function(coefs,lambda,intercept,penVars,penalty="LASSO"){
+get_coef_pen <- function(coefs,lambda,intercept,penVars,penalty="LASSO",a=NULL){
 	if(intercept){
 		coefs <- coefs[-1]
 	}
 	if(is.null(penVars)==FALSE){
 		coefs <- coefs[penVars]
 	}
-	if(penalty=="LASSO"){
-		sum(abs(coefs))*lambda
-	}
+	if( penalty == "LASSO" ){ ### PenRho for LASSO
+      sum( abs( coefs )*lambda )
+    } else if( penalty == "SCAD" ){ ### PenRho for SCAD
+      sum( scad( coefs, lambda, a ))
+    } else { ### PenRho for MCP
+      sum( mcp( coefs, lambda, a ))
+    }
 }
 
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
