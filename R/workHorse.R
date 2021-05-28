@@ -326,7 +326,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
-	returnVal <- list(models=models, n=n, p=p, nt=nt, alg="huber",tau=tau)
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	returnVal
 }
 
@@ -339,28 +339,36 @@ print.rq.lasso <- function(x,...){
 	}
 }
 
-qaic <- function(model){
-	
+getModelCoefs <- function(x,index){
+	coefficients(x)[,index]
 }
 
-
-qbic <- function(obj, largeP=FALSE){
-  
-  tau <- model$tau
-  n <- obj$n
-  df <- sum(model$coefficients !=0)
-  if(largeP){
-    bic <- log(model$rho) + df*log(n)*log(length(model$coefficients))/(2*n)
-  }else{
-    bic <- log(model$rho) + df*log(n)/(2*n)
-  }
-  bic
+coef.rq.lasso <- function(x,index=NULL){
+	lt <- length(x$tau)
+	if(lt==1){
+		if(is.null(index)){
+			returnVal <- coefficients(x$models)
+		} else{
+			returnVal <- coefficients(x$models)[,index]
+		}
+	} else{
+		if(is.null(index)){
+			returnVal <- lapply(x$models,coef)
+		} else if(length(index) == 1){
+			returnVal <- sapply(x$models,getModelCoefs,index)
+		} else if(lt != length(index)){
+			stop("index must be one value or one value for each tau")
+		} else{
+			returnVal <- NULL
+			for(i in 1:lt){
+				returnVal <- cbind(returnVal,coefficients(x$models[[i]])[,index[i]]) 
+			}
+			colnames(returnVal) <- x$tau
+		}
+	}
+	returnVal
 }
 
-#pick model to select, seperate tau is for multiple tau values. 
-select <- function(obj, criterion=c("BIC","AIC","PBIC"),lambda=c("same","seperate")){
-	
-}
 
 
 

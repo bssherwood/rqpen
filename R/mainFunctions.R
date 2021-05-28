@@ -48,6 +48,49 @@ qbic <- function(model, largeP=FALSE){
   bic
 }
 
+qic <- function(model,n, method=c("BIC","PBIC","AIC")){
+	tau <- model$tau
+	df <- sum(model$coefficients != 0)
+	if(method=="PBIC"){
+		log(model$rho) + df*log(n)*log(length(model$coefficients))/(2*n)
+	} else if (method == "BIC"){		    
+		log(model$rho) + df*log(n)/(2*n)
+	} else if (method== "AIC"){
+		log(model$rho) + 2*df
+	} else{
+		stop("invalid method")
+	}
+}
+
+select.rq.lasso <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
+	n <- obj$n
+	if(length(weights)==1){
+		if(septau){
+			warning("septau set to TRUE, but only one quantile modeled")
+		}
+		qic_vals <- qic(obj$models,n,method)
+		min_spot <- which.min(qic_vals)
+		coefs <- coefficients(obj)[,min_spot]
+	} else{
+		qic_vals <- sapply(obj$models,qic,n,method)
+		if(septau){
+			min_vals <- apply(qic_vals,2,which.min)
+			coefs <- coefficients(obj,min_vals)
+		} else{
+			qic_vals <- apply(qic_vals %*% diag(weights),1,sum)
+			coefs <- coefficients(obj,which.min(qic_vals))
+		}
+	}
+	return_val <- list(coefficients = coefs, ic=qic_vals, lambda=obj$lambda, penalty.factor=obj$penalty.factor)
+	class(return_val) <- "rqPen.select"
+	return_val
+}
+
+print.rqPen.select <- function(x,...){
+    print(coefficients(x))
+}
+
+
 coef.cv.rq.pen <- function(object, lambda='min',...){
   if(lambda=='min'){
      lambda <- object$lambda.min
