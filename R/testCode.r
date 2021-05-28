@@ -1,6 +1,3 @@
-library(rqPen)
-library(hqreg)
-
 p <- 80
 n <- 100
 
