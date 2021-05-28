@@ -144,13 +144,233 @@ get_coef_pen <- function(coefs,lambda,intercept,penVars,penalty="LASSO",a=NULL){
     }
 }
 
+# modified version (rescaled) in order to approximate LAD
+huber.loss <- function(r,gamma){
+  le.ind<- which(abs(r) <= gamma)
+  ##If statement is a Ben addition. There was a problem if all the values of r had a magnitude larger than gamma. 
+  if(length(le.ind)==0){
+    return( abs(r)-gamma/2)
+  } else{
+    #Ben: I put in the below comment because huber.loss was not working well with cv function
+    #l.vec<- as.vector(r)
+    #l.vec[le.ind]<- (r[le.ind])^2/2/gamma
+    #l.vec[-le.ind]<- abs(r[-le.ind])-gamma/2
+    #return(l.vec)
+    r[le.ind]<- (r[le.ind])^2/2/gamma
+    r[-le.ind]<- abs(r[-le.ind])-gamma/2
+    return(r)
+  }
+}
+##############################
+## compare loss functions
+# r<- seq(-10,10,0.01)
+# gamma<- 1
+# plot(r, tanh.loss(r, gamma), type = "l", ylab = "loss")
+# lines(r, huber.loss(r, gamma), col=2)
+# lines(r, r^2, col=3)
+# legend("bottomright", legend = c("tanh", "huber", "squared"), lty = 1, col=1:3)
+# dev.copy2pdf(file="loss_compare.pdf")
+
+rq.huber<- function(r, tau, gamma){
+  r<- as.vector(r)
+  (huber.loss(r,gamma)+(2*tau-1)*r)/2
+}
+
+#  returns a vector of n
+rq.huber.deriv<- function(r, tau, gamma){
+  r<- as.vector(r)
+  le.ind<- which(abs(r) <= gamma)
+  if(length(le.ind)!= 0){
+    l.vec<- r
+    l.vec[le.ind]<- (r[le.ind]/gamma+(2*tau-1))/2
+    l.vec[-le.ind]<- (sign(r[-le.ind])+(2*tau-1))/2
+  } else{
+    l.vec <- (sign(r)+(2*tau-1))/2
+  }
+  return(l.vec)
+} 
+
+neg.gradient <- function(r,weights,tau,gamma,x,apprx){
+  if(apprx=="huber"){
+    wt_deriv <- as.vector(weights*rq.huber.deriv(r, tau, gamma))
+  }else{
+    wt_deriv <- as.vector(weights*rq.tanh.deriv(r, tau, gamma))
+  }
+  
+  if(is.null(dim(x))){
+    mean(x*wt_deriv)
+  } else{
+    apply(x*wt_deriv,2,mean)
+  }
+}
+
+lassoLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1){
+	n <- length(y)
+	returnVal <- 0
+	
+	#to-do: remove for loop
+	for(tau_val in tau){
+		inter <- quantile(y,tau_val)
+		r <- y - inter
+	
+		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
+		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
+		returnVal <- max(c(returnVal,abs(grad_k)))
+	}
+	returnVal
+}
+
+# If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
+rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
+						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	nt <- length(tau)
+	lpf <- length(penalty.factor)
+	pfmat <- FALSE
+	
+	if(sum(tau <= 0 | tau >=1)>0){
+		stop("tau needs to be between 0 and 1")
+	}
+	if(sum(penalty.factor<0)>0){
+		stop("penalty factors must be positive")
+	}
+	if(nt==1){
+		if(lpf!=p){
+			stop("penalty factor must be of length p")
+		}
+		if(tau.pen){
+			penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
+		}
+	} else{
+		if(length(penalty.factor) == p*nt){
+			pfmat <- TRUE
+		}
+		else if(length(penalty.factor) !=p){
+			stop("penalty factor must be a length p vector or a nt by p matrix, where nt is the number of taus")
+		}
+		if(tau.pen){
+			pfmat <- TRUE
+			if(length(penalty.factor)==p){
+				penalty.factor <- matrix(rep(penalty.factor,nt),nrow=nt,byrow=TRUE)
+			} else{
+				penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			}
+		}
+		
+	}
+	if(is.null(lambda)){
+		lamMax <- lassoLamMax(x,y,tau)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	}
+	if(alg=="huber"){
+		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
+	} else{
+		#TBD
+	}
+	class(returnVal) <- "rq.lasso"
+	returnVal
+}
+
+rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,...){
+	dims <- dim(x)
+	p <- dims[2]
+	if(scalex){
+		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+	} else{
+		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+	}
+	return_val <- NULL
+	return_val$coefficients <- hqModel$beta
+	return_val$lambda <- lambda
+	return_val$penalty.factor <- penalty.factor
+	if(is.null(colnames(x))){
+		x_names <- paste("x",1:p,sep="")
+	} else{
+		x_names <- colnames(x)
+	}
+	x_names <- c("intercept",x_names)
+	
+	rownames(return_val$coefficients) <- x_names
+	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
+	fits <- cbind(1,x)%*% return_val$coefficients
+	return_val$fitted <- fits
+	return_val$residuals <- y - fits
+	return_val$rho <- apply(check(return_val$residuals,tau),2,mean)
+	penalty.factor <- c(0,penalty.factor)
+	return_val$PenRho <- return_val$rho + apply(penalty.factor*abs(return_val$coefficients),2,sum)
+	return_val$tau <- tau
+	return_val$df <- apply(return_val$coefficients!=0,2,sum)
+	return_val
+}
+
+rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	nt <- length(tau)
+	
+	if(length(tau)==1){		
+		models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+	} else{
+		penf <- penalty.factor
+		models <- list()
+		for(i in 1:nt){
+			subtau <- tau[i]
+			if(pfmat){
+				penf <- penalty.factor[i,]
+			}
+			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+		}
+		attributes(models)$names <- paste0("tau",tau)
+	}
+	returnVal <- list(models=models, n=n, p=p, nt=nt, alg="huber",tau=tau)
+	returnVal
+}
+
+
+print.rq.lasso <- function(x,...){
+    if(x$nt==1){
+		print(data.frame(df=x$models$df,lambda=x$models$lambda))
+	} else{
+		print(c("Quantile regression with lasso penalty for quantiles:",x$tau))
+	}
+}
+
+qaic <- function(model){
+	
+}
+
+
+qbic <- function(obj, largeP=FALSE){
+  
+  tau <- model$tau
+  n <- obj$n
+  df <- sum(model$coefficients !=0)
+  if(largeP){
+    bic <- log(model$rho) + df*log(n)*log(length(model$coefficients))/(2*n)
+  }else{
+    bic <- log(model$rho) + df*log(n)/(2*n)
+  }
+  bic
+}
+
+#pick model to select, seperate tau is for multiple tau values. 
+select <- function(obj, criterion=c("BIC","AIC","PBIC"),lambda=c("same","seperate")){
+	
+}
+
+
+
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE, ...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # coef.cutoff is a threshold to set to zero. 
-# Choose the method used to estimate the coefficients ("br" or "fn")
+# Choose the method used to estimate the coefficients ("br", "fn" or "Huber")
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
@@ -177,38 +397,6 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 	  mu_x <- attributes(x)$`scaled:center`
 	  sigma_x <- attributes(x)$`scaled:scale`
    }
-   #if(is.null(method)){
-   # if(n + 2*p < 500){
-   #    method <- "br"
-   # } else{
-   #	method <- "fn"
-   # }
-   #}
-
-   # ##############################################################################################
-   # ### This uses the LASSO.fit or LASSO.fit.nonpen functions to obtain coefficient estimates. ###
-   # ### Note that the coefficients might need to be reordered to match x.                      ###
-   # ##############################################################################################
-   # if( !is.null(weights) & length(weights) != n )
-   #    stop("Length of weights does not match length of y")
-
-   # ### Find indices of penalized and nonpenalized coefficients
-   # nonpenVars <-     ### indices of nonpenalized coefficients (lambdas of 0 or not included in penVars), NULL if no nonpenalized oefficients
-   # penVars    <-     ### indices of penalized coefficients
-
-   # xnew <- as.matrix( x[,penVars] )
-   # if( is.null(nonpenVars) ){
-   #   coefs <- LASSO.fit(y, xnew, tau, intercept, coef.cutoff, weights)
-   # } else {
-   #   znew <- as.matrix( x[,nonpenVars] )
-   #   coefs <- LASSO.fit.nonpen(y, xnew, znew, tau, intercept, coef.cutoff, weights)
-   #   coefs[ intercept + 1:p ] <- coefs[ intercept + order(c(penVars, nonpenVars)) ]
-   # }
-
-   # ### coefs are the coefficients in the correct order with the intercept first
-   # ##############################################################################################
-   # ##############################################################################################
-   # ##############################################################################################
 
    if(is.null(penVars) !=TRUE){# & length(lambda) == 1){
       if(length(lambda)==1){

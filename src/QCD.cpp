@@ -242,6 +242,52 @@ void penderiv( double *beta, int *p, double *a, double *lambda, int *pentype)
 		count++;
 	}
 }
+/*
+void penderiv2( double *beta, int *p, double *a, double *lambda, int *pentype, int *norm)
+// beta is the vector of coefficients and will return the value of the derivative of the penalties
+// n is the number of observations
+// p is the number of coefficients
+// a is a parameter for SCAD and MCP
+// lambda is a parameter for SCAD, MCP, and LASSO
+// pentype is the penalty (0 for SCAD, 1 for MCP, 2 for LASSO)
+{
+	int count = 0;
+	double temp;
+	double normval;
+	while( count < *p )
+	{
+		if( *norm == 1){
+			normval = fabs(beta[count])
+		}
+		if( *norm == 2){
+			normval = 
+		}
+		if( *pentype == 0 ) // SCAD
+		{
+			if( fabs(beta[count]) < lambda[count] )
+				temp = *lambda;
+			else if ( fabs(beta[count]) < (*a)*lambda[count] )
+				temp = ( (*a)*lambda[count] - fabs(beta[count]) )/( *a - 1.0 );
+			else 
+				temp = 0;
+		}
+		else if( *pentype == 1 ) // MCP
+		{
+			if ( fabs(beta[count]) < (*a)*lambda[count] )
+				temp = fabs( lambda[count] - ( fabs(beta[count])/ *a) );
+		//old	( lambda[count] - fabs(beta[count]) )/( *a );
+			else 
+				temp = 0;
+		}
+		else // LASSO
+		{
+			temp = lambda[count];
+		}
+
+		beta[count] = temp;
+		count++;
+	}
+}*/
 	
 }
 

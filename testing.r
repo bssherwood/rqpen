@@ -3,7 +3,7 @@ install_github("bssherwood/rqpen", force=TRUE)
 
 library(rqPen)
 
-x <- matrix(rnorm(800),ncol=8)
+x <- matrix(rnorm(800),ncol=80)
 x_diff <- x
 x_diff[,8] <- x_diff[,8]/100
 
@@ -52,4 +52,13 @@ a <- cv.rq.group.pen(x,y,groups,alg="LP",foldid=folds)
 coefficients(a)
 b <- cv.rq.group.pen(x_diff,y,groups,alg="LP",foldid=folds)
 coefficients(b)
+
+x <- matrix(rnorm(800),ncol=80)
+
+y <- 1 + x[,1] - x[,8] + rnorm(10)
+
+groups <- rep(seq(1,8),each=10)
+
+test <- cv.rq.group.pen(x,y,groups,alg="QICD",criteria="BIC",penalty="SCAD")
+
 

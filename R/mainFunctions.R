@@ -34,6 +34,8 @@ model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
 }
 
 
+
+
 qbic <- function(model, largeP=FALSE){
   tau <- model$tau
   n <- model$n
@@ -508,7 +510,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     ...) 
 {
   if(penalty=="LASSO"){
-	warning("Group penalties use the L1 norm and the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
+	warning("The Lasso group penalties use the L1 norm and thus the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
 	if(is.null(penGroups)){
 		p_range <- 1:dim(x)[2] + intercept

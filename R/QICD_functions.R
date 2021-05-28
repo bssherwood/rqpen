@@ -331,7 +331,7 @@ QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 
 QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
-                 a=3.7, scalex=TRUE, ...)
+                 a=3.7, scalex=TRUE, norm=2, ...)
 #y: response variable, length n vector
 #x: input nxp matrix, of dimension nobs x nvars; each row is an observation vector. 
 #groups: numeric vector of length ncol(x) with the group number of the coefficient (can be unique)
@@ -399,7 +399,7 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
 
   i=0
   distance <- eps+1
-  groupl1 <- rep(0, p)
+  groupNorm <- rep(0, p)
   beta0 <- beta
   intval0 <- intval
   residuals <- as.double(y - x%*%beta - intval)
@@ -409,10 +409,14 @@ QICD.group <- function(y, x, groups, tau=.5, lambda, intercept=TRUE, penalty="SC
   while( (i < maxout) & (distance >= eps) ){
 
     for(grps in unique(groups)){
-      groupl1[groups==grps] <- sum( abs(beta[groups==grps]) )
+	  if(norm==2){
+		groupNorm[groups==grps] <- sqrt( sum( beta[groups==grps]^2) )
+	  } else{
+		groupNorm[groups==grps] <- sum( abs(beta[groups==grps]) )
+	  }
     }
 	#lambda <- n*lambda
-    out <- .C("penderiv", as.double(groupl1), p, a, lambda, pentype)
+    out <- .C("penderiv", as.double(groupNorm), p, a, lambda, pentype)
 	#penweight <- as.double(out[[1]])
     penweight <- as.double( n*out[[1]] )
 

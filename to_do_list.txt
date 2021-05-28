@@ -3,3 +3,4 @@
 3. Warm starts in cv functions
 4. Need to look into penVar 
 5. Allow multiple tau vals to be passed to the fitting functions. 
+6. rq.group.fit returns SCAD as penalty when it is actually LASSO 
