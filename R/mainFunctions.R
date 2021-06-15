@@ -48,7 +48,7 @@ qbic <- function(model, largeP=FALSE){
   bic
 }
 
-qic <- function(model,n, method=c("BIC","PBIC","AIC")){
+qic <- function(model,n, method="BIC"){
 	tau <- model$tau
 	df <- sum(model$coefficients != 0)
 	if(method=="PBIC"){
@@ -62,7 +62,7 @@ qic <- function(model,n, method=c("BIC","PBIC","AIC")){
 	}
 }
 
-qic.select <- function(obj, method=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
+qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(obj$tau))){
 	n <- obj$n
 	if(length(weights)==1){
 		if(septau){
@@ -82,12 +82,12 @@ qic.select <- function(obj, method=c("BIC","PBIC","AIC"),septau=FALSE,weights=re
 		}
 	}
 	return_val <- list(coefficients = coefs, ic=qic_vals, lambda=obj$lambda, penalty.factor=obj$penalty.factor)
-	class(return_val) <- "rqPen.select"
+	class(return_val) <- "qic.select"
 	return_val
 }
 
 
-print.rqPen.select <- function(x,...){
+print.qic.select <- function(x,...){
     print(coefficients(x))
 }
 
