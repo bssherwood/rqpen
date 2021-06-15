@@ -62,7 +62,7 @@ qic <- function(model,n, method=c("BIC","PBIC","AIC")){
 	}
 }
 
-select <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
+qic.select <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
 	n <- obj$n
 	if(length(weights)==1){
 		if(septau){
