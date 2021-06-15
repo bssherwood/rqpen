@@ -52,11 +52,11 @@ qic <- function(model,n, method="BIC"){
 	tau <- model$tau
 	df <- sum(model$coefficients != 0)
 	if(method=="PBIC"){
-		log(model$rho) + df*log(n)*log(length(model$coefficients))/(2*n)
+		log(model$rho*n) + df*log(n)*log(length(model$coefficients))/(2*n)
 	} else if (method == "BIC"){		    
-		log(model$rho) + df*log(n)/(2*n)
+		log(model$rho*n) + df*log(n)/(2*n)
 	} else if (method== "AIC"){
-		log(model$rho) + 2*df
+		log(model$rho*n) + 2*df
 	} else{
 		stop("invalid method")
 	}
@@ -88,7 +88,10 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(obj$t
 
 
 print.qic.select <- function(x,...){
-    print(coefficients(x))
+   cat("\nCoefficients:\n")
+   print(coefficients(x))
+   cat("\nLambda value\n")
+   print(x$lambda)
 }
 
 
