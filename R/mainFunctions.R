@@ -62,7 +62,7 @@ qic <- function(model,n, method=c("BIC","PBIC","AIC")){
 	}
 }
 
-select.rq.lasso <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
+select <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,weights=rep(1,length(obj$tau))){
 	n <- obj$n
 	if(length(weights)==1){
 		if(septau){
@@ -86,7 +86,6 @@ select.rq.lasso <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,we
 	return_val
 }
 
-#blah
 
 print.rqPen.select <- function(x,...){
     print(coefficients(x))
