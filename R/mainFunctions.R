@@ -86,6 +86,8 @@ select.rq.lasso <- function(obj, criterion=c("BIC","PBIC","AIC"),septau=FALSE,we
 	return_val
 }
 
+#blah
+
 print.rqPen.select <- function(x,...){
     print(coefficients(x))
 }
