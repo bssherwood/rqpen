@@ -88,10 +88,8 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(obj$t
 
 
 print.qic.select <- function(x,...){
-   cat("\nCoefficients:\n")
-   print(coefficients(x))
-   cat("\nLambda value\n")
-   print(x$lambda)
+   cat("\n IC values by Lambda:\n")
+   print(cbind(x$lambda,x$ic))
 }
 
 
