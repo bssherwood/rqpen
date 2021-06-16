@@ -318,7 +318,7 @@ rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),s
 	} else{
 		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
 	}
-	rq.lasso.modelreturn(hqModel$beta)
+	rq.lasso.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor)
 }
 
 rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
