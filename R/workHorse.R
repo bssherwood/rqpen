@@ -36,18 +36,23 @@ scad <- function(x, lambda=1, a=3.7){
 
 
 scad_deriv <- function(x, lambda=1,a=3.7){
-  absx <- u <- abs(x)
-  u[] <- 0
-  index <- absx < a*lambda & absx > 0
-  u[ index ] <-
-       ifelse( absx[ index ] <= lambda, 
-               lambda,
-               ( a*lambda - absx[ index ] )/( a-1 ) 
-             )
-  u[index] <- u[index]*sign( x[index] )
-  u[ x == 0 ] <- lambda # because we take derivative as x approaces 0 from above
-
-  u
+	ll <- length(lambda)
+	if(ll !=1 && ll != length(x)){
+		stop("lambda must be of length 1 or same length as x")
+	}
+	absx <- u <- abs(x)
+	u[] <- 0
+	index <- absx < a*lambda & absx > 0
+	if(ll==1){
+		u[ index ] <- ifelse( absx[ index ] <= lambda, lambda, ( a*lambda - absx[ index ] )/( a-1 ) )
+		u[index] <- u[index]*sign( x[index] )
+		u[ x == 0 ] <- lambda # because we take derivative as x approaces 0 from above
+	} else{
+		u[index] <- ifelse( absx[ index ] <= lambda[index], lambda[index], ( a*lambda[index] - absx[ index ] )/( a-1 ) )
+		u[index] <- u[index]*sign(x[index])
+		u[ x==0] <- lambda[x==0]
+	}
+	u
 }
 
 #scad_1_deriv <- function(x,lambda=1,a=3.7){
@@ -68,15 +73,25 @@ mcp <- function(x, lambda=1, a=3){
 
 
 mcp_deriv <- function(x, lambda=1, a=3){
-  u <- x
-  u[] <- 0
-  index <- abs(x) < a*lambda
-  u[ index ] <- ifelse( x[index] == 0,
-                        lambda,
-                        lambda*sign(x[index]) - x[index]/a
-                      )
-
-  u
+	ll <- length(lambda)
+	if(ll !=1 && ll != length(x)){
+		stop("lambda must be of length 1 or same length as x")
+	}
+	u <- x
+	u[] <- 0
+	index <- abs(x) < a*lambda
+	if(ll == 1){
+		u[ index ] <- ifelse( x[index] == 0,
+							lambda,
+							lambda*sign(x[index]) - x[index]/a
+						  )
+	} else{
+		u[ index ] <- ifelse( x[index] == 0,
+							lambda[index],
+							lambda[index]*sign(x[index]) - x[index]/a
+						  )
+	}
+	u
 }
 
 
@@ -266,6 +281,9 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
+		if(length(lambda)==1){
+			stop("The Huber algorithm requires at least 2 values of lambda")
+		}
 		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
 	} else{
 		if(nt > 1){
@@ -292,6 +310,41 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 	}
 	class(returnVal) <- "rq.lasso"
 	returnVal
+}
+
+
+rq.lasso.filter <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
+	nt <- length(obj$tau)
+	if(penalty=="SCAD"){
+		derivf <- scad_deriv
+	} else if(penalty=="MCP"){
+		derivf <- mcp_deriv
+	} else{
+		stop("Penalty must be SCAD or MCP")
+	}
+	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
+	maxlam2 <- 2*max(obj$lambda)
+	ll <- length(obj$lambda)
+	if(nt == 1){
+		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
+		for(i in 1:ll){
+			if(obj$alg=="Huber"){
+				sublam <- c(maxlam2, obj$lambda[i])
+			} else{
+				sublam <- obj$lambda[i] 
+			}
+			update_est <- rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)
+			obj$models$coefficients[,i] <- update_est
+		}
+	} else{
+	
+	}
+}
+
+rq.nlasso <- (x,y,tau=.5,pen="SCAD",lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
+						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
+	first
+						
 }
 
 rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor){

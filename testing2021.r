@@ -13,11 +13,10 @@ x <- matrix(rnorm(n*p),ncol=p)
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
 
 # select debugging
-r1 <- rq.lasso(x,y,alg="huber",tau=c(.1,.5,.7))
-r1a <- rq.lasso(x,y,alg="br",tau=c(.1,.5,.7))
+r1 <- rq.lasso(x,y,alg="huber",tau=.475)
+r1a <- rq.lasso(x,y,alg="br",tau=.475)
 r2 <- qic.select(r1,method="PBIC")
-r2a <- qic.select(r1,method="BIC",septau=TRUE)
-
+r2a <- qic.select(r1a,method="BIC",septau=TRUE)
 
 
 
