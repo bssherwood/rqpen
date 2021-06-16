@@ -276,8 +276,9 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 				subm <- rq.lasso.fit(x,y,tau,lambda=sublam, method=alg,scalex=scalex, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models$coefficients <- coefs
+			models[[i]] <- rq.lasso.modelreturn(coefs)
 		}
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	}
 	class(returnVal) <- "rq.lasso"
 	returnVal
