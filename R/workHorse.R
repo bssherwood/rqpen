@@ -268,22 +268,24 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 	if(alg=="huber"){
 		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
 	} else{
-		#TBD
+		models <- list()
+		for(i in 1:length(tau)){
+			coefs <- NULL
+			for(lam in lambda){
+				sublam <- lam*penalty.factor
+				subm <- rq.lasso.fit(x,y,tau,lambda=sublam, method=alg,scalex=scalex, ...)
+				coefs <- cbind(coefs,coefficients(subm))
+			}
+			models$coefficients <- coefs
+		}
 	}
 	class(returnVal) <- "rq.lasso"
 	returnVal
 }
 
-rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,...){
-	dims <- dim(x)
-	p <- dims[2]
-	if(scalex){
-		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
-	} else{
-		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
-	}
+rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor){
 	return_val <- NULL
-	return_val$coefficients <- hqModel$beta
+	return_val$coefficients <- coefs
 	return_val$lambda <- lambda
 	return_val$penalty.factor <- penalty.factor
 	if(is.null(colnames(x))){
@@ -304,6 +306,19 @@ rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),s
 	return_val$tau <- tau
 	return_val$df <- apply(return_val$coefficients!=0,2,sum)
 	return_val
+} 
+
+
+
+rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,...){
+	dims <- dim(x)
+	p <- dims[2]
+	if(scalex){
+		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+	} else{
+		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+	}
+	rq.lasso.modelreturn(hqModel$beta)
 }
 
 rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){

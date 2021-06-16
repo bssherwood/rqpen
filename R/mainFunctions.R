@@ -56,7 +56,7 @@ qic <- function(model,n, method="BIC"){
 	} else if (method == "BIC"){		    
 		log(model$rho*n) + df*log(n)/(2*n)
 	} else if (method== "AIC"){
-		log(model$rho*n) + 2*df
+		log(model$rho*n) + df/n
 	} else{
 		stop("invalid method")
 	}
@@ -89,7 +89,12 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(obj$t
 
 print.qic.select <- function(x,...){
    cat("\n IC values by Lambda:\n")
-   print(cbind(x$lambda,x$ic))
+   print(data.frame(lambda=x$lambda,IC=x$ic))
+}
+
+print.rq.lasso <- function(x,...){
+	cat("\n df by lambda:\n")
+	print(data.frame(df=x$models$df,lambda=x$lambda))
 }
 
 
