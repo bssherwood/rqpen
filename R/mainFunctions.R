@@ -93,8 +93,19 @@ print.qic.select <- function(x,...){
 }
 
 print.rq.lasso <- function(x,...){
-	cat("\n df by lambda:\n")
-	print(data.frame(df=x$models$df,lambda=x$lambda))
+	if(length(x$tau)==1){
+		cat("\n df by lambda:\n")
+		print(data.frame(lambda=x$lambda,df=x$models$df))
+	} else{
+		cat("\n df by lambda:\n")
+		printdata <- NULL
+		for(i in 1:length(x$tau)){
+			printdata <- cbind(printdata,x$models[[i]]$df) 
+		}
+		printdata <- cbind(x$lambda,printdata)
+		printdata <- data.frame(printdata)
+		colnames(printdata) <- c("lambda",x$tau)
+	}
 }
 
 
