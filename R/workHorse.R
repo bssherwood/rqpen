@@ -268,15 +268,25 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 	if(alg=="huber"){
 		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
 	} else{
-		models <- list()
-		for(i in 1:length(tau)){
+		if(nt > 1){
+			models <- list()
+			for(i in 1:nt){
+				coefs <- NULL
+				for(lam in lambda){
+					sublam <- lam*penalty.factor
+					subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
+					coefs <- cbind(coefs,coefficients(subm))
+				}
+				models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor)
+			}
+		} else{
 			coefs <- NULL
 			for(lam in lambda){
 				sublam <- lam*penalty.factor
-				subm <- rq.lasso.fit(x,y,tau,lambda=sublam, method=alg,scalex=scalex, ...)
+				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau,lambda,penalty.factor)
+			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	}
