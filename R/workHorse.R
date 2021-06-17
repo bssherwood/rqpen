@@ -357,12 +357,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.nlasso <- function(x, y, tau=.5, pen="SCAD", lambda=NULL, nlambda=100,
-              eps=.0001, penalty.factor = rep(1, ncol(x)),
-  						alg=ifelse(sum(dim(x)) < 200,"huber","br"),
-  						scalex=TRUE,tau.pen=FALSE,...) {
-	# first
-						
+rq.nc <- function(x, y, penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3), ...) {
+	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
+	init.model <- rq.lasso(x,y,...)
+	rq.lla(init.model,x,y,penalty,a,...)
 }
 
 rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor){
@@ -475,7 +473,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # coef.cutoff is a threshold to set to zero. 
-# Choose the method used to estimate the coefficients ("br", "fn" or "Huber")
+# Choose the method used to estimate the coefficients ("br", "fn" or any other method used by quantreg)
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)

@@ -6,15 +6,16 @@ library(hqreg)
 library(glmnet)
 
 p <- 8
-n <- 100
+n <- 10000
 
 x <- matrix(rnorm(n*p),ncol=p)
 
-y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
+y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,353)
 
 # select debugging
-obj <- rq.lasso(x,y,alg="huber",tau=.475, penalty.factor=c(0,0,0,0,1,0,2,3))
+obj <- rq.lasso(x,y,alg="huber",tau=.475)
 obj2 <- rq.lla(obj,x,y)
+coefficients(qic.select(obj2))
 
 obj  <- rq.lasso(x,y,alg="huber",tau=.475)
 obj2 <- rq.lla(obj,x,y)
