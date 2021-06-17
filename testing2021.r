@@ -14,11 +14,11 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
 
 # select debugging
 obj <- rq.lasso(x,y,alg="huber",tau=.475, penalty.factor=c(0,0,0,0,1,0,2,3))
-obj2 <- rq.lasso.filter(obj,x,y)
+obj2 <- rq.lla(obj,x,y)
 
 obj  <- rq.lasso(x,y,alg="huber",tau=.475)
-obj2 <- rq.lasso.filter(obj,x,y)
-obj3 <- rq.lasso.filter(obj,x,y,penalty="MCP")
+obj2 <- rq.lla(obj,x,y)
+obj3 <- rq.lla(obj,x,y,penalty="MCP")
 
 
 r1a <- rq.lasso(x,y,alg="br",tau=.475,penalty.factor=c(0,0,0,0,1,0,2,3))

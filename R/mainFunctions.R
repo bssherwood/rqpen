@@ -118,15 +118,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
   coefficients(object$models[[target_model]])
 }
 
-coef.rq.pen.seq <- function(object, tau=NULL,lambda=NULL,...){
-#need to do some work to make this nice
-	nt <- length(object$tau)
-	if(nt == 1){
-		
-	} else{
-	
-	}
-}
+
 
 
 

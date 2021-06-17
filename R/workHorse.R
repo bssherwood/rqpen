@@ -440,7 +440,7 @@ getModelCoefs <- function(x,index){
 	coefficients(x)[,index]
 }
 
-coef.rq.lasso <- function(x,index=NULL){
+coef.rq.pen.seq <- function(x,index=NULL){
 	lt <- length(x$tau)
 	if(lt==1){
 		if(is.null(index)){
