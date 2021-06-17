@@ -324,18 +324,16 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 		stop("Penalty must be SCAD or MCP")
 	}
 	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
-	maxlam2 <- 2*max(obj$lambda)
 	ll <- length(obj$lambda)
 	if(nt == 1){
 		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
 			if(obj$alg=="huber"){
-				sublam <- c(maxlam2, obj$lambda[i])
-				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
 
 			} else{
 				sublam <- obj$lambda[i] 
-				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 			}
 			obj$models$coefficients[,i] <- update_est
 		}
@@ -345,11 +343,11 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
 					sublam <- c(maxlam2, obj$lambda[i])
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])[,2]
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])[,2]
 
 				} else{
 					sublam <- obj$lambda[i] 
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])
 				}
 				obj$models[[j]]$coefficients[,i] <- update_est
 			}
