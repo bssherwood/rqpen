@@ -341,9 +341,11 @@ rq.lasso.filter <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,
 	}
 }
 
-rq.nlasso <- (x,y,tau=.5,pen="SCAD",lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
-						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
-	first
+rq.nlasso <- function(x, y, tau=.5, pen="SCAD", lambda=NULL, nlambda=100,
+              eps=.0001, penalty.factor = rep(1, ncol(x)),
+  						alg=ifelse(sum(dim(x)) < 200,"huber","br"),
+  						scalex=TRUE,tau.pen=FALSE,...) {
+	# first
 						
 }
 

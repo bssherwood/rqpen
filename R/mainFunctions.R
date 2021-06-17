@@ -27,9 +27,9 @@ model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
   fits <- test_x %*% coefficients(model)
   eval_func <- switch(which(c("check","SqErr","AE")==func), check, square, abs)
   if(is.null(test_w)){
-	mean(eval_func(test_y-fits,...)) 
+	  mean(eval_func(test_y-fits,...)) 
   } else{
-	weighted.mean(eval_func(test_y-fits,...), test_w)
+	  weighted.mean(eval_func(test_y-fits,...), test_w)
   }
 }
 
@@ -119,7 +119,11 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",
+                      criteria = "CV",
+                      intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,
+                      nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,
+                      alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -293,23 +297,36 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
      # some variables are unpenalized and thus lambda is a multivalued vector with some zeros
   }
   # lambda is the vector of reasonable choices of lambda to use in the penalty
-
   models <- list()
   fit_models <- TRUE
-  lam_pos <- 1
+  lam_pos = floor(length(lambda)/2)
+  max_lambda_pos <- length(lambda)
+  min_lambda_pos <- 1
   if(penalty=="LASSO"){
-   while(fit_models){
-		if(fit_models){
-			models[[lam_pos]] <- rq.lasso.fit(x,y,tau,lambda[lam_pos],weights,intercept,penVars=penVars,...)
-      
-		}
-		if(sum(abs(coefficients(models[[lam_pos]])[p_range]))==0 || lam_pos==length(lambda)){
-		#if we got a fully sparse model, no need to fit more sparse models
-			fit_models <- FALSE
-			lambda <- lambda[1:lam_pos]
-		}
-    lam_pos <- lam_pos + 1
-	 }
+    while (fit_models) {
+      if (fit_models) {
+        models[[lam_pos]] = rq.lasso.fit(x,y,tau,lambda[lam_pos],
+                                         weights,intercept,
+                                         penVars=penVars,...)
+      }
+      if (sum(abs(coefficients(models[[lam_pos]])[p_range])) != 0) {
+        if(lam_pos > min_lambda_pos) {
+          min_lambda_pos = lam_pos
+        }
+        lam_pos = lam_pos + ceiling((max_lambda_pos - lam_pos)/2)
+      } else {
+        if(lam_pos == max_lambda_pos) {
+          end_pos = lam_pos
+          fit_models = FALSE
+        }
+        if(lam_pos < max_lambda_pos) {
+          max_lambda_pos = lam_pos
+        }
+        lam_pos = lam_pos - floor((lam_pos - min_lambda_pos)/2)
+      }
+    }
+    
+    lambda = lambda[1:lam_pos]
   } else{
   	while(fit_models){
   		if(fit_models){
@@ -342,14 +359,19 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 		test_weights <- weights[foldid==i]
 	  }
       if(penalty=="LASSO"){
-         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)
+         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,
+                             weights=train_weights,intercept=intercept,penVars=penVars,...)
       } else{
-         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
+         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,
+                             weights=train_weights,intercept=intercept,
+                             penalty=penalty,penVars=penVars,...)
       }
       if(cvFunc=="check"){
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, tau=tau))
+         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, 
+                                                test_y, test_weights, tau=tau))
       } else{
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, func=cvFunc))
+         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, 
+                                                test_y, test_weights, func=cvFunc))
       } 
     }
     cv_results <- apply(cv_results,1,mean)
