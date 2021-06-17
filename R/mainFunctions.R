@@ -36,6 +36,7 @@ model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
 
 
 
+
 qbic <- function(model, largeP=FALSE){
   tau <- model$tau
   n <- model$n
@@ -92,7 +93,7 @@ print.qic.select <- function(x,...){
    print(data.frame(lambda=x$lambda,IC=x$ic))
 }
 
-print.rq.lasso <- function(x,...){
+print.rq.pen.seq <- function(x,...){
 	if(length(x$tau)==1){
 		cat("\n df by lambda:\n")
 		print(data.frame(lambda=x$lambda,df=x$models$df))
@@ -115,6 +116,16 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
   }
   target_model <- which(object$cv[,1] == lambda)
   coefficients(object$models[[target_model]])
+}
+
+coef.rq.pen.seq <- function(object, tau=NULL,lambda=NULL,...){
+#need to do some work to make this nice
+	nt <- length(object$tau)
+	if(nt == 1){
+		
+	} else{
+	
+	}
 }
 
 

@@ -308,12 +308,13 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	}
-	class(returnVal) <- "rq.lasso"
+	returnVal$penalty <- "lasso"
+	class(returnVal) <- "rq.pen.seq"
 	returnVal
 }
 
 
-rq.lasso.filter <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
+rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	nt <- length(obj$tau)
 	if(penalty=="SCAD"){
 		derivf <- scad_deriv
@@ -328,17 +329,34 @@ rq.lasso.filter <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,
 	if(nt == 1){
 		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
-			if(obj$alg=="Huber"){
+			if(obj$alg=="huber"){
 				sublam <- c(maxlam2, obj$lambda[i])
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+
 			} else{
 				sublam <- obj$lambda[i] 
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 			}
-			update_est <- rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)
 			obj$models$coefficients[,i] <- update_est
 		}
 	} else{
-	
+		for(j in 1:nt){
+			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
+			for(i in 1:ll){
+				if(obj$alg=="huber"){
+					sublam <- c(maxlam2, obj$lambda[i])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])[,2]
+
+				} else{
+					sublam <- obj$lambda[i] 
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])
+				}
+				obj$models[[j]]$coefficients[,i] <- update_est
+			}
+		}
 	}
+	obj$penalty <- penalty
+	obj
 }
 
 rq.nlasso <- function(x, y, tau=.5, pen="SCAD", lambda=NULL, nlambda=100,
