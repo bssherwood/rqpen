@@ -395,7 +395,6 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
 
 			} else{
-				sublam <- obj$lambda[i] 
 				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 			}
 			obj$models$coefficients[,i] <- update_est
@@ -405,11 +404,9 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
-					sublam <- c(maxlam2, obj$lambda[i])
 					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])[,2]
 
 				} else{
-					sublam <- obj$lambda[i] 
 					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])
 				}
 				obj$models[[j]]$coefficients[,i] <- update_est
