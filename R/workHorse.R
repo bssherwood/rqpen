@@ -405,10 +405,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])[,2]
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
 
 				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models[[j]])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[i],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 				}
 				obj$models[[j]]$coefficients[,i] <- update_est
 			}
@@ -418,7 +418,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.nc <- function(x, y, tau, penalty=c("SCAD","MCP","aLasso"),lambda=NULL, a=NULL,alg="huber", ...) {
+rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),lambda=NULL, a=NULL,alg="huber", ...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
