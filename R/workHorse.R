@@ -476,6 +476,7 @@ rq.nc <- function(x, y, tau, penalty=c("SCAD","MCP","aLasso"),lambda=NULL, a=NUL
 			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p))
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p))
+		returnVal
 	}
 }
 
