@@ -243,6 +243,10 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 # If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
+	if(alg = "lp"){
+	#use br as the default for linear programming 
+		alg <- "br"
+	}
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -480,7 +484,7 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 	}
 }
 
-rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),alg=c("huber","lp","qicd"), a=NULL, norm=2,group=1:ncol(X), group.pen.factor=rep(1,length(groups)), tau.pen=FALSE, ...){
+rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2,group=1:ncol(X), group.pen.factor=rep(1,length(groups)), tau.pen=FALSE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -499,6 +503,12 @@ rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP")
 	if(norm == 2 & alg != "huber"){
 		alg <- "huber"
 		warning("algorithm switched to huber, which is the only option for 2-norm")
+	}
+	if(penalty=="gAdLasso" & alg != "huber"){
+		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
+	}
+	if(penalty=="gAdLasso" & alg == "qicd"){
+		warning("No qicd algorithm for adaptive lasso, so switched to huber. If lp is used it will only be for the second stage.")
 	}
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
@@ -536,13 +546,13 @@ rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP")
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(norm == 1){
-		#if(alg == "huber"){
-		#	returnVal <- rq.group.lla(
-		#} else {
-		#	
-		#}
-	}
-	
+		if(penalty == "gAdLasso"){
+			init.model <- rq.enet(x,y,tau,...)
+		} else{
+			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,...)
+		}
+		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
+	}	
 }
 
 rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor){

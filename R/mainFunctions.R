@@ -230,6 +230,10 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criter
 
     cv <- data.frame(lambda=lambdas, cve=NA)
     
+	if( criteria=="AIC" ){
+	  cv$cve <- log(rho) + colSums(coefs!=0)/n
+      names(cv)[2] <- "BIC"
+	}
     if( criteria=="BIC" ){
       cv$cve <- log(rho) + colSums(coefs!=0)*log(n)/(2*n)
       names(cv)[2] <- "BIC"
