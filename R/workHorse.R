@@ -382,7 +382,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	} else if(penalty=="MCP"){
 		derivf <- mcp_deriv
 	} else if(penalty=="aLasso"){
-		
+		derivf <- alasso_wt
 	} else{
 		stop("Penalty must be SCAD, MCP or aLasso")
 	}
