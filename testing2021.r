@@ -6,7 +6,7 @@ library(hqreg)
 library(glmnet)
 
 p <- 8
-n <- 10000
+n <- 100
 
 x <- matrix(rnorm(n*p),ncol=p)
 
@@ -15,6 +15,11 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,353)
 # select debugging
 obj <- rq.enet(x,y,tau=.475)
 obj2 <- rq.enet(x,y,tau=c(.1,.7))
+
+obj3 <- rq.nc(x,y,penalty="SCAD",tau=.4)
+obj4 <- rq.nc(x,y,penalty="SCAD",tau=c(.5,.9))
+
+
 obj2 <- rq.lla(obj,x,y)
 coefficients(qic.select(obj2))
 

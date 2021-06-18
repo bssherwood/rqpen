@@ -1,6 +1,5 @@
 0. criteria cv for cv.rq.pen with qicd algorithm 
-2. Smarter way to choose lambdas for cv.rq.pen
+2. Update choice of lambda for all penalties
 3. Warm starts in cv functions
 4. Need to look into penVar 
-5. Allow multiple tau vals to be passed to the fitting functions. 
 6. rq.group.fit returns SCAD as penalty when it is actually LASSO 

@@ -415,7 +415,7 @@ re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
 
 
 rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
-                      penalty="SCAD",a=3.7,iterations=10,converge_criteria=1e-06,
+                      penalty="SCAD",a=3.7,iterations=1,converge_criteria=1e-06,
                       alg=ifelse(p<50,"LP","QICD"),penVars=NULL,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
