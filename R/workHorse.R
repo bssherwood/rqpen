@@ -313,6 +313,63 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 	returnVal
 }
 
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,alpha=0,...){
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	nt <- length(tau)
+	lpf <- length(penalty.factor)
+	pfmat <- FALSE
+	
+	if(sum(tau <= 0 | tau >=1)>0){
+		stop("tau needs to be between 0 and 1")
+	}
+	if(sum(penalty.factor<0)>0){
+		stop("penalty factors must be positive")
+	}
+	if(nt==1){
+		if(lpf!=p){
+			stop("penalty factor must be of length p")
+		}
+		if(tau.pen){
+			penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
+		}
+	} else{
+		if(length(penalty.factor) == p*nt){
+			pfmat <- TRUE
+		}
+		else if(length(penalty.factor) !=p){
+			stop("penalty factor must be a length p vector or a nt by p matrix, where nt is the number of taus")
+		}
+		if(tau.pen){
+			pfmat <- TRUE
+			if(length(penalty.factor)==p){
+				penalty.factor <- matrix(rep(penalty.factor,nt),nrow=nt,byrow=TRUE)
+			} else{
+				penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			}
+		}
+		
+	}
+	if(is.null(lambda)){
+		lamMax <- lassoLamMax(x,y,tau)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	}
+	if(length(lambda)==1){
+			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
+	}
+	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,alpha=alpha,...)
+	if(alpha==0){
+		returnVal$penalty <- "ridge"
+	} else{
+		returnVal$penalty <- "enet"
+		returnVal$alpha <- alpha
+	}
+	class(returnVal) <- "rq.pen.seq"
+	returnVal	
+}
+
 
 rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	nt <- length(obj$tau)
