@@ -94,6 +94,10 @@ mcp_deriv <- function(x, lambda=1, a=3){
 	u
 }
 
+alasso_wt <- function(x,lambda=1,a=1){
+	lambda*(1/abs(x))^a
+}
+
 
 
 square <- function(x){
@@ -377,8 +381,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP"){
 		derivf <- mcp_deriv
+	} else if(penalty=="aLasso"){
+		
 	} else{
-		stop("Penalty must be SCAD or MCP")
+		stop("Penalty must be SCAD, MCP or aLasso")
 	}
 	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
 	ll <- length(obj$lambda)
@@ -416,7 +422,11 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 
 rq.nc <- function(x, y, penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3), ...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
-	init.model <- rq.lasso(x,y,...)
+	if(penalty=="aLasso"){
+		init.model <- rq.enet(x,y,...)
+	} else{
+		init.model <- rq.lasso(x,y,...)
+	}
 	rq.lla(init.model,x,y,penalty,a,...)
 }
 
