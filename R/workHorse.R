@@ -461,7 +461,7 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 				coefs <- NULL
 				for(lam in lambda){
 					sublam <- lam
-					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, method="QICD", ...)
+					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", ...)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
 				models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p))
@@ -470,7 +470,7 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 			coefs <- NULL
 			for(lam in lambda){
 				sublam <- lam
-				subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, method="QICD",...)
+				subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD",...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
 			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p))
