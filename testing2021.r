@@ -10,11 +10,26 @@ n <- 100
 
 x <- matrix(rnorm(n*p),ncol=p)
 
-y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
+y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,353)
 
 # select debugging
-r1 <- rq.lasso(x,y,alg="huber",tau=.475)
-r1a <- rq.lasso(x,y,alg="br",tau=.475)
+obj <- rq.enet(x,y,tau=.475)
+obj2 <- rq.enet(x,y,tau=c(.1,.7))
+
+obj3 <- rq.nc(x,y,penalty="SCAD",tau=.4)
+obj4 <- rq.nc(x,y,penalty="SCAD",tau=c(.5,.9))
+obj5 <- rq.nc(x,y,penalty="SCAD",alg="QICD")
+
+
+obj2 <- rq.lla(obj,x,y)
+coefficients(qic.select(obj2))
+
+obj  <- rq.lasso(x,y,alg="huber",tau=.475)
+obj2 <- rq.lla(obj,x,y)
+obj3 <- rq.lla(obj,x,y,penalty="MCP")
+
+
+r1a <- rq.lasso(x,y,alg="br",tau=.475,penalty.factor=c(0,0,0,0,1,0,2,3))
 r2 <- qic.select(r1,method="PBIC")
 r2a <- qic.select(r1a,method="BIC",septau=TRUE)
 

@@ -94,6 +94,10 @@ mcp_deriv <- function(x, lambda=1, a=3){
 	u
 }
 
+alasso_wt <- function(x,lambda=1,a=1){
+	lambda*(1/abs(x))^a
+}
+
 
 
 square <- function(x){
@@ -117,6 +121,7 @@ randomly_assign <- function(n,k){
 }
 
 rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=NULL,intercept=TRUE,coef.cutoff=.00000001,...){
+   warning("rq.lasso() fits for multiple tau and provides a sequence of lambda and faster algorithms")
    model_list <- list()
    iter <- 1
    for(tau in tau_seq){
@@ -219,7 +224,7 @@ neg.gradient <- function(r,weights,tau,gamma,x,apprx){
   }
 }
 
-lassoLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1){
+getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"){
 	n <- length(y)
 	returnVal <- 0
 	
@@ -238,6 +243,10 @@ lassoLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1){
 # If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
+	if(alg == "lp"){
+	#use br as the default for linear programming 
+		alg <- "br"
+	}
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -277,7 +286,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 		
 	}
 	if(is.null(lambda)){
-		lamMax <- lassoLamMax(x,y,tau)
+		lamMax <- getLamMax(x,y,tau)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
@@ -308,43 +317,242 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.facto
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	}
-	class(returnVal) <- "rq.lasso"
+	returnVal$penalty <- "lasso"
+	class(returnVal) <- "rq.pen.seq"
 	returnVal
 }
 
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,alpha=0,...){
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	nt <- length(tau)
+	lpf <- length(penalty.factor)
+	pfmat <- FALSE
+	
+	if(sum(tau <= 0 | tau >=1)>0){
+		stop("tau needs to be between 0 and 1")
+	}
+	if(sum(penalty.factor<0)>0){
+		stop("penalty factors must be positive")
+	}
+	if(nt==1){
+		if(lpf!=p){
+			stop("penalty factor must be of length p")
+		}
+		if(tau.pen){
+			penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
+		}
+	} else{
+		if(length(penalty.factor) == p*nt){
+			pfmat <- TRUE
+		}
+		else if(length(penalty.factor) !=p){
+			stop("penalty factor must be a length p vector or a nt by p matrix, where nt is the number of taus")
+		}
+		if(tau.pen){
+			pfmat <- TRUE
+			if(length(penalty.factor)==p){
+				penalty.factor <- matrix(rep(penalty.factor,nt),nrow=nt,byrow=TRUE)
+			} else{
+				penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			}
+		}
+		
+	}
+	if(is.null(lambda)){
+		lamMax <- getLamMax(x,y,tau)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	}
+	if(length(lambda)==1){
+			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
+	}
+	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,alpha=alpha,...)
+	if(alpha==0){
+		returnVal$penalty <- "ridge"
+	} else{
+		returnVal$penalty <- "enet"
+		returnVal$alpha <- alpha
+	}
+	class(returnVal) <- "rq.pen.seq"
+	returnVal	
+}
 
-rq.lasso.filter <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
+
+rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	nt <- length(obj$tau)
 	if(penalty=="SCAD"){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP"){
 		derivf <- mcp_deriv
+	} else if(penalty=="aLasso"){
+		derivf <- alasso_wt
 	} else{
-		stop("Penalty must be SCAD or MCP")
+		stop("Penalty must be SCAD, MCP or aLasso")
 	}
 	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
-	maxlam2 <- 2*max(obj$lambda)
 	ll <- length(obj$lambda)
 	if(nt == 1){
 		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
-			if(obj$alg=="Huber"){
-				sublam <- c(maxlam2, obj$lambda[i])
+			if(obj$alg=="huber"){
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+
 			} else{
-				sublam <- obj$lambda[i] 
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 			}
-			update_est <- rq.lasso(x,y,obj$tau,lambda=sublam,penalty.factor=pfs[,i],alg=obj$alg,...)
 			obj$models$coefficients[,i] <- update_est
 		}
 	} else{
+		for(j in 1:nt){
+			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
+			for(i in 1:ll){
+				if(obj$alg=="huber"){
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+
+				} else{
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+				}
+				obj$models[[j]]$coefficients[,i] <- update_est
+			}
+		}
+	}
+	obj$penalty <- penalty
+	obj
+}
+
+rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber", ...) {
+	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
+	penalty <- match.arg(penalty)
+	nt <- length(tau)
+	dims <- dim(x)
+	p <- dims[2]
+	n <- dims[1] 
+	if( max(tau) >= 1 | min(tau) <= 0){
+		stop("Values for tau must be between 0 and 1") 
+	}
+	if(penalty == "aLasso" & alg != "huber"){
+		alg <- "huber"
+		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
+	}
 	
+	if(alg != "qicd" & alg != "QICD"){
+		if(penalty=="aLasso"){
+			if(is.null(a)){
+				a <- 1
+			}
+			init.model <- rq.enet(x,y,tau,...)
+		} else{
+			if(is.null(a)){
+				if(penalty == "SCAD"){
+					a <- 3.7
+				} else{
+					a <- 3
+				}
+			}
+			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,...)
+		}
+		rq.lla(init.model,x,y,penalty,a,...)
+	} else{
+		if(is.null(lambda)){
+			lamMax <- getLamMax(x,y,tau)
+			lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+		}
+		if(nt > 1){
+			models <- list()
+			for(i in 1:nt){
+				coefs <- NULL
+				for(lam in lambda){
+					sublam <- lam
+					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", ...)
+					coefs <- cbind(coefs,coefficients(subm))
+				}
+				models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p))
+			}
+		} else{
+			coefs <- NULL
+			for(lam in lambda){
+				sublam <- lam
+				subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD",...)
+				coefs <- cbind(coefs,coefficients(subm))
+			}
+			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p))
+		}
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p))
+		returnVal
 	}
 }
 
-rq.nlasso <- (x,y,tau=.5,pen="SCAD",lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
-						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
-	first
-						
+rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2,group=1:ncol(X), group.pen.factor=rep(1,length(groups)), tau.pen=FALSE, ...){
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	g <- max(unique(group))
+	nt <- length(tau)
+	lpf <- length(group.pen.factor)
+	pfmat <- FALSE
+	if(max(group==1:ncol(X))==1){
+		warning("p groups for p predictors, not really using a group penalty")
+	}
+	penalty <- match.arg(penalty)
+	alg <- match.arg(alg)
+	if(penalty=="gLasso" & norm==1){
+		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
+	}
+	if(norm == 2 & alg != "huber"){
+		alg <- "huber"
+		warning("algorithm switched to huber, which is the only option for 2-norm")
+	}
+	if(penalty=="gAdLasso" & alg != "huber"){
+		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
+	}
+	if(penalty=="gAdLasso" & alg == "qicd"){
+		warning("No qicd algorithm for adaptive lasso, so switched to huber. If lp is used it will only be for the second stage.")
+	}
+	if(sum(tau <= 0 | tau >=1)>0){
+		stop("tau needs to be between 0 and 1")
+	}
+	if(sum(penalty.factor<0)>0){
+		stop("penalty factors must be positive")
+	}
+	if(nt==1){
+		if(lpf!=g){
+			stop("group penalty factor must be of length g")
+		}
+		if(tau.pen){
+			penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
+		}
+	} else{
+		if(length(penalty.factor) == g*nt){
+			pfmat <- TRUE
+		}
+		else if(max(penalty.factor) !=g){
+			stop("penalty factor must be a vector with g groups or a nt by g matrix, where nt is the number of taus and g is the number of groups")
+		}
+		if(tau.pen){
+			pfmat <- TRUE
+			if(length(penalty.factor)==p){
+				penalty.factor <- matrix(rep(penalty.factor,nt),nrow=nt,byrow=TRUE)
+			} else{
+				penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			}
+		}
+		
+	}
+	if(is.null(lambda)){
+		lamMax <- getLamMax(x,y,tau,penalty)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	}
+	if(norm == 1){
+		if(penalty == "gAdLasso"){
+			init.model <- rq.enet(x,y,tau,...)
+		} else{
+			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,...)
+		}
+		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
+	}	
 }
 
 rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor){
@@ -422,7 +630,7 @@ getModelCoefs <- function(x,index){
 	coefficients(x)[,index]
 }
 
-coef.rq.lasso <- function(x,index=NULL){
+coef.rq.pen.seq <- function(x,index=NULL){
 	lt <- length(x$tau)
 	if(lt==1){
 		if(is.null(index)){
@@ -457,7 +665,7 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # coef.cutoff is a threshold to set to zero. 
-# Choose the method used to estimate the coefficients ("br", "fn" or "Huber")
+# Choose the method used to estimate the coefficients ("br", "fn" or any other method used by quantreg)
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
@@ -601,7 +809,7 @@ group_derivs <- function(deriv_func,groups,coefs,lambda,a=3.7){
 }
 
 rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,penalty="SCAD", a=3.7, coef.cutoff=1e-08,
-                                initial_beta=NULL,iterations=10,converge_criteria=.0001,penGroups=NULL,...){
+                                initial_beta=NULL,iterations=1,converge_criteria=.0001,penGroups=NULL,...){
     group_num <- length(unique(groups))
     if(length(lambda) == 1){
        lambda <- rep(lambda,group_num)
