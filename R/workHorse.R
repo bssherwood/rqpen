@@ -243,7 +243,7 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 # If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=.0001, penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
-	if(alg = "lp"){
+	if(alg == "lp"){
 	#use br as the default for linear programming 
 		alg <- "br"
 	}
