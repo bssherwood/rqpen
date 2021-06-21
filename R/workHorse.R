@@ -598,7 +598,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty)
+		lamMax <- getLamMax(x,y,tau,penalty=penalty)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(norm == 1){
