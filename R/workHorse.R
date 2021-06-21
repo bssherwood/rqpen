@@ -530,7 +530,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
-	g <- max(unique(group))
+	g <- length(unique(groups))
 	nt <- length(tau)
 	lpf <- length(group.pen.factor)
 	pfmat <- FALSE
