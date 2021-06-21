@@ -583,7 +583,7 @@ rq.group.pen <- function(x,y, tau=.5,group=1:ncol(X), penalty=c("gLasso","gAdLas
 		}
 		
 	}
-	if(is.null(a))){
+	if(is.null(a)){
 		if(penalty=="gLasso"){
 			a <- 1
 		} else if( penalty == "gAdLasso"){
