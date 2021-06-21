@@ -422,7 +422,49 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber", ...) {
+rq.group.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),norm=2,...){
+	nt <- length(obj$tau)
+	if(penalty=="SCAD"){
+		derivf <- scad_deriv
+	} else if(penalty=="MCP"){
+		derivf <- mcp_deriv
+	} else if(penalty=="aLasso"){
+		derivf <- alasso_wt
+	} else{
+		stop("Penalty must be SCAD, MCP or aLasso")
+	}
+	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
+	ll <- length(obj$lambda)
+	if(nt == 1){
+		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
+		for(i in 1:ll){
+			if(obj$alg=="huber"){
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+
+			} else{
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+			}
+			obj$models$coefficients[,i] <- update_est
+		}
+	} else{
+		for(j in 1:nt){
+			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
+			for(i in 1:ll){
+				if(obj$alg=="huber"){
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+
+				} else{
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+				}
+				obj$models[[j]]$coefficients[,i] <- update_est
+			}
+		}
+	}
+	obj$penalty <- penalty
+	obj
+}
+
+rq.nc <- function(x, y, tau=.5,group=1:ncol(X),  penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber", ...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -435,6 +477,10 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 	if(penalty == "aLasso" & alg != "huber"){
 		alg <- "huber"
 		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
+	}
+	if(is.null(lambda)){
+		lamMax <- getLamMax(x,y,tau,penalty)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	
 	if(alg != "qicd" & alg != "QICD"){
@@ -455,10 +501,6 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 		}
 		rq.lla(init.model,x,y,penalty,a,...)
 	} else{
-		if(is.null(lambda)){
-			lamMax <- getLamMax(x,y,tau)
-			lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
-		}
 		if(nt > 1){
 			models <- list()
 			for(i in 1:nt){
@@ -484,7 +526,7 @@ rq.nc <- function(x, y, tau=.5, penalty=c("SCAD","MCP","aLasso"),a=NULL,lambda=N
 	}
 }
 
-rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2,group=1:ncol(X), group.pen.factor=rep(1,length(groups)), tau.pen=FALSE, ...){
+rq.group.pen <- function(x,y, tau=.5,group=1:ncol(X), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(groups)), tau.pen=FALSE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -541,6 +583,17 @@ rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP")
 		}
 		
 	}
+	if(is.null(a))){
+		if(penalty=="gLasso"){
+			a <- 1
+		} else if( penalty == "gAdLasso"){
+			a <- 1
+		} else if (penalty == "gSCAD"){ 
+			a <- 3.7
+		} else if (penalty == "gMCP"){
+			a <- 3
+		}
+	}
 	if(is.null(lambda)){
 		lamMax <- getLamMax(x,y,tau,penalty)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
@@ -549,7 +602,12 @@ rq.group.pen <- function(x,y, tau, penalty=c("gLasso","gAdLasso","gSCAD","gMCP")
 		if(penalty == "gAdLasso"){
 			init.model <- rq.enet(x,y,tau,...)
 		} else{
-			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,...)
+			if(alg == "qicd"){
+				init.alg <- "lp"
+			} else{
+				init.alg <- alg
+			}
+			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,...)
 		}
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	

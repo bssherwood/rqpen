@@ -2,8 +2,16 @@ library(devtools)
 devtools::unload("rqPen")
 install_github("bssherwood/rqpen")
 library(rqPen)
+x <- matrix(rnorm(800),nrow=100)
+y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+cv_model <- cv.rq.pen(x,y)
+cv_model$models
+
 library(hqreg)
 library(glmnet)
+
+
+
 
 p <- 8
 n <- 100
