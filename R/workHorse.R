@@ -94,6 +94,8 @@ mcp_deriv <- function(x, lambda=1, a=3){
 	u
 }
 
+
+
 alasso_wt <- function(x,lambda=1,a=1){
 	lambda*(1/abs(x))^a
 }
@@ -424,15 +426,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 
 rq.group.lla <- function(obj,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...){
 	nt <- length(obj$tau)
-	if(penalty=="SCAD"){
-		derivf <- scad_deriv
-	} else if(penalty=="MCP"){
-		derivf <- mcp_deriv
-	} else if(penalty=="aLasso"){
-		derivf <- alasso_wt
-	} else{
-		stop("Penalty must be SCAD, MCP or aLasso")
-	}
+	derivf <- getDerivF(penalty)
 	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
 	ll <- length(obj$lambda)
 	if(nt == 1){
@@ -464,7 +458,7 @@ rq.group.lla <- function(obj,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a
 	obj
 }
 
-rq.nc <- function(x, y, tau=.5,group=1:ncol(X),  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber", ...) {
+rq.nc <- function(x, y, tau=.5,group=1:ncol(X),  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber",tau.pen=FALSE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -524,6 +518,35 @@ rq.nc <- function(x, y, tau=.5,group=1:ncol(X),  penalty=c("aLasso","SCAD","MCP"
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p))
 		returnVal
 	}
+}
+
+group_derivs <- function(deriv_func,groups,coefs,lambda,a=3.7,norm=1){
+   if(length(lambda)==1){
+      lambda <- rep(lambda,length(groups))
+   }
+   derivs <- NULL
+   for(g in 1:length(unique(groups))){
+      g_index <- which(groups==g)
+      current_lambda <- lambda[g]
+	  if(norm == 1){
+		gnorm <- sum(abs(coefs[g_index]))
+	  } else{
+		gnorm <- sqrt(sum(coefs[g_index]^2))
+	  }
+      derivs <- c(derivs, deriv_func(gnorm,current_lambda,a))
+   }
+   derivs
+}
+
+getDerivF <- function(penalty){
+	if(penalty=="SCAD" | penalty=="gSCAD"){
+		derivf <- scad_deriv
+	} else if(penalty=="MCP" | penalty == "gMCP"){
+		derivf <- mcp_deriv
+	} else if(penalty=="aLasso" | penalty == "gAdLasso"){
+		derivf <- alasso_wt
+	}
+	derivf
 }
 
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))), tau.pen=FALSE, ...){
@@ -611,6 +634,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 				init.alg <- alg
 			}
 			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,...)
+			rq.group.lla(init.model,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...)
 		}
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	
@@ -855,19 +879,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
   object$beta[,target_model]
 }
 
-group_derivs <- function(deriv_func,groups,coefs,lambda,a=3.7){
-   if(length(lambda)==1){
-      lambda <- rep(lambda,length(groups))
-   }
-   derivs <- NULL
-   for(g in 1:length(unique(groups))){
-      g_index <- which(groups==g)
-      current_lambda <- lambda[g]
-      coefs_l1 <- sum(abs(coefs[g_index]))
-      derivs <- c(derivs, deriv_func(coefs_l1,current_lambda,a))
-   }
-   derivs
-}
+
 
 rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,penalty="SCAD", a=3.7, coef.cutoff=1e-08,
                                 initial_beta=NULL,iterations=1,converge_criteria=.0001,penGroups=NULL,...){
