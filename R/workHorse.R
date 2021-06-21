@@ -534,7 +534,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	nt <- length(tau)
 	lpf <- length(group.pen.factor)
 	pfmat <- FALSE
-	if(max(groups==1:ncol(X))==1){
+	if(max(groups==1:ncol(x))==1){
 		warning("p groups for p predictors, not really using a group penalty")
 	}
 	penalty <- match.arg(penalty)
