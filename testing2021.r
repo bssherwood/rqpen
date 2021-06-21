@@ -23,9 +23,9 @@ obj2 <- rq.enet(x,y,tau=c(.1,.7))
 
 obj3 <- rq.nc(x,y,penalty="SCAD",tau=.4)
 obj4 <- rq.nc(x,y,penalty="SCAD",tau=c(.5,.9))
-obj5 <- rq.nc(x,y,penalty="SCAD",alg="QICD")
+#obj5 <- rq.nc(x,y,penalty="SCAD",alg="QICD")
 
-obj6 <- rq.group.pen(x,y,group=c(1,1,1,1,2,2,3,3))
+obj6 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3))
 
 
 obj2 <- rq.lla(obj,x,y)
