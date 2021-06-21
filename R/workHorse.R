@@ -558,7 +558,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
 	}
-	if(sum(penalty.factor<0)>0){
+	if(sum(group.pen.factor<0)>0){
 		stop("penalty factors must be positive")
 	}
 	if(nt==1){
