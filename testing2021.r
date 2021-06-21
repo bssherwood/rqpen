@@ -2,10 +2,7 @@ library(devtools)
 devtools::unload("rqPen")
 install_github("bssherwood/rqpen")
 library(rqPen)
-x <- matrix(rnorm(800),nrow=100)
-y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-cv_model <- cv.rq.pen(x,y)
-cv_model$models
+
 
 library(hqreg)
 library(glmnet)
@@ -28,6 +25,8 @@ obj3 <- rq.nc(x,y,penalty="SCAD",tau=.4)
 obj4 <- rq.nc(x,y,penalty="SCAD",tau=c(.5,.9))
 obj5 <- rq.nc(x,y,penalty="SCAD",alg="QICD")
 
+obj6 <- rq.group.pen(x,y,group=c(1,1,1,1,2,2,3,3))
+
 
 obj2 <- rq.lla(obj,x,y)
 coefficients(qic.select(obj2))
@@ -41,7 +40,10 @@ r1a <- rq.lasso(x,y,alg="br",tau=.475,penalty.factor=c(0,0,0,0,1,0,2,3))
 r2 <- qic.select(r1,method="PBIC")
 r2a <- qic.select(r1a,method="BIC",septau=TRUE)
 
-
+x <- matrix(rnorm(800),nrow=100)
+y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+cv_model <- cv.rq.pen(x,y)
+cv_model$models
 
 
 

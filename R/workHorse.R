@@ -422,7 +422,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.group.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),norm=2,...){
+rq.group.lla <- function(obj,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...){
 	nt <- length(obj$tau)
 	if(penalty=="SCAD"){
 		derivf <- scad_deriv
@@ -541,6 +541,9 @@ rq.group.pen <- function(x,y, tau=.5,group=1:ncol(X), penalty=c("gLasso","gAdLas
 	alg <- match.arg(alg)
 	if(penalty=="gLasso" & norm==1){
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
+	}
+	if(norm == 1 & penalty == "gAdLasso"){
+		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
 	}
 	if(norm == 2 & alg != "huber"){
 		alg <- "huber"
