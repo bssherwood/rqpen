@@ -431,9 +431,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	derivf <- getDerivF(penalty)
 	lampen <- group.pen.factor %*% t(obj$lambda)
 	tau.mult <- rep(1,nt)
-	if(tau.pen){
-		tau.mult <- sqrt(obj$tau*(1-obj$tau))
-	}
 	ll <- length(obj$lambda)
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
