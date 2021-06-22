@@ -661,7 +661,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 				penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
 			}
 			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
-			rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,...)
+			rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 		}
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	
