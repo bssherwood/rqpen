@@ -8,6 +8,7 @@ library(hqreg)
 library(glmnet)
 
 
+obj6 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3), penalty="gSCAD", norm=1)
 
 
 p <- 8
