@@ -435,7 +435,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		tau.mult <- sqrt(obj$tau*(1-obj$tau))
 	}
 	ll <- length(obj$lambda)
-	if(norm !=1 | norm != 2){
+	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
 	}
 	if(nt == 1){
