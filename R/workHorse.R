@@ -424,7 +424,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,tau.pen=FALSE,...){
+rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
 	nt <- length(obj$tau)
 	g <- max(groups)
 	penalty <- match.arg(penalty)
@@ -441,7 +441,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	if(nt == 1){
 		#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
-			coef_by_group_deriv <- group_derivs(deriv_func, groups, coefficients(obj$models)[-1,i],lampen[,i]*tau.mult[i],a,norm=norm)
+			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models)[-1,i],lampen[,i],a,norm=norm)
 			if(obj$alg=="huber"){
 				if(norm == 1){
 					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
@@ -457,7 +457,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		}
 	} else{
 		for(j in 1:nt){
-			coef_by_group_deriv <- group_derivs(deriv_func, groups, coefficients(obj$models[[j]])[-1,i],lampen[,i]*tau.mult[i],a,norm=norm)
+			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models[[j]])[-1,i],lampen[,i],a,norm=norm)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
 					if(norm==1){
