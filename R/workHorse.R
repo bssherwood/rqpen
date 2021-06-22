@@ -643,23 +643,25 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		lamMax <- getLamMax(x,y,tau,penalty=penalty)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
+			
+	if(pfmat){
+		#maybe some applies mapvalues
+	} else{
+		penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
+	}
+	
 	if(norm == 1){
 		if(penalty == "gAdLasso"){
-			init.model <- rq.enet(x,y,tau,...)
+			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
 		} else{
 			if(alg == "qicd"){
 				init.alg <- "lp"
 			} else{
 				init.alg <- alg
 			}
-			if(pfmat){
-				#maybe some applies mapvalues
-			} else{
-				penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
-			}
 			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
-			rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 		}
+		rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	
 }
