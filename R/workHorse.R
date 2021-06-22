@@ -424,32 +424,51 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.group.lla <- function(obj,x,y,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)),...){
+rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,tau.pen=FALSE,...){
 	nt <- length(obj$tau)
+	g <- max(groups)
 	penalty <- match.arg(penalty)
 	derivf <- getDerivF(penalty)
-	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
+	lampen <- group.pen.factor %*% t(obj$lambda)
+	tau.mult <- rep(1,nt)
+	if(tau.pen){
+		tau.mult <- sqrt(obj$tau*(1-obj$tau))
+	}
 	ll <- length(obj$lambda)
+	if(norm !=1 | norm != 2){
+		stop("Norm needs to be set to 1 or 2.")
+	}
 	if(nt == 1){
-		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
+		#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
+			coef_by_group_deriv <- group_derivs(deriv_func, groups, coefficients(obj$models)[-1,i],lampen[,i]*tau.mult[i],a,norm=norm)
 			if(obj$alg=="huber"){
-				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
-
+				if(norm == 1){
+					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+					update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+				} else{
+					#update_est <- coefficients(rq.group.pen
+				}
 			} else{
-				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+				penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
 			}
 			obj$models$coefficients[,i] <- update_est
 		}
 	} else{
 		for(j in 1:nt){
-			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
+			coef_by_group_deriv <- group_derivs(deriv_func, groups, coefficients(obj$models[[j]])[-1,i],lampen[,i]*tau.mult[i],a,norm=norm)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
-
+					if(norm==1){
+						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+					} else{
+						#update_est <- coefficients(rq.group.pen(
+					}
 				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
 				}
 				obj$models[[j]]$coefficients[,i] <- update_est
 			}
@@ -531,8 +550,10 @@ group_derivs <- function(deriv_func,groups,coefs,lambda,a=3.7,norm=1){
       current_lambda <- lambda[g]
 	  if(norm == 1){
 		gnorm <- sum(abs(coefs[g_index]))
-	  } else{
+	  } else if(norm==2){
 		gnorm <- sqrt(sum(coefs[g_index]^2))
+	  } else{
+		stop("Invalid norm, use 1 or 2")
 	  }
       derivs <- c(derivs, deriv_func(gnorm,current_lambda,a))
    }
@@ -889,6 +910,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 
 rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,penalty="SCAD", a=3.7, coef.cutoff=1e-08,
                                 initial_beta=NULL,iterations=1,converge_criteria=.0001,penGroups=NULL,...){
+	warning("rq.group.lin.prog() is deprecated. Recommend using rq.group.pen instead")
     group_num <- length(unique(groups))
     if(length(lambda) == 1){
        lambda <- rep(lambda,group_num)
