@@ -27,6 +27,8 @@ obj4 <- rq.nc(x,y,penalty="SCAD",tau=c(.5,.9))
 
 obj6 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3))
 
+obj <- rq.lasso(x,y,tau=.25)
+
 
 obj2 <- rq.lla(obj,x,y)
 coefficients(qic.select(obj2))

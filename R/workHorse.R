@@ -424,8 +424,9 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.group.lla <- function(obj,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...){
+rq.group.lla <- function(obj,x,y,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...){
 	nt <- length(obj$tau)
+	penalty <- match.arg(penalty)
 	derivf <- getDerivF(penalty)
 	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
 	ll <- length(obj$lambda)
@@ -458,7 +459,7 @@ rq.group.lla <- function(obj,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a
 	obj
 }
 
-rq.nc <- function(x, y, tau=.5,group=1:ncol(X),  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber",tau.pen=FALSE,...) {
+rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=.0001,alg="huber",...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -549,7 +550,7 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))), tau.pen=FALSE, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=.0001,alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -589,22 +590,22 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			stop("group penalty factor must be of length g")
 		}
 		if(tau.pen){
-			penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+			penalty.factor <- group.pen.factor*sqrt(tau*(1-tau))
 			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
 		}
 	} else{
-		if(length(penalty.factor) == g*nt){
+		if(length(group.pen.factor) == g*nt){
 			pfmat <- TRUE
 		}
-		else if(max(penalty.factor) !=g){
+		else if(length(group.pen.factor) !=g){
 			stop("penalty factor must be a vector with g groups or a nt by g matrix, where nt is the number of taus and g is the number of groups")
 		}
 		if(tau.pen){
 			pfmat <- TRUE
-			if(length(penalty.factor)==p){
-				penalty.factor <- matrix(rep(penalty.factor,nt),nrow=nt,byrow=TRUE)
+			if(length(group.pen.factor)==p){
+				group.pen.factor <- matrix(rep(group.pen.factor,nt),nrow=nt,byrow=TRUE)
 			} else{
-				penalty.factor <- penalty.factor*sqrt(tau*(1-tau))
+				group.pen.factor <- group.pen.factor*sqrt(tau*(1-tau))
 			}
 		}
 		
@@ -633,8 +634,13 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			} else{
 				init.alg <- alg
 			}
-			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,...)
-			rq.group.lla(init.model,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...)
+			if(pfmat){
+				#maybe some applies mapvalues
+			} else{
+				penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
+			}
+			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
+			rq.group.lla(init.model,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,...)
 		}
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	
