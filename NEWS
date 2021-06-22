@@ -1,4 +1,4 @@
-rqPen 2.2.3 (Release date: TBD)
+rqPen 3.0 (Release date: TBD)
 Changes:
 * Updated code for get_coef_pen() to a fix a bug where it was returning multiple values. Thank you to Jingyi Kenneth Tay for noticing this issue. 
 

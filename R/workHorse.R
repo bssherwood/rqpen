@@ -424,7 +424,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-rq.group.lla <- function(obj,x,y,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)), tau.pen=FALSE,...){
+rq.group.lla <- function(obj,x,y,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,group,group.pen.factor=rep(1,length(groups)),...){
 	nt <- length(obj$tau)
 	penalty <- match.arg(penalty)
 	derivf <- getDerivF(penalty)
@@ -640,7 +640,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 				penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
 			}
 			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
-			rq.group.lla(init.model,x,y,penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2,...)
+			rq.group.lla(init.model,x,y,penalty=penalty,a=a,norm=norm,...)
 		}
 		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	}	
