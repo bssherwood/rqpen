@@ -3,4 +3,4 @@
 3. Warm starts in cv functions
 4. Need to look into penVar 
 5. rq.group.fit returns SCAD as penalty when it is actually LASSO 
-6. rq.lasso.modelreturn used for returning non-lasso penalties, but then penRho is calculated incorrectly. Adaptive lasso is particularly problematic
+6. rq.lasso.modelreturn used for returning non-lasso penalties, but then penRho is calculated incorrectly. Adaptive lasso is particularly problematic, but should review all cases.
