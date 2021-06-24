@@ -621,7 +621,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 				penf <- group.pen.factor[i,]
 			}
 			models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
-			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,tau,models[[i]]$lambda,rep(1,p),"gLasso",1)
+			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLasso",1)
 			models[[i]]$penalty.factor <- NULL
 			models[[i]]$group.pen.factor <- penf
 		}
