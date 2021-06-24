@@ -420,11 +420,15 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			}
 		}
 	}
+	if(penalty=="aLasso"){
+		obj$penalty.factor <- pfs
+	}
 	obj$penalty <- penalty
 	obj
 }
 
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
+	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	g <- max(groups)
 	penalty <- match.arg(penalty)
@@ -436,7 +440,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		stop("Norm needs to be set to 1 or 2.")
 	}
 	if(nt == 1){
-		#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
 			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models)[-1,i],lampen[,i],a,norm=norm)
 			if(obj$alg=="huber"){
@@ -495,6 +498,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 	}
 	
 	if(alg != "qicd" & alg != "QICD"){
+	#QICD implementation not provided in rq.lasso
 		if(penalty=="aLasso"){
 			if(is.null(a)){
 				a <- 1
@@ -642,6 +646,9 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	}
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(norm != 1 | norm != 2){
+		stop("norm must be 1 or 2")
+	}
 	if(penalty=="gLasso" & norm==1){
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
 	}
@@ -723,7 +730,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
 		}
 		rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
-		#then figure out how to get group derivative for each coefficient. I might have some code that does that already. 
 	} else{
 		if(penalty == "gLasso"){
 			groupEst <- hrq

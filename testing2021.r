@@ -15,6 +15,9 @@ x <- matrix(rnorm(n*p),ncol=p)
 
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
 
+obj <- rq.nc(x,y,tau=.25, penalty="aLasso", alg="lp")
+
+
 obj6 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,3,3,3), penalty="gSCAD", norm=1)
 obj7 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,3,3,3), penalty="gAdLasso", norm=1)
 obj8 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,3,3,3), penalty="gMCP", norm=1)
