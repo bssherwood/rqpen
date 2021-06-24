@@ -19,8 +19,8 @@ pos_part <- function(x){
   ifelse( x < 0, x, 0 ) # min(x,0) # 
 }
 
-lasso <- function(x,lambda=1){
-   lambda*abs(x)
+lasso <- function(x,lambda=1,a=1){
+   lambda*a*abs(x)
 }
 
 scad <- function(x, lambda=1, a=3.7){
@@ -817,8 +817,8 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-ridge <- function(x,lambda){
-	lambda*square(x)
+ridge <- function(x,lambda,a=1){
+	a*lambda*square(x)
 }
 
 elastic <- function(x,lambda,a){
