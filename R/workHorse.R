@@ -610,7 +610,6 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
 		models <- rq.pen.modelreturn(models$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
-		models <- updateGroupPenRho(models,2,groups,1)
 	} else{
 		penf <- group.pen.factor
 		models <- list()
@@ -621,7 +620,6 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 			}
 			models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
 			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
-			models[[i]] <- updateGroupPenRho(models[[i]],2,groups,1)
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
@@ -728,8 +726,11 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 	} else{
 		if(penalty == "gLasso"){
-			groupEst <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
+			models <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		}
+		return_val <- list(models=models,n=n,p=p,alg=alg,tau=tau,penalty=penalty)
+		return_val <-  updateGroupPenRho(return_val,2,groups,1)
+
 	}
 	return_val
 }
