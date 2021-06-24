@@ -439,9 +439,13 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
 	}
+	gpfmat <- NULL
 	if(nt == 1){
 		for(i in 1:ll){
 			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models)[-1,i],lampen[,i],a,norm=norm)
+			if(penalty == "gAdLasso"){
+				gpfmat <- cbind(gpfmat,coef_by_group_deriv)
+			}
 			if(obj$alg=="huber"){
 				if(norm == 1){
 					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
@@ -454,6 +458,12 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
 			}
 			obj$models$coefficients[,i] <- update_est
+		}
+		obj$models$penalty.factor <- NULL
+		if(penalty == "gAdLasso"){
+			obj$models$group.pen.factor <- gpfmat 
+		} else{
+			obj$models$group.pen.factor <- group.pen.factor
 		}
 	} else{
 		for(j in 1:nt){
@@ -472,9 +482,18 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 				}
 				obj$models[[j]]$coefficients[,i] <- update_est
 			}
+			obj$models[[j]]$penalty.factor <- NULL
+			if(penalty == "gAdLasso"){
+				obj$models[[j]]$group.pen.factor <- gpfmat 
+			} else{
+				obj$models[[j]]$group.pen.factor <- group.pen.factor
+			}
 		}
 	}
+	#obj <- updateGroupPenRho(obj
+	obj$groups <- groups
 	obj$penalty <- penalty
+	#obj$class <- c(obj$class, "rq.group.pen.seq")
 	obj
 }
 
@@ -824,8 +843,18 @@ getPenfunc <- function(penalty){
 	penfunc
 }
 
+updateGroupPenRho <- function(obj,norm,groups,a){
+	penfunc <- getPenfunc(obj$penalty)
+	for(i in 1:length(obj$models)){
+		obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$lambda[i],obj$group.pen.factor,obj$penalty,norm,a))
+	}
+	obj
+}
+
+
 getGroupPen <- function(coefs,lambda,group.pen.factor,penalty,norm,a){
    lambda <- lambda*group.pen.factor
+   penfunc <- getPenfunc(penalty)
    pens <- NULL
    for(g in 1:length(unique(groups))){
       g_index <- which(groups==g)
@@ -837,9 +866,9 @@ getGroupPen <- function(coefs,lambda,group.pen.factor,penalty,norm,a){
 	  } else{
 		stop("Invalid norm, use 1 or 2")
 	  }
-      derivs <- c(derivs, deriv_func(gnorm,current_lambda,a))
+      pens <- c(pens, penfunc(gnorm,current_lambda,a))
    }
-   derivs	
+   pens	
 }
 
 rq.glasso.modelreturn <- function(coefs,x,y,tau,lambda,group.pen.factor,penalty){
@@ -867,6 +896,7 @@ rq.glasso.modelreturn <- function(coefs,x,y,tau,lambda,group.pen.factor,penalty)
 	return_val$df <- apply(return_val$coefficients!=0,2,sum)
 	return_val
 }
+
 
 
 
