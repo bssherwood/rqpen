@@ -855,7 +855,7 @@ updateGroupPenRho <- function(obj,norm,groups,a){
 		}
 	} else{
 		for(j in 1:length(obj$models)){
-			for(i in 1:length(obj$models[[j]]$lambda){
+			for(i in 1:length(obj$models[[j]]$lambda)){
 				if(penalty=="gAdLasso"){
 					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[,i],obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
 				} else{			
