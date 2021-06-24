@@ -600,41 +600,6 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-# rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,...){
-	# dims <- dim(x)
-	# p <- dims[2]
-	# if(scalex){
-		# hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
-	# } else{
-		# hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
-	# }
-	# rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor)
-# }
-
-# rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
-	# dims <- dim(x)
-	# n <- dims[1]
-	# p <- dims[2]
-	# nt <- length(tau)
-	
-	# if(length(tau)==1){		
-		# models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
-	# } else{
-		# penf <- penalty.factor
-		# models <- list()
-		# for(i in 1:nt){
-			# subtau <- tau[i]
-			# if(pfmat){
-				# penf <- penalty.factor[i,]
-			# }
-			# models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
-		# }
-		# attributes(models)$names <- paste0("tau",tau)
-	# }
-	# returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,lambda=lambda,penalty.factor=penalty.factor)
-	# returnVal
-# }
-
 rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...){
 	dims <- dim(x)
 	n <- dims[1]
@@ -644,21 +609,24 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
+		models <- modelreturn(models$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
+		models <- updateGroupPenRho(models,2,groups,1)
 	} else{
-		penf <- penalty.factor
+		penf <- group.pen.factor
 		models <- list()
 		for(i in 1:nt){
 			subtau <- tau[i]
 			if(pfmat){
-				penf <- penalty.factor[i,]
+				penf <- group.pen.factor[i,]
 			}
-			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penf,scalex=scalex,...)
+			models[[i]] <- hrq_glasso(x,y,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
+			models[[i]] <- modelreturn(models[[i]]$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
+			models[[i]] <- updateGroupPenRho(models[[i]],2,groups,1)
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau)
 	returnVal
-	
 }
 
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex, ...){
