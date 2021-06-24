@@ -317,7 +317,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 			}
 			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
 		}
-		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau)
 	}
 	returnVal$penalty <- "lasso"
 	class(returnVal) <- "rq.pen.seq"
@@ -393,9 +393,9 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	} else{
 		stop("Penalty must be SCAD, MCP or aLasso")
 	}
-	lampen <- as.numeric(obj$penalty.factor %*% t(obj$lambda))
-	ll <- length(obj$lambda)
 	if(nt == 1){
+		lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
+		ll <- length(obj$models$lambda)
 		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
 		for(i in 1:ll){
 			if(obj$alg=="huber"){
@@ -408,6 +408,8 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 		}
 	} else{
 		for(j in 1:nt){
+			lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
+			ll <- length(obj$models[[j]]$lambda)
 			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
@@ -433,15 +435,14 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	g <- max(groups)
 	penalty <- match.arg(penalty)
 	derivf <- getDerivF(penalty)
-	lampen <- group.pen.factor %*% t(obj$lambda)
-	tau.mult <- rep(1,nt)
-	ll <- length(obj$lambda)
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
 	}
 	gpfmat <- NULL
 	if(nt == 1){
-		for(i in 1:ll){
+		lampen <- group.pen.factor %*% t(obj$models$lambda)
+		ll <- length(obj$models$lambda)
+		for(i in 1:ll){	
 			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models)[-1,i],lampen[,i],a,norm=norm)
 			if(penalty == "gAdLasso"){
 				gpfmat <- cbind(gpfmat,coef_by_group_deriv)
@@ -467,6 +468,8 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		}
 	} else{
 		for(j in 1:nt){
+			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
+			ll <- length(obj$models[[j]]$lambda)
 			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models[[j]])[-1,i],lampen[,i],a,norm=norm)
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
