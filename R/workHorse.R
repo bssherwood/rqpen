@@ -950,7 +950,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
-	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,lambda=lambda,penalty.factor=penalty.factor)
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau)
 	returnVal
 }
 
