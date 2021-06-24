@@ -242,6 +242,19 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 	returnVal
 }
 
+getLamMaxGroup <- function(x,y,group.index,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso"){
+	returnVal <- 0
+	n <- length(y)
+	for(tau_val in tau){
+		r0 <- y - quantile(y,tau_val)
+		grad_k<- -neg.gradient(r0, rep(1,n), tau_val, gamma=gamma, x, n, apprx="huber")
+		grad_k.norm<- tapply(grad_k, group.index, l2norm)
+  
+		lambda.max<- max(c(returnVal,grad_k.norm/w.lambda))
+	}
+	lambda.max
+}
+
 # If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001), penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
@@ -707,7 +720,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty=penalty)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,penalty=penalty)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 			
