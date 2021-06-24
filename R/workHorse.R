@@ -635,7 +635,7 @@ getDerivF <- function(penalty){
 	# returnVal
 # }
 
-rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,...){
+rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -661,7 +661,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,...){
 	
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -755,12 +755,12 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			} else{
 				init.alg <- alg
 			}
-			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,...)
+			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,tau.pen=FALSE,penalty.factor=penalty.factor,scalex=scalex,...)
 		}
 		rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 	} else{
 		if(penalty == "gLasso"){
-			groupEst <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,...)
+			groupEst <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		}
 	}
 }
