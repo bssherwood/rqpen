@@ -246,10 +246,10 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,gamma=.2,gamma.max=4,gamma.q=.
 	returnVal <- 0
 	n <- length(y)
 	for(tau_val in tau){
-		r0 <- y - quantile(y,tau_val)
+		r <- y - quantile(y,tau_val)
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
 
-		grad_k<- -neg.gradient(r0, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
+		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
 		grad_k.norm<- tapply(grad_k, group.index, l2norm)
   
 		lambda.max<- max(c(returnVal,grad_k.norm/w.lambda))
