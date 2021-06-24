@@ -848,18 +848,18 @@ updateGroupPenRho <- function(obj,norm,groups,a){
 	if(length(obj$tau)==1){
 		for(i in 1:length(obj$models$lambda)){
 			if(obj$penalty=="gAdLasso"){
-				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
+				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
 			} else{			
-				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
+				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
 			}
 		}
 	} else{
 		for(j in 1:length(obj$models)){
 			for(i in 1:length(obj$models[[j]]$lambda)){
 				if(obj$penalty=="gAdLasso"){
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[,i],obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
 				} else{			
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[,i],obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
 				}
 			}
 		}	
@@ -868,7 +868,7 @@ updateGroupPenRho <- function(obj,norm,groups,a){
 }
 
 
-getGroupPen <- function(coefs,lambda,group.pen.factor,penalty,norm,a){
+getGroupPen <- function(coefs,groups,lambda,group.pen.factor,penalty,norm,a){
    lambda <- lambda*group.pen.factor
    penfunc <- getPenfunc(penalty)
    pens <- NULL
