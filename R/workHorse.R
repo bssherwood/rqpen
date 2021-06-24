@@ -242,7 +242,7 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 	returnVal
 }
 
-getLamMaxGroup <- function(x,y,group.index,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso"){
+getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso"){
 	returnVal <- 0
 	n <- length(y)
 	for(tau_val in tau){
@@ -252,7 +252,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,gamma=.2,gamma.max=4,gamma.q=.
 		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
 		grad_k.norm<- tapply(grad_k, group.index, hrqglas:::l2norm)
   
-		lambda.max<- max(c(returnVal,grad_k.norm/w.lambda))
+		lambda.max<- max(c(returnVal,grad_k.norm/group.pen.factor))
 	}
 	lambda.max
 }
@@ -722,7 +722,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMaxGroup(x,y,groups,tau,penalty=penalty)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 			
