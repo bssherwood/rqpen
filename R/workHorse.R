@@ -301,10 +301,16 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 			models <- list()
 			for(i in 1:nt){
 				coefs <- NULL
+				j <- 1
 				for(lam in lambda){
-					sublam <- lam*penalty.factor
+					if(pfmat){
+						sublam <- lam*penalty.factor[j,]
+					} else{
+						sublam <- lam*penalty.factor
+					}
 					subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
 					coefs <- cbind(coefs,coefficients(subm))
+					j <- j + 1
 				}
 				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
 			}
@@ -629,7 +635,7 @@ getDerivF <- function(penalty){
 	# returnVal
 # }
 
-rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,tau.pen,pfmat,...){
+rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -646,11 +652,11 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,tau.pen,pfmat,...
 			if(pfmat){
 				penf <- penalty.factor[i,]
 			}
-			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penf,scalex=scalex,...)
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
-	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,lambda=lambda,penalty.factor=penalty.factor)
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau)
 	returnVal
 	
 }
@@ -754,7 +760,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 	} else{
 		if(penalty == "gLasso"){
-			groupEst <- hrq
+			groupEst <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,...)
 		}
 	}
 }
