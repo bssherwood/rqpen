@@ -610,6 +610,8 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
 		models <- rq.pen.modelreturn(models$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
+		models$penalty.factor <- NULL
+		models$group.pen.factor <- group.pen.factor
 	} else{
 		penf <- group.pen.factor
 		models <- list()
@@ -620,6 +622,8 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 			}
 			models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
 			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
+			models[[i]]$penalty.factor <- NULL
+			models[[i]]$group.pen.factor <- penf
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
