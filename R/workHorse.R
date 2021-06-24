@@ -629,7 +629,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	returnVal
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
