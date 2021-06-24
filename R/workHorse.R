@@ -490,7 +490,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 			}
 		}
 	}
-	#obj <- updateGroupPenRho(obj
+	obj  <- updateGroupPenRho(obj,norm,groups,a)
 	obj$groups <- groups
 	obj$penalty <- penalty
 	#obj$class <- c(obj$class, "rq.group.pen.seq")
@@ -827,7 +827,7 @@ elastic <- function(x,lambda,a){
 
 
 getPenfunc <- function(penalty){
-	if(penalty=="lasso" | penalty == "gLasso" | penalty="aLasso"){
+	if(penalty == "lasso" | penalty == "gLasso" | penalty=="aLasso"){
 	#adaptive lasso is lasso with different weights, so i think this will work
 		penfunc <- lasso
 	}
@@ -845,8 +845,24 @@ getPenfunc <- function(penalty){
 
 updateGroupPenRho <- function(obj,norm,groups,a){
 	penfunc <- getPenfunc(obj$penalty)
-	for(i in 1:length(obj$models)){
-		obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$lambda[i],obj$group.pen.factor,obj$penalty,norm,a))
+	if(length(obj$tau)==1){
+		for(i in 1:length(obj$models$lambda)){
+			if(penalty=="gAdLasso"){
+				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
+			} else{			
+				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[,i],obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
+			}
+		}
+	} else{
+		for(j in 1:length(obj$models)){
+			for(i in 1:length(obj$models[[j]]$lambda){
+				if(penalty=="gAdLasso"){
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[,i],obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
+				} else{			
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[,i],obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+				}
+			}
+		}	
 	}
 	obj
 }
