@@ -619,7 +619,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 			if(pfmat){
 				penf <- group.pen.factor[i,]
 			}
-			models[[i]] <- hrq_glasso(x,y,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
+			models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
 			models[[i]] <- modelreturn(models[[i]]$beta,x,y,tau,fit$lambda,rep(1,p),"gLasso",1)
 			models[[i]] <- updateGroupPenRho(models[[i]],2,groups,1)
 		}
