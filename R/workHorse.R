@@ -624,6 +624,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		attributes(models)$names <- paste0("tau",tau)
 	}
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau)
+	returnVal <- updateGroupPenRho(return_val,2,groups,1)
 	returnVal
 }
 
@@ -726,11 +727,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 	} else{
 		if(penalty == "gLasso"){
-			models <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
+			return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		}
-		return_val <- list(models=models,n=n,p=p,alg=alg,tau=tau,penalty=penalty)
-		return_val <-  updateGroupPenRho(return_val,2,groups,1)
-
 	}
 	return_val
 }
