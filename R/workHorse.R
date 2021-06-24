@@ -652,7 +652,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,tau.pen,pfmat,...
 	
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=c(1,2), group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -660,14 +660,12 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	nt <- length(tau)
 	lpf <- length(group.pen.factor)
 	pfmat <- FALSE
+	norm <- match.arg(norm)
 	if(g==p){
 		warning("p groups for p predictors, not really using a group penalty")
 	}
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
-	if(norm != 1 | norm != 2){
-		stop("norm must be 1 or 2")
-	}
 	if(penalty=="gLasso" & norm==1){
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
 	}
