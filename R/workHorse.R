@@ -306,7 +306,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 					subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
-				models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
+				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
 			}
 		} else{
 			coefs <- NULL
@@ -315,7 +315,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
+			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor)
 	}
@@ -544,7 +544,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", ...)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
-				models[[i]] <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
+				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
 			}
 		} else{
 			coefs <- NULL
@@ -553,7 +553,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 				subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD",...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models <- rq.lasso.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
+			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p))
 		returnVal
@@ -599,7 +599,7 @@ getDerivF <- function(penalty){
 	# } else{
 		# hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
 	# }
-	# rq.lasso.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor)
+	# rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor)
 # }
 
 # rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
@@ -758,7 +758,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 
 
 
-rq.lasso.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
+rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 # for loop that could be removed
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
@@ -924,7 +924,7 @@ rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),s
 	} else{
 		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
 	}
-	rq.lasso.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor)
+	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"lasso",1)
 }
 
 rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
