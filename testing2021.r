@@ -15,7 +15,8 @@ x <- matrix(rnorm(n*p,sd=10),ncol=p)
 
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
 
-obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.8))
+obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25)
+obj10 <- hrq_glasso(x,y,c(1,1,1,1,2,2,3,3),tau=.25)
 
 
 obj   <- rq.nc(x,y,tau=.25, penalty="aLasso", alg="lp",scalex=TRUE)

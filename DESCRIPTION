@@ -5,7 +5,7 @@ Version: 2.2.2
 Date: 2020-04-09
 Author: Ben Sherwood [aut, cre], Adam Maidman [ctb] 
 Depends: R (>= 3.0.0)
-Imports: methods, quantreg, regpro, hqreg
+Imports: methods, quantreg, regpro, hqreg, hrqglas
 Suggests: 
     testthat (>= 3.0.0),
     splines

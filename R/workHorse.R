@@ -226,9 +226,12 @@ neg.gradient <- function(r,weights,tau,gamma,x,apprx){
   }
 }
 
-getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"){
+getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso",scalex=TRUE){
 	n <- length(y)
 	returnVal <- 0
+	if(scalex){
+		x <- scale(x)
+	}
 	
 	#to-do: remove for loop
 	for(tau_val in tau){
@@ -242,9 +245,12 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 	returnVal
 }
 
-getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso"){
+getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso",scalex=TRUE){
 	returnVal <- 0
 	n <- length(y)
+	if(scalex){
+		x <- scale(x)
+	}
 	for(tau_val in tau){
 		r <- y - quantile(y,tau_val)
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
@@ -303,7 +309,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 		
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau)
+		lamMax <- getLamMax(x,y,tau,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
@@ -385,7 +391,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001)
 		
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau)
+		lamMax <- getLamMax(x,y,tau,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(length(lambda)==1){
@@ -536,7 +542,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty=penalty)
+		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	
@@ -722,7 +728,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 			
