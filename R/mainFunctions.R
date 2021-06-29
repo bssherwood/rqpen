@@ -119,7 +119,12 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 }
 
 coef.rq.pen.seq <- function(object, lambda=NULL, tau=NULL){
-	coefficients(object$models)
+	nt <- length(ojb$tau)
+	if(nt == 1){	
+		coefficients(object$models)
+	} else{
+		lapply(object$models, coefficients)
+	}
 }
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
