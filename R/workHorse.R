@@ -569,7 +569,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex)
+		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	
