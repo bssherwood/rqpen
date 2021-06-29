@@ -465,6 +465,9 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
 	}
+	if(norm ==2 & obj$alg != "huber"){
+		stop("Huber approximation is the only available algorithm for 2-norm based penalties.")
+	}
 	gpfmat <- NULL
 	if(nt == 1){
 		lampen <- group.pen.factor %*% t(obj$models$lambda)
@@ -479,7 +482,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
 					update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
 				} else{
-					#update_est <- coefficients(rq.group.pen
+					update_est <- coefficients(rq.group.pen(x,y,obj$tau,groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
 				}
 			} else{
 				penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
