@@ -554,7 +554,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	obj
 }
 
-rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",...) {
+rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",scalex=TRUE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
