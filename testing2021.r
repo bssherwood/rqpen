@@ -20,9 +20,23 @@ g <- c(1,1,1,1,2,2,3,3)
 
 obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25)
 obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75))
+#coefficients(obj9)
+#coefficients(obj10)
 
-coefficients(obj9)
-coefficients(obj10)
+obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25,penalty="gAdLasso")
+obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75), penalty="gAdLasso")
+#coefficients(obj9)
+#coefficients(obj10)
+
+obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25,penalty="gSCAD")
+obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75), penalty="gSCAD")
+#coefficients(obj9)
+#coefficients(obj10)
+
+obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25,penalty="gMCP")
+obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75), penalty="gMCP")
+#coefficients(obj9)
+#coefficients(obj10)
 
 
 
