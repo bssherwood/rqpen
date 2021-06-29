@@ -309,7 +309,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 		
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex)
+		lamMax <- getLamMax(x,y,tau,scalex=scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
@@ -391,7 +391,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001)
 		
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex)
+		lamMax <- getLamMax(x,y,tau,scalex=scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(length(lambda)==1){
