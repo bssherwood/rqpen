@@ -19,6 +19,10 @@ g <- c(1,1,1,1,2,2,3,3)
 
 
 obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25)
+obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75))
+
+
+
 obj10 <- hrq_glasso(x,y,c(1,1,1,1,2,2,3,3),tau=.25,w.lambda=c(1,1,1))
 
 obj11 <- rq.group.pen(x,y,groups=g,penalty="gSCAD")

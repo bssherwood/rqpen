@@ -762,6 +762,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
 		}
 	}
+	class(return_val) <- "rq.pen.seq"
 	return_val
 }
 
