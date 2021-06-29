@@ -7,3 +7,9 @@
 7. Penalty.factor for rq.nc
 8. update get lambda max to depend on the penalty, and maybe make it bigger for sparsity. 
 9. Cut off lambda for non-sparse sequences. 
+10. Non-convex penalties and fitted and residuals, check if they are doing that correctly. Maybe remove those as options. 
+
+hrqglasso
+
+1. Maybe deal with issues where penalty factors are all zero. 
+

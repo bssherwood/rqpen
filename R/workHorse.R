@@ -456,6 +456,15 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
+clearModels <- function(model,spos,epos){
+	model$coefficients[,spos:epos] <- NULL
+	model$lambda[spos:epos] <- NULL
+	model$rho[spos:epos] <- NULL
+	model$PenRho[spos:epos] <- NULL
+	model$df[spos:epos] <- NULL
+	model
+}
+
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
@@ -473,22 +482,27 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		lampen <- group.pen.factor %*% t(obj$models$lambda)
 		ll <- length(obj$models$lambda)
 		for(i in 1:ll){	
-			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models)[-1,i],lampen[,i],a,norm=norm)
-			if(penalty == "gAdLasso"){
-				gpfmat <- cbind(gpfmat,coef_by_group_deriv)
-			}
-			if(obj$alg=="huber"){
-				if(norm == 1){
-					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-					update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
-				} else{
-					update_est <- coefficients(rq.group.pen(x,y,obj$tau,groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
-				}
+			coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models)[-1,i]),lampen[,i],a,norm=norm)
+			if(sum(coef_by_group_deriv)==0){
+				obj$models <- clearModels(obj$models,i,ll)
+				break
 			} else{
-				penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-				update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+				if(penalty == "gAdLasso"){
+					gpfmat <- cbind(gpfmat,coef_by_group_deriv)
+				}
+				if(obj$alg=="huber"){
+					if(norm == 1){
+						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+						update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+					} else{
+						update_est <- coefficients(rq.group.pen(x,y,obj$tau,groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
+					}
+				} else{
+					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+					update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+				}
+				obj$models$coefficients[,i] <- update_est
 			}
-			obj$models$coefficients[,i] <- update_est
 		}
 		obj$models$penalty.factor <- NULL
 		if(penalty == "gAdLasso"){
@@ -500,20 +514,28 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		for(j in 1:nt){
 			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
 			ll <- length(obj$models[[j]]$lambda)
-			coef_by_group_deriv <- group_derivs(derivf, groups, coefficients(obj$models[[j]])[-1,i],lampen[,i],a,norm=norm)
-			for(i in 1:ll){
-				if(obj$alg=="huber"){
-					if(norm==1){
-						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
-					} else{
-						#update_est <- coefficients(rq.group.pen(
-					}
+			for(i in 1:ll){	
+				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a,norm=norm)
+				if(sum(coef_by_group_deriv)==0){
+					obj$models[[j]] <- clearModels(obj$models[[j]],i,ll)
+					break
 				} else{
-					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+					if(penalty == "gAdLasso"){
+						gpfmat <- cbind(gpfmat,coef_by_group_deriv)
+					}
+					if(obj$alg=="huber"){
+						if(norm == 1){
+							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+						} else{
+							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
+						}
+					} else{
+						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+					}
+					obj$models[[j]]$coefficients[,i] <- update_est
 				}
-				obj$models[[j]]$coefficients[,i] <- update_est
 			}
 			obj$models[[j]]$penalty.factor <- NULL
 			if(penalty == "gAdLasso"){
@@ -765,6 +787,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
 		}
 	}
+	#need to re do the models for fitted and residual values, maybe should just remove those features. 
 	class(return_val) <- "rq.pen.seq"
 	return_val
 }
