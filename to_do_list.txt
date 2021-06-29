@@ -6,3 +6,4 @@
 6. Penalized rho calculations for rq.group.pen 
 7. Penalty.factor for rq.nc
 8. update get lambda max to depend on the penalty, and maybe make it bigger for sparsity. 
+9. Cut off lambda for non-sparse sequences. 
