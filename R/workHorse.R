@@ -759,8 +759,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			} else{
 				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 			}
+			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
 		}
-		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
 	}
 	return_val
 }
