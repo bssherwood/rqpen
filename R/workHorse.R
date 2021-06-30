@@ -658,6 +658,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
+		print(paste("in rq.glasso", models$beta))
 		models <- rq.pen.modelreturn(models$beta,x,y,tau,models$lambda,rep(1,p),"gLasso",1)
 		models$penalty.factor <- NULL
 		models$group.pen.factor <- group.pen.factor
