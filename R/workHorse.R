@@ -811,16 +811,19 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 		x_names <- colnames(x)
 	}
 	x_names <- c("intercept",x_names)
-	if(is.null(rownames(return_val$coefficients))==FALSE){
-		rownames(return_val$coefficients) <- x_names
-	}
+	
 	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
 	fits <- cbind(1,x)%*% return_val$coefficients
 	return_val$fitted <- fits
 	return_val$residuals <- y - fits
 	return_val$PenRho <- return_val$rho <- apply(check(return_val$residuals,tau),2,mean)	
-	for(i in 1:length(return_val$rho)){
-		return_val$PenRho[i] <- return_val$rho[i] + sum(penfunc(return_val$coefficients[-1,i],lambda[i]*return_val$penalty.factor,a))
+	if(is.null(rownames(return_val$coefficients))==FALSE){
+		rownames(return_val$coefficients) <- x_names
+		return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*return_val$penalty.factor,a))
+	} else{
+		for(i in 1:length(return_val$rho)){
+			return_val$PenRho[i] <- return_val$rho[i] + sum(penfunc(return_val$coefficients[-1,i],lambda[i]*return_val$penalty.factor,a))
+		}
 	}
 	return_val$tau <- tau
 	return_val$df <- apply(return_val$coefficients!=0,2,sum)
