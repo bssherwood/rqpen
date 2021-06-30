@@ -892,20 +892,28 @@ getPenfunc <- function(penalty){
 updateGroupPenRho <- function(obj,norm,groups,a){
 	penfunc <- getPenfunc(obj$penalty)
 	if(length(obj$tau)==1){
-		for(i in 1:length(obj$models$lambda)){
-			if(obj$penalty=="gAdLasso"){
-				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
-			} else{			
-				obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
+		if(length(obj$models$lambda)==1){
+			obj$models$PenRho <- obj$models$rho + sum(getGroupPen(obj$models$coefficients[-1],groups,obj$models$lambda,obj$models$group.pen.factor,obj$penalty,norm,a))
+		} else{
+			for(i in 1:length(obj$models$lambda)){
+				if(obj$penalty=="gAdLasso"){
+					obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
+				} else{			
+					obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
+				}
 			}
 		}
 	} else{
 		for(j in 1:length(obj$models)){
-			for(i in 1:length(obj$models[[j]]$lambda)){
-				if(obj$penalty=="gAdLasso"){
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
-				} else{			
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+			if(length(obj$models[[j]]$lambda)==1){
+				obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$models[[j]]$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
+			} else{
+				for(i in 1:length(obj$models[[j]]$lambda)){
+					if(obj$penalty=="gAdLasso"){
+						obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
+					} else{			
+						obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+					}
 				}
 			}
 		}	
