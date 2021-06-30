@@ -497,7 +497,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
 						update_est <- coefficients(rq.lasso(x,y,obj$tau,lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
 					} else{
-						update_est <- coefficients(rq.group.pen(x,y,obj$tau,groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
+						update_est <- coefficients(rq.group.pen(x,y,obj$tau,groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)
 					}
 				} else{
 					penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
@@ -531,7 +531,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
 							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
 						} else{
-							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=c(2,1),group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)[,2]
+							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)
 						}
 					} else{
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
@@ -658,7 +658,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
-		print(paste("in rq.glasso", models$beta))
+		#print(paste("in rq.glasso", models$beta))
 		models <- rq.pen.modelreturn(models$beta,x,y,tau,models$lambda,rep(1,p),"gLasso",1)
 		models$penalty.factor <- NULL
 		models$group.pen.factor <- group.pen.factor
