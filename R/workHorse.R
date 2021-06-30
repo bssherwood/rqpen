@@ -482,9 +482,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		lampen <- group.pen.factor %*% t(obj$models$lambda)
 		ll <- length(obj$models$lambda)
 		for(i in 1:ll){	
-			print(paste("working on index",i))
 			coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models)[-1,i]),lampen[,i],a,norm=norm)
-			print(paste("group.pen.factor is ", coef_by_group_deriv))
 			if(sum(coef_by_group_deriv)==0){
 				obj$models <- clearModels(obj$models,i,ll)
 				break
@@ -517,7 +515,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
 			ll <- length(obj$models[[j]]$lambda)
 			for(i in 1:ll){	
-				print(paste("working on index",i))
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a,norm=norm)
 				if(sum(coef_by_group_deriv)==0){
 					obj$models[[j]] <- clearModels(obj$models[[j]],i,ll)

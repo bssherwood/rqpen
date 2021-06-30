@@ -21,6 +21,8 @@ obj   <- rq.nc(x,y,tau=.25, penalty="aLasso")
 
 
 obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25,penalty="gAdLasso")
+obj10 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=c(.25,.75), penalty="gAdLasso")
+
 
 
 obj9 <- rq.group.pen(x,y,groups=c(1,1,1,1,2,2,3,3),tau=.25)
