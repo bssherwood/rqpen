@@ -811,8 +811,9 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 		x_names <- colnames(x)
 	}
 	x_names <- c("intercept",x_names)
-	
-	rownames(return_val$coefficients) <- x_names
+	if(is.null(rownames(return_val$coefficients))==FALSE){
+		rownames(return_val$coefficients) <- x_names
+	}
 	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
 	fits <- cbind(1,x)%*% return_val$coefficients
 	return_val$fitted <- fits
