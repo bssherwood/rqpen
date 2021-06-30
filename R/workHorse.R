@@ -817,7 +817,7 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 	return_val$fitted <- fits
 	return_val$residuals <- y - fits
 	return_val$PenRho <- return_val$rho <- apply(check(return_val$residuals,tau),2,mean)	
-	if(is.null(rownames(return_val$coefficients))==FALSE){
+	if(is.null(dim(return_val$coefficients))==TRUE){
 		rownames(return_val$coefficients) <- x_names
 		return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*return_val$penalty.factor,a))
 	} else{
