@@ -470,6 +470,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	nt <- length(obj$tau)
 	g <- max(groups)
 	penalty <- match.arg(penalty)
+	obj$penalty <- penalty
 	derivf <- getDerivF(penalty)
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
