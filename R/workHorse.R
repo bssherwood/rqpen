@@ -892,7 +892,7 @@ getPenfunc <- function(penalty){
 }
 
 updateGroupPenRho <- function(obj,norm,groups,a){
-	print(paste("penalty is "), obj$penalty)
+	print(paste("penalty is ", obj$penalty))
 	if(length(obj$tau)==1){
 		if(length(obj$models$lambda)==1){
 			obj$models$PenRho <- obj$models$rho + sum(getGroupPen(obj$models$coefficients[-1],groups,obj$models$lambda,obj$models$group.pen.factor,obj$penalty,norm,a))
