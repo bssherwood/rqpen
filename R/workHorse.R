@@ -548,7 +548,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 				obj$models[[j]]$group.pen.factor <- group.pen.factor
 			}
 			dimnames(obj$models[[j]]$group.pen.factor) <- NULL
-			obj$models[[j]] <- rq.pen.modelreturn(obj$models[[j]]$coefficients,x,y,obj$tau,obj$models[[j]]$lambda,rep(1,p),penalty,a)
+			obj$models[[j]] <- rq.pen.modelreturn(obj$models[[j]]$coefficients,x,y,obj$tau[j],obj$models[[j]]$lambda,rep(1,p),penalty,a)
 		}
 	}
 	obj  <- updateGroupPenRho(obj,norm,groups,a)
