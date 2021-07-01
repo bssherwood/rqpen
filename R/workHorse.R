@@ -801,6 +801,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 
 rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 # for loop that could be removed
+	print(paste("penalty is ", penalty))
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
 	return_val$coefficients <- coefs
