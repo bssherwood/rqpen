@@ -801,7 +801,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 
 rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 # for loop that could be removed
-	print(paste("penalty is ", penalty))
+#	print(paste("penalty is ", penalty))
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
 	return_val$coefficients <- coefs
@@ -892,6 +892,7 @@ getPenfunc <- function(penalty){
 }
 
 updateGroupPenRho <- function(obj,norm,groups,a){
+	print(paste("penalty is "), obj$penalty)
 	if(length(obj$tau)==1){
 		if(length(obj$models$lambda)==1){
 			obj$models$PenRho <- obj$models$rho + sum(getGroupPen(obj$models$coefficients[-1],groups,obj$models$lambda,obj$models$group.pen.factor,obj$penalty,norm,a))
