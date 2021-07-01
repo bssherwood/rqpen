@@ -817,14 +817,14 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 	
 	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
 	fits <- cbind(1,x)%*% return_val$coefficients
-	return_val$fitted <- fits
-	return_val$residuals <- y - fits
+	#return_val$fitted <- fits
+	res <- y - fits
 	if(is.null(dim(return_val$coefficients))==TRUE){
-		return_val$rho <- mean(check(return_val$residuals,tau))	
+		return_val$rho <- mean(check(res,tau))	
 		return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*return_val$penalty.factor,a))
 		return_val$df <- sum(return_val$coefficients!=0)
 	} else{
-		return_val$rho <- apply(check(return_val$residuals,tau),2,mean)	
+		return_val$rho <- apply(check(res,tau),2,mean)	
 		rownames(return_val$coefficients) <- x_names
 		for(i in 1:length(return_val$rho)){
 			return_val$PenRho[i] <- return_val$rho[i] + sum(penfunc(return_val$coefficients[-1,i],lambda[i]*return_val$penalty.factor,a))
@@ -944,31 +944,31 @@ getGroupPen <- function(coefs,groups,lambda,group.pen.factor,penalty,norm,a){
    pens	
 }
 
-rq.glasso.modelreturn <- function(coefs,x,y,tau,lambda,group.pen.factor,penalty){
-#need to think about this some more
-	return_val <- NULL
-	return_val$coefficients <- coefs
-	return_val$lambda <- lambda
-	return_val$penalty.factor <- penalty.factor
-	if(is.null(colnames(x))){
-		x_names <- paste("x",1:p,sep="")
-	} else{
-		x_names <- colnames(x)
-	}
-	x_names <- c("intercept",x_names)
+# rq.glasso.modelreturn <- function(coefs,x,y,tau,lambda,group.pen.factor,penalty){
+# #need to think about this some more
+	# return_val <- NULL
+	# return_val$coefficients <- coefs
+	# return_val$lambda <- lambda
+	# return_val$penalty.factor <- penalty.factor
+	# if(is.null(colnames(x))){
+		# x_names <- paste("x",1:p,sep="")
+	# } else{
+		# x_names <- colnames(x)
+	# }
+	# x_names <- c("intercept",x_names)
 	
-	rownames(return_val$coefficients) <- x_names
-	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
-	fits <- cbind(1,x)%*% return_val$coefficients
-	return_val$fitted <- fits
-	return_val$residuals <- y - fits
-	return_val$rho <- apply(check(return_val$residuals,tau),2,mean)
-	penalty.factor <- c(0,penalty.factor)
-	return_val$PenRho <- return_val$rho + apply(penalty.factor*abs(return_val$coefficients),2,sum)
-	return_val$tau <- tau
-	return_val$df <- apply(return_val$coefficients!=0,2,sum)
-	return_val
-}
+	# rownames(return_val$coefficients) <- x_names
+	# #need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
+	# fits <- cbind(1,x)%*% return_val$coefficients
+	# return_val$fitted <- fits
+	# return_val$residuals <- y - fits
+	# return_val$rho <- apply(check(return_val$residuals,tau),2,mean)
+	# penalty.factor <- c(0,penalty.factor)
+	# return_val$PenRho <- return_val$rho + apply(penalty.factor*abs(return_val$coefficients),2,sum)
+	# return_val$tau <- tau
+	# return_val$df <- apply(return_val$coefficients!=0,2,sum)
+	# return_val
+# }
 
 
 
@@ -1138,16 +1138,16 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 	 } else{
 		fits <- original_x %*% return_val$coefficients
 	 }
-	 return_val$residuals <- y - fits
-	 return_val$PenRho <- sum(sapply(return_val$residuals,check,tau))+get_coef_pen(return_val$coefficients,lambda,intercept,penVars)	 
+	 res <- y - fits
+	 return_val$PenRho <- sum(sapply(res,check,tau))+get_coef_pen(return_val$coefficients,lambda,intercept,penVars)	 
    } else{
 	 return_val$PenRho <- model$rho
-	 return_val$residuals <- model$residuals[1:n]   
+	 res <- model$residuals[1:n]   
    }
    if(is.null(weights)){   
-     return_val$rho <- sum(sapply(return_val$residuals,check,tau))
+     return_val$rho <- sum(sapply(res,check,tau))
    } else{
-     return_val$rho <- sum(orig_weights*sapply(return_val$residuals,check,tau))
+     return_val$rho <- sum(orig_weights*sapply(res,check,tau))
    }
    return_val$tau <- tau
    return_val$n <- n                  
