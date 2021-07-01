@@ -504,12 +504,15 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 				obj$models$coefficients[,i] <- update_est
 			}
 		}
+		#doing rep(1,p) because the penalty factor will be handled later. 
+		obj$models <- rq.pen.modelreturn(obj$models$coefficients,x,y,obj$tau,obj$models$lambda,rep(1,p),penalty,a)
 		obj$models$penalty.factor <- NULL
 		if(penalty == "gAdLasso"){
 			obj$models$group.pen.factor <- gpfmat 
 		} else{
 			obj$models$group.pen.factor <- group.pen.factor
 		}
+		dimnames(obj$models$group.pen.factor) <- NULL
 	} else{
 		for(j in 1:nt){
 			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
@@ -543,6 +546,8 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 			} else{
 				obj$models[[j]]$group.pen.factor <- group.pen.factor
 			}
+			dimnames(obj$models[[j]]$group.pen.factor) <- NULL
+			obj$models[[j]] <- rq.pen.modelreturn(obj$models[[j]]$coefficients,x,y,obj$tau,obj$models[[j]]$lambda,rep(1,p),penalty,a)
 		}
 	}
 	obj  <- updateGroupPenRho(obj,norm,groups,a)
@@ -788,7 +793,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
 		}
 	}
-	#need to re do the models for fitted and residual values, maybe should just remove those features. 
 	class(return_val) <- "rq.pen.seq"
 	return_val
 }
