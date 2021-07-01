@@ -874,7 +874,7 @@ elastic <- function(x,lambda,a){
 
 
 getPenfunc <- function(penalty){
-	if(penalty == "lasso" | penalty == "gLasso" | penalty=="aLasso"){
+	if(penalty == "lasso" | penalty == "gLasso" | penalty=="aLasso" | penalty=="gAdLasso"){
 	#adaptive lasso is lasso with different weights, so i think this will work
 		penfunc <- lasso
 	}
