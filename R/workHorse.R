@@ -460,7 +460,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 }
 
 clearModels <- function(model,spos,epos){
-	model$coefficients[,spos:epos] <- NULL
+	model$coefficients <- model$coefficients[,1:(spos-1)]
 	model$lambda[spos:epos] <- NULL
 	model$rho[spos:epos] <- NULL
 	model$PenRho[spos:epos] <- NULL
