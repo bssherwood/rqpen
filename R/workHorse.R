@@ -576,7 +576,7 @@ getA <- function(a,penalty){
 				a <- 3.7
 				penalty <- "SCAD"
 			} 
-			if(peanlty == "MCP" | penalty == "gMCP"){
+			if(penalty == "MCP" | penalty == "gMCP"){
 				a <- 3
 				penalty <- "MCP"
 			}
