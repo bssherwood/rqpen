@@ -711,6 +711,8 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 }
 
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
+	penalty <- match.arg(penalty)
+	alg <- match.arg(alg)
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
