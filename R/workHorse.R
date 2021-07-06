@@ -459,12 +459,13 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	obj
 }
 
-clearModels <- function(model,spos,epos){
-	model$coefficients <- model$coefficients[,1:(spos-1)]
-	model$lambda[spos:epos] <- NULL
-	model$rho[spos:epos] <- NULL
-	model$PenRho[spos:epos] <- NULL
-	model$df[spos:epos] <- NULL
+clearModels <- function(model,pos){
+	endpos <- pos - 1
+	model$coefficients <- model$coefficients[,1:endpos]
+	model$lambda <- model$lambda[1:endpos]
+	model$rho <- model$rho[1:endpos]
+	model$PenRho <- model$PenRho[1:endpos]
+	model$df <- model$df[1:endpos]
 	model
 }
 
@@ -488,7 +489,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 		for(i in 1:ll){	
 			coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models)[-1,i]),lampen[,i],a,norm=norm)
 			if(sum(coef_by_group_deriv)==0){
-				obj$models <- clearModels(obj$models,i,ll)
+				obj$models <- clearModels(obj$models,i)
 				break
 			} else{
 				if(penalty == "gAdLASSO"){
@@ -524,7 +525,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 			for(i in 1:ll){	
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a,norm=norm)
 				if(sum(coef_by_group_deriv)==0){
-					obj$models[[j]] <- clearModels(obj$models[[j]],i,ll)
+					obj$models[[j]] <- clearModels(obj$models[[j]],i)
 					break
 				} else{
 					if(penalty == "gAdLASSO"){
