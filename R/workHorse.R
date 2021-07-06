@@ -1042,7 +1042,7 @@ print.rq.pen.seq <- function(x,...){
     if(length(x$tau)==1){
 		print(data.frame(df=x$models$df,lambda=x$models$lambda))
 	} else{
-		print(paste(c("Quantile regression with ", obj$penalty, " penalty for quantiles:",x$tau), collapse=" "))
+		print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
 	}
 }
 

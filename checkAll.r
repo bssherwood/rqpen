@@ -28,11 +28,11 @@ rq.nc(x,y)
 rq.nc(x,y,alg="br")
 rq.nc(x,y,alg="QICD")
 
-rq.nc(x,y)
+rq.nc(x,y,penalty="aLASSO")
 rq.nc(x,y,alg="br", penalty="aLASSO")
 rq.nc(x,y,alg="QICD",penalty="aLASSO")
 
-rq.nc(x,y)
+rq.nc(x,y,penalty="MCP")
 rq.nc(x,y,alg="br", penalty="MCP")
 rq.nc(x,y,alg="QICD",penalty="MCP")
 
@@ -46,10 +46,10 @@ rq.nc(x,y,tau=tvals)
 rq.nc(x,y,alg="br",tau=tvals)
 rq.nc(x,y,alg="QICD",tau=tvals)
 
-rq.nc(x,y,tau=tvals)
+rq.nc(x,y,tau=tvals,penalty="aLASSO")
 rq.nc(x,y,alg="br", penalty="aLASSO",tau=tvals)
 rq.nc(x,y,alg="QICD",penalty="aLASSO",tau=tvals)
 
-rq.nc(x,y,tau=tvals)
+rq.nc(x,y,tau=tvals,penalty="MCP")
 rq.nc(x,y,alg="br", penalty="MCP",tau=tvals)
 rq.nc(x,y,alg="QICD",penalty="MCP",tau=tvals)
