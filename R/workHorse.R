@@ -226,7 +226,7 @@ neg.gradient <- function(r,weights,tau,gamma,x,apprx){
   }
 }
 
-getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso",scalex=TRUE){
+getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="LASSO",scalex=TRUE){
 	n <- length(y)
 	returnVal <- 0
 	if(scalex){
@@ -245,7 +245,7 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="lasso"
 	returnVal
 }
 
-getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLasso",scalex=TRUE){
+getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE){
 	returnVal <- 0
 	n <- length(y)
 	if(scalex){
@@ -333,7 +333,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 					coefs <- cbind(coefs,coefficients(subm))
 					j <- j + 1
 				}
-				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
+				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"LASSO",1)
 			}
 		} else{
 			coefs <- NULL
@@ -342,11 +342,11 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"lasso",1)
+			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"LASSO",1)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau)
 	}
-	returnVal$penalty <- "lasso"
+	returnVal$penalty <- "LASSO"
 	class(returnVal) <- "rq.pen.seq"
 	returnVal
 }
@@ -361,6 +361,9 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001)
 	
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
+	}
+	if(alpha < 0 | alpha > 1){
+		stop("alpha needs to be >= 0 and <= 1")
 	}
 	if(sum(penalty.factor<0)>0){
 		stop("penalty factors must be positive")
@@ -415,10 +418,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP"){
 		derivf <- mcp_deriv
-	} else if(penalty=="aLasso"){
+	} else if(penalty=="aLASSO"){
 		derivf <- alasso_wt
 	} else{
-		stop("Penalty must be SCAD, MCP or aLasso")
+		stop("Penalty must be SCAD, MCP or aLASSO")
 	}
 	if(nt == 1){
 		lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
@@ -449,7 +452,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			}
 		}
 	}
-	if(penalty=="aLasso"){
+	if(penalty=="aLASSO"){
 		obj$penalty.factor <- pfs
 	}
 	obj$penalty <- penalty
@@ -465,7 +468,7 @@ clearModels <- function(model,spos,epos){
 	model
 }
 
-rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
+rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	g <- max(groups)
@@ -488,7 +491,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 				obj$models <- clearModels(obj$models,i,ll)
 				break
 			} else{
-				if(penalty == "gAdLasso"){
+				if(penalty == "gAdLASSO"){
 					gpfmat <- cbind(gpfmat,coef_by_group_deriv)
 				}
 				if(obj$alg=="huber"){
@@ -508,7 +511,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 		#doing rep(1,p) because the penalty factor will be handled later. 
 		obj$models <- rq.pen.modelreturn(obj$models$coefficients,x,y,obj$tau,obj$models$lambda,rep(1,p),penalty,a)
 		obj$models$penalty.factor <- NULL
-		if(penalty == "gAdLasso"){
+		if(penalty == "gAdLASSO"){
 			obj$models$group.pen.factor <- gpfmat 
 		} else{
 			obj$models$group.pen.factor <- group.pen.factor
@@ -524,7 +527,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 					obj$models[[j]] <- clearModels(obj$models[[j]],i,ll)
 					break
 				} else{
-					if(penalty == "gAdLasso"){
+					if(penalty == "gAdLASSO"){
 						gpfmat <- cbind(gpfmat,coef_by_group_deriv)
 					}
 					if(obj$alg=="huber"){
@@ -543,7 +546,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 			}
 			obj$models[[j]] <- rq.pen.modelreturn(obj$models[[j]]$coefficients,x,y,obj$tau[j],obj$models[[j]]$lambda,rep(1,p),penalty,a)	
 			obj$models[[j]]$penalty.factor <- NULL			
-			if(penalty == "gAdLasso"){
+			if(penalty == "gAdLASSO"){
 				obj$models[[j]]$group.pen.factor <- gpfmat 
 			} else{
 				obj$models[[j]]$group.pen.factor <- group.pen.factor
@@ -558,7 +561,38 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLasso","gSCAD","gMCP"),a=i
 	obj
 }
 
-rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",scalex=TRUE,...) {
+c("gLASSO","gAdLASSO","gSCAD","gMCP")
+
+getA <- function(a,penalty){
+	if(penalty=="aLASSO" | penalty == "gAdLASSO"){
+		if(is.null(a)){
+			a <- 1
+		} else if(a < 0){
+			stop("for adaptive lasso the tuning parameter `a' must be positive")
+		}
+	} else{
+		if(is.null(a)){
+			if(penalty == "SCAD" | penalty == "gSCAD"){
+				a <- 3.7
+				penalty <- "SCAD"
+			} 
+			if(peanlty == "MCP" | penalty == "gMCP"){
+				a <- 3
+				penalty <- "MCP"
+			}
+		} else{
+			if(penalty == "SCAD" & a <= 2){
+				stop("Tuning parameter `a' must be larger than 2 for SCAD")
+			}
+			if(penalty == "MCP" & a <= 1){
+				stop("Tuning parameter `a' must be larger than 1 for MCP")
+			}
+		}
+	}
+	return a
+}
+
+rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",scalex=TRUE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -568,7 +602,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 	if( max(tau) >= 1 | min(tau) <= 0){
 		stop("Values for tau must be between 0 and 1") 
 	}
-	if(penalty == "aLasso" & alg != "huber"){
+	if(penalty == "aLASSO" & alg != "huber"){
 		alg <- "huber"
 		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
 	}
@@ -576,22 +610,13 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("aLasso","SCAD","MCP"),a=NULL,lambda=
 		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
+	a <- getA(a,penalty)
 	
 	if(alg != "qicd" & alg != "QICD"){
 	#QICD implementation not provided in rq.lasso
-		if(penalty=="aLasso"){
-			if(is.null(a)){
-				a <- 1
-			}
+		if(penalty=="aLASSO"){
 			init.model <- rq.enet(x,y,tau,...)
 		} else{
-			if(is.null(a)){
-				if(penalty == "SCAD"){
-					a <- 3.7
-				} else{
-					a <- 3
-				}
-			}
 			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,...)
 		}
 		rq.lla(init.model,x,y,penalty,a,...)
@@ -646,7 +671,7 @@ getDerivF <- function(penalty){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP" | penalty == "gMCP"){
 		derivf <- mcp_deriv
-	} else if(penalty=="aLasso" | penalty == "gAdLasso"){
+	} else if(penalty=="aLASSO" | penalty == "gAdLASSO"){
 		derivf <- alasso_wt
 	}
 	derivf
@@ -661,7 +686,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	
 	if(length(tau)==1){		
 		models <- hrq_glasso(x=x,y=y,group.index=groups,tau=tau,lambda=lambda,w.lambda=group.pen.factor,scalex=scalex,...)
-		models <- rq.pen.modelreturn(models$beta,x,y,tau,models$lambda,rep(1,p),"gLasso",1)
+		models <- rq.pen.modelreturn(models$beta,x,y,tau,models$lambda,rep(1,p),"gLASSO",1)
 		models$penalty.factor <- NULL
 		models$group.pen.factor <- group.pen.factor
 	} else{
@@ -673,24 +698,31 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 				penf <- group.pen.factor[i,]
 			}
 			models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,...)
-			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLasso",1)
+			models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
 			models[[i]]$penalty.factor <- NULL
 			models[[i]]$group.pen.factor <- penf
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
-	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLasso")
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO")
 	returnVal <- updateGroupPenRho(returnVal,2,groups,1)
 	returnVal
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLasso","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
 	g <- length(unique(groups))
 	nt <- length(tau)
 	lpf <- length(group.pen.factor)
+	if(penalty != "gLASSO"){
+		a <- getA(a,penalty)
+	} else{
+		if(is.null(a)==FALSE){
+			warning("The tuning parameter a is not used for group lasso")
+		}
+	}
 	pfmat <- FALSE
 	if(g==p){
 		warning("p groups for p predictors, not really using a group penalty")
@@ -700,20 +732,20 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	if(norm != 1 & norm != 2){
 		stop("norm must be 1 or 2")
 	}
-	if(penalty=="gLasso" & norm==1){
+	if(penalty=="gLASSO" & norm==1){
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
 	}
-	if(norm == 1 & penalty == "gAdLasso"){
+	if(norm == 1 & penalty == "gAdLASSO"){
 		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
 	}
 	if(norm == 2 & alg != "huber"){
 		alg <- "huber"
 		warning("algorithm switched to huber, which is the only option for 2-norm")
 	}
-	if(penalty=="gAdLasso" & alg != "huber"){
+	if(penalty=="gAdLASSO" & alg != "huber"){
 		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
 	}
-	if(penalty=="gAdLasso" & alg == "qicd"){
+	if(penalty=="gAdLASSO" & alg == "qicd"){
 		warning("No qicd algorithm for adaptive lasso, so switched to huber. If lp is used it will only be for the second stage.")
 	}
 	if(sum(tau <= 0 | tau >=1)>0){
@@ -747,17 +779,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 		
 	}
-	if(is.null(a)){
-		if(penalty=="gLasso"){
-			a <- 1
-		} else if( penalty == "gAdLasso"){
-			a <- 1
-		} else if (penalty == "gSCAD"){ 
-			a <- 3.7
-		} else if (penalty == "gMCP"){
-			a <- 3
-		}
-	}
 	if(is.null(lambda)){
 		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
@@ -770,7 +791,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 	}
 	
 	if(norm == 1){
-		if(penalty == "gAdLasso"){
+		if(penalty == "gAdLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
 		} else{
 			if(alg == "qicd"){
@@ -782,10 +803,10 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLasso","gAdLa
 		}
 		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
 	} else{
-		if(penalty == "gLasso"){
+		if(penalty == "gLASSO"){
 			return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		} else{
-			if(penalty == "gAdLasso"){
+			if(penalty == "gAdLASSO"){
 				init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
 			} else{
 				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
@@ -858,7 +879,7 @@ getDerivF <- function(penalty){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP" | penalty == "gMCP"){
 		derivf <- mcp_deriv
-	} else if(penalty=="aLasso" | penalty == "gAdLasso"){
+	} else if(penalty=="aLASSO" | penalty == "gAdLASSO"){
 		derivf <- alasso_wt
 	}
 	derivf
@@ -874,7 +895,7 @@ elastic <- function(x,lambda,a){
 
 
 getPenfunc <- function(penalty){
-	if(penalty == "lasso" | penalty == "gLasso" | penalty=="aLasso" | penalty=="gAdLasso"){
+	if(penalty == "LASSO" | penalty == "gLASSO" | penalty=="aLASSO" | penalty=="gAdLASSO"){
 	#adaptive lasso is lasso with different weights, so i think this will work
 		penfunc <- lasso
 	}
@@ -890,13 +911,15 @@ getPenfunc <- function(penalty){
 	penfunc
 }
 
+
+
 updateGroupPenRho <- function(obj,norm,groups,a){
 	if(length(obj$tau)==1){
 		if(length(obj$models$lambda)==1){
 			obj$models$PenRho <- obj$models$rho + sum(getGroupPen(obj$models$coefficients[-1],groups,obj$models$lambda,obj$models$group.pen.factor,obj$penalty,norm,a))
 		} else{
 			for(i in 1:length(obj$models$lambda)){
-				if(obj$penalty=="gAdLasso"){
+				if(obj$penalty=="gAdLASSO"){
 					obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor[,i],obj$penalty,norm,a))
 				} else{			
 					obj$models$PenRho[i] <- obj$models$rho[i] + sum(getGroupPen(obj$models$coefficients[-1,i],groups,obj$models$lambda[i],obj$models$group.pen.factor,obj$penalty,norm,a))
@@ -909,7 +932,7 @@ updateGroupPenRho <- function(obj,norm,groups,a){
 				obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$models[[j]]$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
 			} else{
 				for(i in 1:length(obj$models[[j]]$lambda)){
-					if(obj$penalty=="gAdLasso"){
+					if(obj$penalty=="gAdLASSO"){
 						obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
 					} else{			
 						obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
@@ -978,7 +1001,7 @@ rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),s
 	} else{
 		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
 	}
-	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"lasso",1)
+	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",1)
 }
 
 rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){

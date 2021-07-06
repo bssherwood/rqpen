@@ -127,7 +127,62 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 	# }
 # }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,...){
+	penalty <- match.arg(penalty)
+	if(penalty=="LASSO"){
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,...)
+		if(is.null(a)==FALSE){
+			warning("Parameter `a' is not used in lasso")
+		}
+	} else if(penalty == "ridge"){
+		fit <- rq.enet(x,y,tau,lambda,nlambda,...)
+		if(is.null(a)==FALSE){
+			warning("Parameter `a' is not used in ridge")
+		}
+	} else if(penalty == "enet"){
+		if(is.null(a)){
+			stop("For elastic net value `a' must be specified")
+		} else if(length(a) == 1){
+			fit <- rq.enet(x,y,tau,lambda,nlambda,alpha=a,...)
+		} else{
+			fit <- list()
+			for(i in 1:length(a)){
+				fit[[i]] <- rq.enet(x,y,tau,lambda,nlambda,alpha=a[i],...)
+			}
+		}
+	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
+		if(is.null(a)){
+			if(penalty== "aLASSO"){
+				a <- 1
+			} 
+			if(penalty == "SCAD"){
+				a <- 3.7
+			}
+			if(penalty == "MCP"){
+				a <- 3
+			}
+		} else if(length(a) == 1){
+			fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda,...)
+		} else{
+			fit <- list()
+			for(i in 1:length(a)){
+				fit[[i]] <- rq.nc(x,y,tau,penalty,a,lambda,nlambda,...)
+			}
+		}
+	}
+	fit
+}
+
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
+	if(is.null(weights)==FALSE){
+		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
+	}
+	fit <- rq.pen(x,y,tau,lambda=NULL,penalty=penalty,a=a,nlambda=100,...)
+}
+
+
+
+cv.rq.pen.old <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
