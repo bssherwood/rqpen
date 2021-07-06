@@ -589,7 +589,7 @@ getA <- function(a,penalty){
 			}
 		}
 	}
-	return a
+	a
 }
 
 rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",scalex=TRUE,...) {
