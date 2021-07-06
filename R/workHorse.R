@@ -603,8 +603,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		stop("Values for tau must be between 0 and 1") 
 	}
 	if(penalty == "aLASSO" & alg != "huber"){
-		alg <- "huber"
-		warning("Algorithm switched to huber becaused that is the only one available for adaptive lasso.")
+		stop("Only algorithm for adaptive lasso is huber.")
 	}
 	if(is.null(lambda)){
 		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex)
@@ -742,8 +741,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
 	}
 	if(norm == 2 & alg != "huber"){
-		alg <- "huber"
-		warning("algorithm switched to huber, which is the only option for 2-norm")
+		stop("If setting norm = 2 then algorithm must be huber")
 	}
 	if(penalty=="gAdLASSO" & alg != "huber"){
 		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
