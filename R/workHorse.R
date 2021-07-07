@@ -739,7 +739,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
 	}
 	if(norm == 1 & penalty == "gAdLASSO"){
-		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
+		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each coefficient in a group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
 	}
 	if(norm == 2 & alg != "huber"){
 		stop("If setting norm = 2 then algorithm must be huber")
@@ -748,7 +748,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
 	}
 	if(penalty=="gAdLASSO" & alg == "qicd"){
-		warning("No qicd algorithm for adaptive lasso, so switched to huber. If lp is used it will only be for the second stage.")
+		stop("No qicd algorithm for adaptive lasso.")
 	}
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
