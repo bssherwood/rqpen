@@ -9,8 +9,8 @@ library(hqreg)
 library(glmnet)
 
 set.seed(1)
-p <- 8
-n <- 100
+p <- 30
+n <- 25
 
 x <- matrix(rnorm(n*p,sd=10),ncol=p)
 

@@ -174,6 +174,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","ridge","enet","aLAS
 }
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
+#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. 	
 	if(is.null(weights)==FALSE){
 		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
 	}
@@ -911,7 +912,9 @@ getRho <- function(model){
     model$rho
 }
 
-cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
+
+
+cv.rq.group.pen.old <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
@@ -932,7 +935,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
        stop("QICD algorithm wtih non-convex penalties setup only to use BIC or PBIC as the criteria")
     }
     #start with lasso fit
-    lasso_fit <- cv.rq.group.pen(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
+    lasso_fit <- cv.rq.group.pen.old(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
                                    nlambda, eps, init.lambda,alg="LP",penGroups,...)
     #then iterate through lasso models to get new models
     model_coefs <- NULL
