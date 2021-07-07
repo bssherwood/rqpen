@@ -174,9 +174,14 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","ridge","enet","aLAS
 }
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
-#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. 	
+#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
 	if(is.null(weights)==FALSE){
 		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
+	}
+	if(length(a)>1){
+	
+	} else{
+		#hmmmm how do we handle the lambda and a values being different. I guess who cares. 
 	}
 	fit <- rq.pen(x,y,tau,lambda=NULL,penalty=penalty,a=a,nlambda=100,...)
 }
