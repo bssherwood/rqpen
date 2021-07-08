@@ -173,18 +173,48 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","ridge","enet","aLAS
 	fit
 }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
-#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
-	if(is.null(weights)==FALSE){
-		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
-	}
-	if(length(a)>1){
+# Uncomment below, this is what I'm working on 
+
+# cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
+# #need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
+	# if(is.null(weights)==FALSE){
+		# stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
+	# }
+	# if(length(a)>1){
 	
-	} else{
-		#hmmmm how do we handle the lambda and a values being different. I guess who cares. 
-	}
-	fit <- rq.pen(x,y,tau,lambda=NULL,penalty=penalty,a=a,nlambda=100,...)
-}
+	# } else{
+		# #hmmmm how do we handle the lambda and a values being different. I guess who cares. 
+		# #Think about what we want to return and how to get to that form. 
+	# }
+	# if(is.null(foldid)){
+      # foldid <- randomly_assign(n,nfolds)
+    # }
+    # for(i in 1:nfolds){
+      # train_x <- x[foldid!=i,]
+      # train_y <- y[foldid!=i]
+      # test_x <- x[foldid==i,,drop=FALSE]
+      # test_y <- y[foldid==i]
+	  # train_weights <- weights[foldid!=i] #not sure this line is needed
+	  # if(is.null(weights)){
+		# train_weights <- test_weights <- NULL
+	  # } else{
+	    # train_weights <- weights[foldid!=i]
+		# test_weights <- weights[foldid==i]
+	  # }
+      # if(penalty=="LASSO"){
+         # cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)
+      # } else{
+         # cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
+      # }
+      # if(cvFunc=="check"){
+         # cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, tau=tau))
+      # } else{
+         # cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, func=cvFunc))
+      # } 
+    # }
+    # cv_results <- apply(cv_results,1,mean)
+	# fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a,nlambda=nlambda,...)
+# }
 
 
 
