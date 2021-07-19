@@ -472,6 +472,7 @@ clearModels <- function(model,pos){
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
+	p <- ncol(x)
 	g <- max(groups)
 	penalty <- match.arg(penalty)
 	obj$penalty <- penalty
