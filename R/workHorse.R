@@ -1017,6 +1017,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 		penf <- penalty.factor
 		models <- list()
 		pos <- 1
+		modelnames <- NULL
 		for(i in 1:nt){
 			for(j in 1:na){
 				subtau <- tau[i]
@@ -1025,9 +1026,10 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 				}
 				models[[pos]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a[j],...)
 				pos <- pos+1
+				modelnames <- c(modelnames,paste0("tau",tau[i],"_a",a[j]))
 			}
 		}
-		attributes(models)$names <- paste0("tau",tau)
+		attributes(models)$names <- modelnames
 	}
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,a=a)
 	returnVal
