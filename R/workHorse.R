@@ -351,7 +351,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	returnVal
 }
 
-rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,alpha=0,...){
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,a=0,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -362,8 +362,8 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
 	}
-	if(sum(alpha < 0 | alpha > 1) > 0){
-		stop("alpha needs to be >= 0 and <= 1")
+	if(sum(a < 0 | a > 1) > 0){
+		stop("a needs to be >= 0 and <= 1")
 	}
 	if(sum(penalty.factor<0)>0){
 		stop("penalty factors must be positive")
@@ -400,13 +400,10 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	if(length(lambda)==1){
 			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
 	}
-	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,alpha=alpha,...)
-	if(alpha==0){
-		returnVal$penalty <- "ridge"
-	} else{
-		returnVal$penalty <- "enet"
-		returnVal$alpha <- alpha
-	}
+	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,a=a,...)
+	returnVal$penalty <- "enet"
+	returnVal$a <- a
+	
 	class(returnVal) <- "rq.pen.seq"
 	returnVal	
 }
@@ -907,8 +904,6 @@ getPenfunc <- function(penalty){
 		penfunc <- scad
 	} else if(penalty=="MCP" | penalty == "gMCP"){
 		penfunc <- mcp
-	} else if(penalty=="ridge"){
-		penfunc <- ridge
 	} else if(penalty=="enet"){
 		penfunc <- elastic
 	}
@@ -997,25 +992,25 @@ getGroupPen <- function(coefs,groups,lambda,group.pen.factor,penalty,norm,a){
 
 
 
-rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,...){
+rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,a=1,...){
 	dims <- dim(x)
 	p <- dims[2]
 	if(scalex){
-		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,alpha=a,...)
 	} else{
-		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,...)
+		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,alpha=a,...)
 	}
 	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",1)
 }
 
-rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,...){
+rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,a=1,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
 	nt <- length(tau)
 	
 	if(length(tau)==1){		
-		models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+		models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a,...)
 	} else{
 		penf <- penalty.factor
 		models <- list()
@@ -1024,7 +1019,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 			if(pfmat){
 				penf <- penalty.factor[i,]
 			}
-			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a,...)
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
