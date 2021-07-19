@@ -852,6 +852,7 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 		return_val$df <- apply(return_val$coefficients!=0,2,sum)
 	}
 	return_val$tau <- tau
+	return_val$a <- a
 	return_val
 }
 
@@ -1008,22 +1009,25 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 	n <- dims[1]
 	p <- dims[2]
 	nt <- length(tau)
+	na <- length(a)
 	
-	if(length(tau)==1){		
+	if(nt==1 & na=1){		
 		models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a,...)
 	} else{
 		penf <- penalty.factor
 		models <- list()
 		for(i in 1:nt){
-			subtau <- tau[i]
-			if(pfmat){
-				penf <- penalty.factor[i,]
+			for(j in 1:na){
+				subtau <- tau[i]
+				if(pfmat){
+					penf <- penalty.factor[i,]
+				}
+				models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a[j],...)
 			}
-			models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a,...)
 		}
 		attributes(models)$names <- paste0("tau",tau)
 	}
-	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau)
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,a=a)
 	returnVal
 }
 

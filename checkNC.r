@@ -6,5 +6,8 @@ library(rqPen)
 x <- matrix(rnorm(800),ncol=8)
 y <- 1 + x[,1] + x[,8] + rnorm(100)
 
-rq.enet(x,y)
+m1 <- rq.enet(x,y)
+m2 <- rq.enet(x,y,a=.5)
+m3 <- rq.enet(x,y,a=1)
+m4 <- rq.lasso(x,y)
 
