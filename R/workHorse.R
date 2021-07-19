@@ -565,8 +565,8 @@ getA <- function(a,penalty){
 	if(penalty=="aLASSO" | penalty == "gAdLASSO"){
 		if(is.null(a)){
 			a <- 1
-		} else if(a < 0){
-			stop("for adaptive lasso the tuning parameter `a' must be positive")
+		} else if(sum(a < 0)>0){
+			stop("for adaptive lasso the tuning parameter \"a\" must be positive")
 		}
 	} else{
 		if(is.null(a)){
@@ -579,11 +579,11 @@ getA <- function(a,penalty){
 				penalty <- "MCP"
 			}
 		} else{
-			if(penalty == "SCAD" & a <= 2){
-				stop("Tuning parameter `a' must be larger than 2 for SCAD")
+			if(penalty == "SCAD" & sum(a <= 2) > 0 ){
+				stop("Tuning parameter \"a\" must be larger than 2 for SCAD")
 			}
-			if(penalty == "MCP" & a <= 1){
-				stop("Tuning parameter `a' must be larger than 1 for MCP")
+			if(penalty == "MCP" & sum(a <= 1) > 0){
+				stop("Tuning parameter \"a\" must be larger than 1 for MCP")
 			}
 		}
 	}
@@ -1049,9 +1049,9 @@ print.rq.pen.seq <- function(x,...){
     if(nt==1 & na==1){
 		print(data.frame(df=x$models$df,lambda=x$models$lambda))
 	} else if(nt > 1 & na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and \"a\" tuning parameters:", x$a),collapse=" "))
+		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and `a' tuning parameters:", x$a),collapse=" "))
 	} else if( na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and \"a\" tuning parameters:", x$a),collapse=" "))
+		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and 	`a' tuning parameters:", x$a),collapse=" "))
 	} else{
 			print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
 	}	
