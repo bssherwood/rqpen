@@ -1011,7 +1011,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 	nt <- length(tau)
 	na <- length(a)
 	
-	if(nt==1 & na=1){		
+	if(nt==1 & na==1){		
 		models <- rq.lasso.huber.onetau(x,y,tau=tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a,...)
 	} else{
 		penf <- penalty.factor
