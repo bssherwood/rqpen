@@ -1016,13 +1016,15 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 	} else{
 		penf <- penalty.factor
 		models <- list()
+		pos <- 1
 		for(i in 1:nt){
 			for(j in 1:na){
 				subtau <- tau[i]
 				if(pfmat){
 					penf <- penalty.factor[i,]
 				}
-				models[[i]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a[j],...)
+				models[[pos]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a[j],...)
+				pos <- pos+1
 			}
 		}
 		attributes(models)$names <- paste0("tau",tau)
