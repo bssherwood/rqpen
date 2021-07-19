@@ -401,7 +401,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
 	}
 	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,a=a,...)
-	returnVal$penalty <- "enet"
+	returnVal$penalty <- "ENet"
 	returnVal$a <- a
 	
 	class(returnVal) <- "rq.pen.seq"
@@ -560,7 +560,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 	obj
 }
 
-c("gLASSO","gAdLASSO","gSCAD","gMCP")
 
 getA <- function(a,penalty){
 	if(penalty=="aLASSO" | penalty == "gAdLASSO"){
@@ -905,7 +904,7 @@ getPenfunc <- function(penalty){
 		penfunc <- scad
 	} else if(penalty=="MCP" | penalty == "gMCP"){
 		penfunc <- mcp
-	} else if(penalty=="enet"){
+	} else if(penalty=="ENet"){
 		penfunc <- elastic
 	}
 	penfunc
@@ -1001,7 +1000,7 @@ rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),s
 	} else{
 		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,alpha=a,...)
 	}
-	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",1)
+	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",a)
 }
 
 rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,pfmat=FALSE,a=1,...){
@@ -1026,7 +1025,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 				}
 				models[[pos]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,a=a[j],...)
 				pos <- pos+1
-				modelnames <- c(modelnames,paste0("tau",tau[i],"_a",a[j]))
+				modelnames <- c(modelnames,paste0("tau",tau[i],"a",a[j]))
 			}
 		}
 		attributes(models)$names <- modelnames
