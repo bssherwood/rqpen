@@ -15,7 +15,7 @@ n <- 25
 x <- matrix(rnorm(n*p,sd=10),ncol=p)
 
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(n,3)
-g <- c(1,1,1,1,2,2,3,3)
+g <- rep(seq(1:5),6)
 tvals <- c(.25,.75)
 
 rq.group.pen(x,y,groups=g)

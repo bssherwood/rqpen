@@ -264,7 +264,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 }
 
 # If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
-rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001), penalty.factor = rep(1, ncol(x)),
+rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.pen=FALSE,...){
 	if(alg == "lp"){
 	#use br as the default for linear programming 
@@ -351,7 +351,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001
 	returnVal
 }
 
-rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,alpha=0,...){
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.pen=FALSE,alpha=0,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -362,7 +362,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001)
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
 	}
-	if(alpha < 0 | alpha > 1){
+	if(sum(alpha < 0 | alpha > 1) > 0){
 		stop("alpha needs to be >= 0 and <= 1")
 	}
 	if(sum(penalty.factor<0)>0){
@@ -593,7 +593,7 @@ getA <- function(a,penalty){
 	a
 }
 
-rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg="huber",scalex=TRUE,...) {
+rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg="huber",scalex=TRUE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -710,7 +710,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 	returnVal
 }
 
-rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(n<p,.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
 	dims <- dim(x)
