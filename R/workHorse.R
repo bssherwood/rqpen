@@ -830,6 +830,7 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 	return_val$coefficients <- coefs
 	return_val$lambda <- lambda
 	return_val$penalty.factor <- penalty.factor
+	p <- ncol(x)
 	if(is.null(colnames(x))){
 		x_names <- paste("x",1:p,sep="")
 	} else{
