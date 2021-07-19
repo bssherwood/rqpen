@@ -411,6 +411,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 
 rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	nt <- length(obj$tau)
+	na <- length(a)
 	if(penalty=="SCAD"){
 		derivf <- scad_deriv
 	} else if(penalty=="MCP"){
@@ -420,7 +421,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	} else{
 		stop("Penalty must be SCAD, MCP or aLASSO")
 	}
-	if(nt == 1){
+	if(nt == 1 & na == 1){
 		lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
 		ll <- length(obj$models$lambda)
 		pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a),ncol=ll)
@@ -433,25 +434,28 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			}
 			obj$models$coefficients[,i] <- update_est
 		}
-	} else{
+	} else {
 		for(j in 1:nt){
-			lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
-			ll <- length(obj$models[[j]]$lambda)
-			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a),ncol=ll)
-			for(i in 1:ll){
-				if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
+			for(k in 1:na){
+				lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
+				ll <- length(obj$models[[j]]$lambda)
+				pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
+				for(i in 1:ll){
+					if(obj$alg=="huber"){
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
 
-				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+					} else{
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
+					}
+					obj$models[[j]]$coefficients[,i] <- update_est
 				}
-				obj$models[[j]]$coefficients[,i] <- update_est
 			}
 		}
 	}
 	if(penalty=="aLASSO"){
 		obj$penalty.factor <- pfs
 	}
+	obj$a <- a
 	obj$penalty <- penalty
 	obj
 }
@@ -608,6 +612,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	a <- getA(a,penalty)
+	na <- length(a)
 	
 	if(alg != "qicd" & alg != "QICD"){
 	#QICD implementation not provided in rq.lasso
@@ -638,7 +643,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 			}
 			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
 		}
-		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty)
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty,a=a)
 		class(returnVal) <- "rq.pen.seq"
 		returnVal
 	}
