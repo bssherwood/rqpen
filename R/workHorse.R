@@ -456,6 +456,8 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 					} else{
 						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 					}
+					#stopped here, this sort of drastically changes some of the approach to rq.lla as we need more models then the 
+					# first approximation, so need to think about how to correctly do this. 
 					obj$models[[j]]$coefficients[,i] <- update_est
 				}
 			}
