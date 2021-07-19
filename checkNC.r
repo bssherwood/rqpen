@@ -10,4 +10,5 @@ m1 <- rq.enet(x,y)
 m2 <- rq.enet(x,y,a=.5)
 m3 <- rq.enet(x,y,a=1)
 m4 <- rq.lasso(x,y)
+m5 <- rq.enet(x,y,a=seq(0,1,.1))
 
