@@ -436,9 +436,13 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 		}
 	} else {
 		for(j in 1:nt){
-			for(k in 1:na){
+			if(nt==1){
+				lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
+			} else{
 				lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
-				ll <- length(obj$models[[j]]$lambda)
+			}
+			ll <- length(obj$models[[j]]$lambda)
+			for(k in 1:na){				
 				pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
 				for(i in 1:ll){
 					if(obj$alg=="huber"){
