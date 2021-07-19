@@ -444,7 +444,11 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 				ll <- length(obj$models[[j]]$lambda)
 			}
 			for(k in 1:na){				
-				pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
+				if(nt==1){
+					pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a[k]),ncol=ll)
+				} else{
+					pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
+				}
 				for(i in 1:ll){
 					if(obj$alg=="huber"){
 						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],alg=obj$alg,...)$models)[,2]
