@@ -598,6 +598,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	obj  <- updateGroupPenRho(obj,norm,groups)
 	obj$groups <- groups
 	obj$penalty <- penalty
+	obj$a <- a
 	#obj$class <- c(obj$class, "rq.group.pen.seq")
 	obj
 }
