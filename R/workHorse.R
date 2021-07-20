@@ -435,13 +435,17 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			obj$models$coefficients[,i] <- update_est
 		}
 	} else {
+		newModels <- list()
+		pos <- 1
 		for(j in 1:nt){
 			if(nt==1){
 				lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
 				ll <- length(obj$models$lambda)
+				newModels[[pos]] <- obj$models
 			} else{
 				lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
 				ll <- length(obj$models[[j]]$lambda)
+				newModels[[pos]] <- obj$models[[j]]
 			}
 			for(k in 1:na){				
 				if(nt==1){
@@ -458,7 +462,9 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 					}
 					#stopped here, this sort of drastically changes some of the approach to rq.lla as we need more models then the 
 					# first approximation, so need to think about how to correctly do this. 
-					obj$models[[j]]$coefficients[,i] <- update_est
+					newModels[[pos]]$coefficients[,i] <- update_est
+					newModels[[pos]]$a <- a[k]
+					pos <- pos+1
 				}
 			}
 		}
