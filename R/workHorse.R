@@ -654,10 +654,10 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 			coefs <- NULL
 			for(lam in lambda){
 				sublam <- lam
-				subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD",...)
+				subm <- rq.nc.fit(x,y,tau,lambda=sublam, alg="QICD",...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
+			models <- rq.pen.modelreturn(coefs,x,y,tau,lambda,penalty.factor=rep(1,p),penalty,a)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty,a=a)
 		class(returnVal) <- "rq.pen.seq"
