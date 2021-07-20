@@ -640,22 +640,26 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		}
 		rq.lla(init.model,x,y,penalty,a,...)
 	} else{
-		if(nt > 1){
+		if(nt > 1 | na > 1){
+			pos <- 1
 			models <- list()
 			for(i in 1:nt){
-				coefs <- NULL
-				for(lam in lambda){
-					sublam <- lam
-					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", ...)
-					coefs <- cbind(coefs,coefficients(subm))
+				for(j in 1:na){
+					coefs <- NULL
+					for(lam in lambda){
+						sublam <- lam
+						subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", a=a[j], ...)
+						coefs <- cbind(coefs,coefficients(subm))
+					}
+					models[[pos]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a[j])
+					pos <- pos + 1
 				}
-				models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a)
 			}
 		} else{
 			coefs <- NULL
 			for(lam in lambda){
 				sublam <- lam
-				subm <- rq.nc.fit(x,y,tau,lambda=sublam, alg="QICD",...)
+				subm <- rq.nc.fit(x,y,tau,lambda=sublam, alg="QICD", a=a, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
 			models <- rq.pen.modelreturn(coefs,x,y,tau,lambda,penalty.factor=rep(1,p),penalty,a)
