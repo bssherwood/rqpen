@@ -441,17 +441,17 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			if(nt==1){
 				lampen <- as.numeric(obj$models$penalty.factor %*% t(obj$models$lambda))
 				ll <- length(obj$models$lambda)
-				newModels[[pos]] <- obj$models
 			} else{
 				lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
 				ll <- length(obj$models[[j]]$lambda)
-				newModels[[pos]] <- obj$models[[j]]
 			}
 			for(k in 1:na){				
 				if(nt==1){
 					pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models)[-1,])),lampen,a=a[k]),ncol=ll)
+					newModels[[pos]] <- obj$models
 				} else{
 					pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
+					newModels[[pos]] <- obj$models[[j]]
 				}
 				for(i in 1:ll){
 					if(obj$alg=="huber"){
