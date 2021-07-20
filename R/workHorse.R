@@ -542,8 +542,13 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 		newModels <- list()
 		pos <- 1
 		for(j in 1:nt){
-			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
-			ll <- length(obj$models[[j]]$lambda)
+			if(nt == 1){
+				lampen <- group.pen.factor %*% t(obj$models$lambda)
+				ll <- length(obj$models$lambda)
+			} else{
+				lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
+				ll <- length(obj$models[[j]]$lambda)
+			}
 			for(k in 1:na){
 				if(nt > 1){
 					newModels[[pos]] <- obj$models[[j]]
