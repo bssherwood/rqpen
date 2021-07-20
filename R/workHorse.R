@@ -463,14 +463,13 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 					} else{
 						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,...)$models)
 					}
-					#stopped here, this sort of drastically changes some of the approach to rq.lla as we need more models then the 
-					# first approximation, so need to think about how to correctly do this. 
 					newModels[[pos]]$coefficients[,i] <- update_est
 					newModels[[pos]]$a <- a[k]
 					pos <- pos+1
 				}
 			}
 		}
+		obj$models <- newModels
 	}
 	if(penalty=="aLASSO"){
 		obj$penalty.factor <- pfs
@@ -1074,9 +1073,9 @@ print.rq.pen.seq <- function(x,...){
     if(nt==1 & na==1){
 		print(data.frame(df=x$models$df,lambda=x$models$lambda))
 	} else if(nt > 1 & na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and `a' tuning parameters:", x$a),collapse=" "))
+		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
 	} else if( na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and `a' tuning parameters:", x$a),collapse=" "))
+		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
 	} else{
 			print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
 	}	
