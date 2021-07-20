@@ -556,7 +556,11 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					newModels[[pos]] <- obj$models
 				}
 				for(i in 1:ll){	
-					coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
+					if(nt > 1){
+						coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
+					} else{
+						coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models)[-1,i]),lampen[,i],a[k],norm=norm)
+					}
 					if(sum(coef_by_group_deriv)==0){
 						newModels[[pos]] <- clearModels(newModels[[pos]],i)
 						break
