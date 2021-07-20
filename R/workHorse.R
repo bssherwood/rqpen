@@ -1076,7 +1076,7 @@ print.rq.pen.seq <- function(x,...){
 	} else if(nt > 1 & na > 1){
 		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and `a' tuning parameters:", x$a),collapse=" "))
 	} else if( na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and 	`a' tuning parameters:", x$a),collapse=" "))
+		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and `a' tuning parameters:", x$a),collapse=" "))
 	} else{
 			print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
 	}	
