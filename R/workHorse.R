@@ -487,7 +487,7 @@ clearModels <- function(model,pos){
 	model
 }
 
-rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=ifelse(penalty=="SCAD",3.7,3),norm=2, group.pen.factor,...){
+rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	p <- ncol(x)
@@ -495,6 +495,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 	penalty <- match.arg(penalty)
 	obj$penalty <- penalty
 	derivf <- getDerivF(penalty)
+	na <- length(a)
 	if(norm !=1 & norm != 2){
 		stop("Norm needs to be set to 1 or 2.")
 	}
@@ -502,7 +503,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 		stop("Huber approximation is the only available algorithm for 2-norm based penalties.")
 	}
 	gpfmat <- NULL
-	if(nt == 1){
+	if(nt == 1 & na==1){
 		lampen <- group.pen.factor %*% t(obj$models$lambda)
 		ll <- length(obj$models$lambda)
 		for(i in 1:ll){	
@@ -538,31 +539,41 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=i
 		}
 		dimnames(obj$models$group.pen.factor) <- NULL
 	} else{
+		newModels <- list()
+		pos <- 1
 		for(j in 1:nt){
 			lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
 			ll <- length(obj$models[[j]]$lambda)
-			for(i in 1:ll){	
-				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a,norm=norm)
-				if(sum(coef_by_group_deriv)==0){
-					obj$models[[j]] <- clearModels(obj$models[[j]],i)
-					break
+			for(k in 1:na){
+				if(nt > 1){
+					newModels[[pos]] <- obj$models[[j]]
 				} else{
-					if(penalty == "gAdLASSO"){
-						gpfmat <- cbind(gpfmat,coef_by_group_deriv)
-					}
-					if(obj$alg=="huber"){
-						if(norm == 1){
-							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
-						} else{
-							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)
-						}
-					} else{
-						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
-					}
-					obj$models[[j]]$coefficients[,i] <- update_est
+					newModels[[pos]] <- obj$models
 				}
+				for(i in 1:ll){	
+					coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
+					if(sum(coef_by_group_deriv)==0){
+						newModels[[pos]] <- clearModels(newModels[[pos]],i)
+						break
+					} else{
+						if(penalty == "gAdLASSO"){
+							gpfmat <- cbind(gpfmat,coef_by_group_deriv)
+						}
+						if(obj$alg=="huber"){
+							if(norm == 1){
+								penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+								update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+							} else{
+								update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)
+							}
+						} else{
+							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
+							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+						}
+						newModels[[pos]]$coefficients[,i] <- update_est
+					}
+				}
+				pos <- pos + 1
 			}
 			obj$models[[j]] <- rq.pen.modelreturn(obj$models[[j]]$coefficients,x,y,obj$tau[j],obj$models[[j]]$lambda,rep(1,p),penalty,a)	
 			obj$models[[j]]$penalty.factor <- NULL			
@@ -741,6 +752,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	p <- dims[2]
 	g <- length(unique(groups))
 	nt <- length(tau)
+	na <- length(a)
 	lpf <- length(group.pen.factor)
 	if(penalty != "gLASSO"){
 		a <- getA(a,penalty)

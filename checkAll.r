@@ -87,14 +87,10 @@ m2 <- rq.nc(x,y,alg="br", a = c(3,4,5))
 m3 <- rq.nc(x,y,alg="QICD", a = c(3,4,5))
 m1$models
 m2$models
-m3$models
+m3$models 
 
 m1 <- rq.nc(x,y,penalty="aLASSO", a=c(1,2,3))
-m2 <- rq.nc(x,y,alg="br", penalty="aLASSO", a=c(1,2,3))
-m3 <- rq.nc(x,y,alg="QICD",penalty="aLASSO", a=c(1,2,3))
 m1$models
-m2$models
-m3$models
 
 m1 <- rq.nc(x,y,penalty="MCP", a=c(3,4,5))
 m2 <- rq.nc(x,y,alg="br", penalty="MCP",a=c(3,4,5))
@@ -114,11 +110,7 @@ m2$models
 m3$models
 
 m1 <- rq.nc(x,y,tau=tvals,penalty="aLASSO",a=c(1,2,3))
-m2 <- rq.nc(x,y,alg="br", penalty="aLASSO",tau=tvals,a=c(1,2,3))
-m3 <- rq.nc(x,y,alg="QICD",penalty="aLASSO",tau=tvals,a=c(1,2,3))
 m1$models
-m2$models
-m3$models
 
 m1 <- rq.nc(x,y,tau=tvals,penalty="MCP",a=c(3,4,5))
 m2 <- rq.nc(x,y,alg="br", penalty="MCP",tau=tvals,a=c(3,4,5))
