@@ -342,7 +342,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 				subm <- rq.lasso.fit(x,y,tau,lambda=sublam, method=alg,scalex=scalex, ...)
 				coefs <- cbind(coefs,coefficients(subm))
 			}
-			models <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"LASSO",1)
+			models <- rq.pen.modelreturn(coefs,x,y,tau,lambda,penalty.factor,"LASSO",1)
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau)
 	}
