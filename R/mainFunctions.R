@@ -118,6 +118,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
   coefficients(object$models[[target_model]])
 }
 
+
+
 # coef.rq.pen.seq <- function(object, lambda=NULL, tau=NULL){
 	# nt <- length(ojb$tau)
 	# if(nt == 1){	
@@ -127,94 +129,75 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 	# }
 # }
 
-rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,...){
+rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","enet","aLASSO","SCAD","MCP"),a=NULL,...){
 	penalty <- match.arg(penalty)
 	if(penalty=="LASSO"){
-		fit <- rq.lasso(x,y,tau,lambda,nlambda,...)
-		if(is.null(a)==FALSE){
-			warning("Parameter `a' is not used in lasso")
-		}
-	} else if(penalty == "ridge"){
-		fit <- rq.enet(x,y,tau,lambda,nlambda,...)
-		if(is.null(a)==FALSE){
-			warning("Parameter `a' is not used in ridge")
-		}
+		fit <- rq.lasso(x,y,tau,lambda,...)
 	} else if(penalty == "enet"){
-		if(is.null(a)){
-			stop("For elastic net value `a' must be specified")
-		} else if(length(a) == 1){
-			fit <- rq.enet(x,y,tau,lambda,nlambda,alpha=a,...)
-		} else{
-			fit <- list()
-			for(i in 1:length(a)){
-				fit[[i]] <- rq.enet(x,y,tau,lambda,nlambda,alpha=a[i],...)
-			}
-		}
+		fit <- rq.enet(x,y,tau,lambda,a=a,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-		if(is.null(a)){
-			if(penalty== "aLASSO"){
-				a <- 1
-			} 
-			if(penalty == "SCAD"){
-				a <- 3.7
-			}
-			if(penalty == "MCP"){
-				a <- 3
-			}
-		} else if(length(a) == 1){
-			fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda,...)
-		} else{
-			fit <- list()
-			for(i in 1:length(a)){
-				fit[[i]] <- rq.nc(x,y,tau,penalty,a,lambda,nlambda,...)
-			}
-		}
+		fit <- rq.nc(x,y,tau,penalty,a,lambda,...)
 	}
 	fit
 }
 
-# Uncomment below, this is what I'm working on 
+predict.models <- function(object, newx){
+	cbind(1,newx) %*% object$coefficients
+}
 
-# cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,...){
-# #need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
-	# if(is.null(weights)==FALSE){
-		# stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
-	# }
-	# if(length(a)>1){
-	
-	# } else{
-		# #hmmmm how do we handle the lambda and a values being different. I guess who cares. 
-		# #Think about what we want to return and how to get to that form. 
-	# }
-	# if(is.null(foldid)){
-      # foldid <- randomly_assign(n,nfolds)
-    # }
-    # for(i in 1:nfolds){
-      # train_x <- x[foldid!=i,]
-      # train_y <- y[foldid!=i]
-      # test_x <- x[foldid==i,,drop=FALSE]
-      # test_y <- y[foldid==i]
-	  # train_weights <- weights[foldid!=i] #not sure this line is needed
-	  # if(is.null(weights)){
-		# train_weights <- test_weights <- NULL
-	  # } else{
-	    # train_weights <- weights[foldid!=i]
-		# test_weights <- weights[foldid==i]
-	  # }
-      # if(penalty=="LASSO"){
-         # cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)
-      # } else{
-         # cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
-      # }
-      # if(cvFunc=="check"){
-         # cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, tau=tau))
-      # } else{
-         # cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, func=cvFunc))
-      # } 
-    # }
-    # cv_results <- apply(cv_results,1,mean)
-	# fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a,nlambda=nlambda,...)
-# }
+predict.errors <- function(object, newx, newy){
+	preds <- predict(object,newx)
+	errors <- lapply(preds,subtract,newy)
+}
+
+check.errors <- function(object,newx,newy){
+	lapply(object$models,check.errors.model,newx,newy)
+}
+
+check.errors.model <- function(object,newx,newy){
+	preds <- predict.models(object,newx)
+	errors <- newy- preds
+	check(errors,obj$tau)
+}
+
+predict.rq.pen.seq <- function(object, newx){
+	lapply(object$models, predict.models,newx=newx)
+}
+
+subtract <- function(predicted,obs){
+	obs-predicted
+}
+
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauSame=FALSE,tauWeights=rep(1,length(tau)),...){
+#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
+	errorSummary <- match.arg(errorSummary)
+	if(is.null(weights)==FALSE){
+		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
+	}
+	if(is.null(foldid)){
+      foldid <- randomly_assign(n,nfolds)
+    }
+	fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a,...)
+	if(!groupError){
+		indErrors <- list()
+	}
+    for(i in 1:nfolds){
+      train_x <- x[foldid!=i,]
+      train_y <- y[foldid!=i]
+      test_x <- x[foldid==i,,drop=FALSE]
+      test_y <- y[foldid==i]
+	  trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
+	  if(is.null(cvFunc)){
+		testErrors <- check.errors(trainModel,train_x,train_y)
+	  } else{
+		testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+	  }
+	  if(!groupError){
+		indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
+	  }
+    }
+    cv_results <- apply(cv_results,1,mean)
+}
 
 
 

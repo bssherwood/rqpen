@@ -117,30 +117,15 @@ m1$models
 
 m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals,a=seq(3,5))
 m1$models
-m2$models
-m3$models
 
 m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",tau=tvals,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gSCAD",tau=tvals,a=seq(3,5))
 m1$models
-m2$models
-m3$models
 
 m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gMCP",tau=tvals,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gMCP",tau=tvals,a=seq(3,5))
 m1$models
-m2$models
-m3$models
-
 
 m1 <- rq.group.pen(x,y,groups=g,norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",norm=1,a=seq(3,5))
 m1$models
-m2$models
-m3$models
 
 m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,a=seq(3,5))
 m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gAdLASSO",norm=1,a=seq(3,5))
