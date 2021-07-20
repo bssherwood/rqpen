@@ -582,7 +582,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						newModels[[pos]]$coefficients[,i] <- update_est
 					}
 				}
-				newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],newModels[[pos]]$lambda,rep(1,p),penalty,a)	
+				newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],newModels[[pos]]$lambda,rep(1,p),penalty,a[k])	
 				newModels[[pos]]$penalty.factor <- NULL			
 				if(penalty == "gAdLASSO"){
 					newModels[[pos]]$group.pen.factor <- gpfmat 
