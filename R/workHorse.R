@@ -595,7 +595,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 		}
 		obj$models <- newModels
 	}
-	obj  <- updateGroupPenRho(obj,norm,groups,a)
+	obj  <- updateGroupPenRho(obj,norm,groups)
 	obj$groups <- groups
 	obj$penalty <- penalty
 	#obj$class <- c(obj$class, "rq.group.pen.seq")
@@ -750,7 +750,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
 		attributes(models)$names <- paste0("tau",tau)
 	}
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO")
-	returnVal <- updateGroupPenRho(returnVal,2,groups,1)
+	returnVal <- updateGroupPenRho(returnVal,2,groups)
 	returnVal
 }
 
@@ -960,8 +960,9 @@ getPenfunc <- function(penalty){
 
 
 
-updateGroupPenRho <- function(obj,norm,groups,a){
-	if(length(obj$tau)==1){
+updateGroupPenRho <- function(obj,norm,groups){
+	if(length(obj$tau)==1 & length(obj$a)==1){
+		a <- obj$a
 		if(length(obj$models$lambda)==1){
 			obj$models$PenRho <- obj$models$rho + sum(getGroupPen(obj$models$coefficients[-1],groups,obj$models$lambda,obj$models$group.pen.factor,obj$penalty,norm,a))
 		} else{
@@ -975,6 +976,7 @@ updateGroupPenRho <- function(obj,norm,groups,a){
 		}
 	} else{
 		for(j in 1:length(obj$models)){
+			a <- obj$models[[j]]$a
 			if(length(obj$models[[j]]$lambda)==1){
 				obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$models[[j]]$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
 			} else{
