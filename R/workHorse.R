@@ -434,6 +434,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 			}
 			obj$models$coefficients[,i] <- update_est
 		}
+		obj$models$a <- a
 	} else {
 		newModels <- list()
 		pos <- 1
