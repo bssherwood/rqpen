@@ -487,9 +487,9 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					if(obj$alg=="huber"){
 						if(norm == 1){
 							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models)[,2]
+							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models[[1]])[,2]
 						} else{
-							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models)
+							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models[[1]])
 						}
 					} else{
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
