@@ -493,7 +493,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						}
 					} else{
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models)
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models[[1]])
 					}
 					newModels[[pos]]$coefficients[,i] <- update_est
 				}
