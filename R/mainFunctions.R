@@ -157,7 +157,7 @@ check.errors <- function(object,newx,newy){
 check.errors.model <- function(object,newx,newy){
 	preds <- predict.models(object,newx)
 	errors <- newy- preds
-	check(errors,obj$tau)
+	check(errors,object$tau)
 }
 
 predict.rq.pen.seq <- function(object, newx){
@@ -181,20 +181,23 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 	if(!groupError){
 		indErrors <- list()
 	}
+	foldErrors <- rep(NA,nfolds)
     for(i in 1:nfolds){
-      train_x <- x[foldid!=i,]
-      train_y <- y[foldid!=i]
-      test_x <- x[foldid==i,,drop=FALSE]
-      test_y <- y[foldid==i]
-	  trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
-	  if(is.null(cvFunc)){
-		testErrors <- check.errors(trainModel,train_x,train_y)
-	  } else{
-		testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
-	  }
-	  if(!groupError){
-		indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
-	  }
+		train_x <- x[foldid!=i,]
+		train_y <- y[foldid!=i]
+		test_x <- x[foldid==i,,drop=FALSE]
+		test_y <- y[foldid==i]
+		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
+		if(is.null(cvFunc)){
+			testErrors <- check.errors(trainModel,train_x,train_y)
+		} else{
+			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+		}
+		if(!groupError){
+			indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
+		} else{
+			foldErrors[i] <- 
+		}
     }
     cv_results <- apply(cv_results,1,mean)
 }
