@@ -93,21 +93,21 @@ print.qic.select <- function(x,...){
    print(data.frame(lambda=x$lambda,IC=x$ic))
 }
 
-print.rq.pen.seq <- function(x,...){
-	if(length(x$tau)==1){
-		cat("\n df by lambda:\n")
-		print(data.frame(lambda=x$lambda,df=x$models$df))
-	} else{
-		cat("\n df by lambda:\n")
-		printdata <- NULL
-		for(i in 1:length(x$tau)){
-			printdata <- cbind(printdata,x$models[[i]]$df) 
-		}
-		printdata <- cbind(x$lambda,printdata)
-		printdata <- data.frame(printdata)
-		colnames(printdata) <- c("lambda",x$tau)
-	}
-}
+# print.rq.pen.seq <- function(x,...){
+	# if(length(x$tau)==1){
+		# cat("\n df by lambda:\n")
+		# print(data.frame(lambda=x$lambda,df=x$models$df))
+	# } else{
+		# cat("\n df by lambda:\n")
+		# printdata <- NULL
+		# for(i in 1:length(x$tau)){
+			# printdata <- cbind(printdata,x$models[[i]]$df) 
+		# }
+		# printdata <- cbind(x$lambda,printdata)
+		# printdata <- data.frame(printdata)
+		# colnames(printdata) <- c("lambda",x$tau)
+	# }
+# }
 
 
 coef.cv.rq.pen <- function(object, lambda='min',...){
