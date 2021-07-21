@@ -318,7 +318,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		}
 		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
 	} else{
-		models <- vector(model="list",length=nt)
+		models <- vector(mode="list",length=nt)
 		for(i in 1:nt){
 			coefs <- NULL
 			j <- 1
