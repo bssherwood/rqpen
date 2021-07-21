@@ -168,7 +168,15 @@ subtract <- function(predicted,obs){
 	obs-predicted
 }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauSame=FALSE,tauWeights=rep(1,length(tau)),...){
+modelTau <- function(object){
+	object$tau
+}
+
+modelA <- function(object){
+	object$a	
+}
+
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),...){
 #need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
 	errorSummary <- match.arg(errorSummary)
 	if(is.null(weights)==FALSE){
@@ -179,15 +187,18 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
     }
 	fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a,...)
 	if(!groupError){
-		indErrors <- list()
+		indErrors <- vector(mode="list",length=nfolds)
 	}
-	foldErrors <- rep(NA,nfolds)
+	nt <- length(tau)
+	na <- length(fit$a)
+	nl <- length(fit$models[[1]]$lambda)
+	foldErrors <- fe2ndMoment <- matrix(rep(0,nt*na*nl),ncol=nl)
     for(i in 1:nfolds){
 		train_x <- x[foldid!=i,]
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
 		test_y <- y[foldid==i]
-		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
+		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a)#,...)
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,train_x,train_y)
 		} else{
@@ -195,11 +206,18 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 		}
 		if(!groupError){
 			indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
-		} else{
-		#	foldErrors[i] <- 
 		}
+		foldMeans <- do.call(rbind, lapply(testErrors,apply,2,cvSummary))
+		foldErrors <- foldErrors + foldMeans
+		fe2ndMoment <- fe2ndMoment + foldMeans^2
     }
+	fe2ndMoment <- fe2ndMoment/nfolds
+	foldErrors <- foldErrors/nfolds
+	stdErr <- sqrt( (nfold/(nfold-1))*(fe2ndMoment - foldErrors^2))
     cv_results <- apply(cv_results,1,mean)
+	tauvals <- sapply(fit$models,modelTau)
+	avals <- sapply(fit$models,modelA)
+	#Then get the min by this index or something....
 }
 
 
