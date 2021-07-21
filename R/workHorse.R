@@ -945,7 +945,7 @@ print.rq.pen.seq <- function(x,...){
 	nt <- length(x$tau)
 	na <- length(x$a)
     if(nt==1 & na==1){
-		print(data.frame(df=x$models$df,lambda=x$models$lambda))
+		print(data.frame(df=x$models[[1]]$df,lambda=x$models[[1]]$lambda))
 	} else if(nt > 1 & na > 1){
 		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
 	} else if( na > 1){
