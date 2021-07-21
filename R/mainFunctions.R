@@ -196,7 +196,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 		if(!groupError){
 			indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
 		} else{
-			foldErrors[i] <- 
+		#	foldErrors[i] <- 
 		}
     }
     cv_results <- apply(cv_results,1,mean)
