@@ -40,11 +40,11 @@ model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
 qbic <- function(model, largeP=FALSE){
   tau <- model$tau
   n <- model$n
-  df <- sum(model$coefficients !=0)
+  nzero <- sum(model$coefficients !=0)
   if(largeP){
-    bic <- log(model$rho) + df*log(n)*log(length(model$coefficients))/(2*n)
+    bic <- log(model$rho) + nzero*log(n)*log(length(model$coefficients))/(2*n)
   }else{
-    bic <- log(model$rho) + df*log(n)/(2*n)
+    bic <- log(model$rho) + nzero*log(n)/(2*n)
   }
   bic
 }
@@ -178,7 +178,7 @@ modelA <- function(object){
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),...){
 #need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
-	errorSummary <- match.arg(errorSummary)
+	n <- length(y)
 	if(is.null(weights)==FALSE){
 		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
 	}
@@ -198,7 +198,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
 		test_y <- y[foldid==i]
-		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a)#,...)
+		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,train_x,train_y)
 		} else{
