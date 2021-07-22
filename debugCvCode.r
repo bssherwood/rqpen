@@ -5,13 +5,80 @@ install_github("bssherwood/rqpen")
 library(rqPen)
 
 
-x <- matrix(rnorm(800),ncol=8)
-y <- 1 + 3*x[,1] + 2*x[,3] - 5*x[,8] + rt(100,5)
-tau <- .5
+predict.models <- function(object, newx){
+	cbind(1,newx) %*% object$coefficients
+}
+
+predict.errors <- function(object, newx, newy){
+	preds <- predict(object,newx)
+	errors <- lapply(preds,subtract,newy)
+}
+
+check.errors <- function(object,newx,newy){
+	lapply(object$models,check.errors.model,newx,newy)
+}
+
+check.errors.model <- function(object,newx,newy){
+	preds <- predict.models(object,newx)
+	errors <- newy- preds
+	check(errors,object$tau)
+}
+
+predict.rq.pen.seq <- function(object, newx){
+	lapply(object$models, predict.models,newx=newx)
+}
+
+subtract <- function(predicted,obs){
+	obs-predicted
+}
+
+modelTau <- function(object){
+	object$tau
+}
+
+modelA <- function(object){
+	object$a	
+}
+
+
+
+
+byTauResults <- function(cvErr,tauvals,avals,models,se){
+#for loops!
+	mn <- length(tauvals)
+	overallMin <- apply(cvErr,1,min)
+	overallSpot <- apply(cvErr,1,which.min)
+	index <- 1:mn
+	
+	btr <- data.table(tau=tauvals,minCv=overallMin,lamdaIndex=overallSpot,a=avals,modelsIndex=index)
+	btr <- btr[, .SD[which.min(minCv)],by=tau]
+	lambdaVals <- lambda[btr[[3]]]
+	
+	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <-  NULL
+	for(i in 1:nrow(btr)){
+		subse <- se[btr[[5]][i],btr[[3]][i]] #5 is model index and 3 is lambda index
+		cvse <- c(cvse,subse)
+		se1Above <- btr[[2]][1] + subse
+		subLambda <- models[[btr[[5]]][i]]$lambda[btr[[3]][i]]
+		subLambda1sePos <- which(cvErr[btr[[5]][1],] <= se1Above)[1]
+		lambda1seIndex <- c(lambda1seIndex,subLambda1sePos)
+		subLambda1se <- lambda[subLambda1sePos]
+		lambda1se <- c(lambda1se,subLambda1se)
+	}
+	
+	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex)
+	btr <- setcolorder(btr, c(1,2,6,3,8,9,4,7,5))
+	btr
+}
+
+
+x <- matrix(rnorm(8000),ncol=8)
+y <- 1 + 3*x[,1] + 2*x[,3] - 5*x[,8] + rt(1000,5)
+tau <- c(.2,.5)
 lambda=NULL
 weights=NULL
-penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP")[1]
-a=NULL
+penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP")[5]
+a=c(3,4)
 cvFunc=NULL
 nfolds=10
 foldid=NULL
@@ -61,7 +128,8 @@ tauWeights=rep(1,length(tau))
 	stdErr <- sqrt( (nfolds/(nfolds-1))*(fe2ndMoment - foldErrors^2))
 	tauvals <- sapply(fit$models,modelTau)
 	avals <- sapply(fit$models,modelA)
-	#Then get the min by this index or something....
+	btr <- byTauResults(foldErrors,tauvals,avals,fit$models,se)
+}
 #}
 
 

@@ -448,7 +448,7 @@ clearModels <- function(model,pos){
 	model$lambda <- model$lambda[1:endpos]
 	model$rho <- model$rho[1:endpos]
 	model$PenRho <- model$PenRho[1:endpos]
-	model$df <- model$df[1:endpos]
+	model$nzero <- model$nzero[1:endpos]
 	model
 }
 
@@ -791,14 +791,14 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,penalty.factor,penalty,a){
 	if(is.null(dim(return_val$coefficients))==TRUE){
 		return_val$rho <- mean(check(res,tau))	
 		return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*return_val$penalty.factor,a))
-		return_val$df <- sum(return_val$coefficients!=0)
+		return_val$nzero <- sum(return_val$coefficients!=0)
 	} else{
 		return_val$rho <- apply(check(res,tau),2,mean)	
 		rownames(return_val$coefficients) <- x_names
 		for(i in 1:length(return_val$rho)){
 			return_val$PenRho[i] <- return_val$rho[i] + sum(penfunc(return_val$coefficients[-1,i],lambda[i]*return_val$penalty.factor,a))
 		}
-		return_val$df <- apply(return_val$coefficients!=0,2,sum)
+		return_val$nzero <- apply(return_val$coefficients!=0,2,sum)
 	}
 	return_val$tau <- tau
 	return_val$a <- a
@@ -945,7 +945,7 @@ print.rq.pen.seq <- function(x,...){
 	nt <- length(x$tau)
 	na <- length(x$a)
     if(nt==1 & na==1){
-		print(data.frame(df=x$models[[1]]$df,lambda=x$models[[1]]$lambda))
+		print(data.frame(nzero=x$models[[1]]$nzero,lambda=x$models[[1]]$lambda))
 	} else if(nt > 1 & na > 1){
 		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
 	} else if( na > 1){
