@@ -334,7 +334,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 			}
 			models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"LASSO",1)
 		}
-		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau)
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau, a=1)
 	}
 	returnVal$penalty <- "LASSO"
 	class(returnVal) <- "rq.pen.seq"
