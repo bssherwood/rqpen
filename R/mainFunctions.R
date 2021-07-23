@@ -289,6 +289,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 
 	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
 	class(returnVal) <- "cv.rq.pen.seq"
+	returnVal
 }
 
 
