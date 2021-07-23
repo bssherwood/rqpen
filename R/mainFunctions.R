@@ -294,12 +294,12 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 
 print.cv.rq.pen.seq <- function(x,...){
 	if(length(x$tau)==1){
-		print("\n Cross validation tuning parameter choices \n")
+		cat("\n Cross validation tuning parameter choices \n")
 		print(x$btr)
 	} else{
-		print("\n Cross validation tuning parameter optimized for each quantile \n")
+		cat("\n Cross validation tuning parameter optimized for each quantile \n")
 		print(x$btr)
-		print("\n Cross validation tuning parameter optimized across all quantiles \n")
+		cat("\n Cross validation tuning parameter optimized across all quantiles \n")
 		print(x$gtr)
 	}
 }
