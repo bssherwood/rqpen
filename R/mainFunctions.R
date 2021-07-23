@@ -292,6 +292,31 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	returnVal
 }
 
+print.cv.rq.pen.seq <- function(x,...){
+	if(length(x$tau)==1){
+		print("\n Cross validation tuning parameter choices \n")
+		print(x$btr)
+	} else{
+		print("\n Cross validation tuning parameter optimized for each quantile \n")
+		print(x$btr)
+		print("\n Cross validation tuning parameter optimized across all quantiles \n")
+		print(x$gtr)
+	}
+}
+
+
+
+print.cv.rq.pen <- function(x,...){
+   cat("\nCoefficients:\n")
+   print(coefficients(x,...))
+   cat("\nCross Validation (or BIC) Results\n")
+   print(x$cv)
+}
+
+print.rq.pen <- function(x,...){
+    cat("\nCoefficients:\n")
+	print(coefficients(x,...))
+}
 
 
 cv.rq.pen.old <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
