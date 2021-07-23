@@ -17,8 +17,8 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
 g <- c(1,1,1,1,2,2,3,3)
 tvals <- c(.25,.75)
 
-m1 <- rq.lasso(x,y)
-m2 <- rq.lasso(x,y,alg="br")
+m1 <- cv.rq.pen(x,y)
+m2 <- cv.rq.pen(x,y,alg="br")
 m1$models
 m2$models
 

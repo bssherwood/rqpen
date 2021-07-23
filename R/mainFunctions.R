@@ -227,9 +227,9 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	modelIndex <- which(avals==returnA)
 	targetModels <- models[modelIndex]
 	tauvals <- sapply(targetModels,modelTau)
-	lambdavals <- sapply(targetModels,modelLambda,modelIndex[2])
+	lambdavals <- sapply(targetModels,modelLambda,modelIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[2]]
-	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv)
+	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=modelIndex[1,2])
 }
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=TRUE,...){
