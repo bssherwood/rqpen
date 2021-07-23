@@ -239,12 +239,12 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
       foldid <- randomly_assign(n,nfolds)
     }
 	fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a)#,...)
-	if(!groupError){
-		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
-	}
 	nt <- length(tau)
 	na <- length(fit$a)
 	nl <- length(fit$models[[1]]$lambda)
+	if(!groupError){
+		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
+	}
 	foldErrors <- fe2ndMoment <- matrix(rep(0,nt*na*nl),ncol=nl)
     for(i in 1:nfolds){
 		if(printProgress){
@@ -281,9 +281,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr)
 		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
 	}
-	
 
 	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
+	class(returnVal) <- "cv.rq.pen.seq"
 }
 
 
