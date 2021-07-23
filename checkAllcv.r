@@ -19,8 +19,20 @@ tvals <- c(.25,.75)
 
 m1 <- cv.rq.pen(x,y)
 m2 <- cv.rq.pen(x,y,alg="br")
-m1$models
-m2$models
+m3 <- cv.rq.pen(x,y,penalty="Ridge")
+m4 <- cv.rq.pen(x,y,penalty="ENet",a=.5)
+m5 <- cv.rq.pen(x,y,penalty="aLASSO")
+m6 <- cv.rq.pen(x,y,penalty="SCAD")
+m7 <- cv.rq.pen(x,y,penalty="MCP")
+
+m1 <- cv.rq.pen(x,y,tau=c(.1,.3,.7))
+m2 <- cv.rq.pen(x,y,alg="br",tau=c(.1,.3,.7))
+m3 <- cv.rq.pen(x,y,penalty="Ridge",tau=c(.1,.3,.7))
+m4 <- cv.rq.pen(x,y,penalty="ENet",a=.5,tau=c(.1,.3,.7))
+m5 <- cv.rq.pen(x,y,penalty="aLASSO",tau=c(.1,.3,.7))
+m6 <- cv.rq.pen(x,y,penalty="SCAD",tau=c(.1,.3,.7))
+m7 <- cv.rq.pen(x,y,penalty="MCP",tau=c(.1,.3,.7))
+
 
 m1 <- rq.enet(x,y)
 m2 <- rq.enet(x,y,a=.5)

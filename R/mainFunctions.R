@@ -182,6 +182,10 @@ modelLambda <- function(object, index){
 	object$lambda[index]
 }
 
+modelNz <- function(object, index){
+	object$nz[index]
+}
+
 
 
 
@@ -195,7 +199,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se){
 	btr <- data.table(tau=tauvals,minCv=overallMin,lamdaIndex=overallSpot,a=avals,modelsIndex=index)
 	btr <- btr[, .SD[which.min(minCv)],by=tau]
 	
-	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <-  NULL
+	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <-  NULL
 	for(i in 1:nrow(btr)){
 		subse <- se[btr[[5]][i],btr[[3]][i]] #5 is model index and 3 is lambda index
 		cvse <- c(cvse,subse)
@@ -206,10 +210,11 @@ byTauResults <- function(cvErr,tauvals,avals,models,se){
 		lambda1seIndex <- c(lambda1seIndex,subLambda1sePos)
 		subLambda1se <- models[[btr[[5]][i]]]$lambda[subLambda1sePos]
 		lambda1se <- c(lambda1se,subLambda1se)
+		nz <- c(nz, models[[btr[[5]][i]]]$nz[btr[[3]][i]])
 	}
 	
-	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex)
-	btr <- setcolorder(btr, c(1,2,6,3,8,9,4,7,5))
+	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex, nonzero=nz)
+	btr <- setcolorder(btr, c(1,2,6,3,8,9,4,7,5,10))
 	btr
 }
 
@@ -228,8 +233,9 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	targetModels <- models[modelIndex]
 	tauvals <- sapply(targetModels,modelTau)
 	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
+	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
-	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2])
+	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2], Nonzero=nz)
 }
 
 cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
