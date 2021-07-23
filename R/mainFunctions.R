@@ -230,8 +230,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv)
 }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),...){
-#need to think about how to handle this for multi vs one tau. Also multi-a vs single a. Do the four types or something like that and then run the code
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","ridge","enet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=TRUE,...){
 	n <- length(y)
 	if(is.null(weights)==FALSE){
 		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
@@ -241,13 +240,16 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
     }
 	fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a)#,...)
 	if(!groupError){
-		indErrors <- vector(mode="list",length=nfolds)
+		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
 	}
 	nt <- length(tau)
 	na <- length(fit$a)
 	nl <- length(fit$models[[1]]$lambda)
 	foldErrors <- fe2ndMoment <- matrix(rep(0,nt*na*nl),ncol=nl)
     for(i in 1:nfolds){
+		if(printProgress){
+			print(paste("Working on fold",i))
+		}
 		train_x <- x[foldid!=i,]
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
@@ -259,8 +261,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
 		}
 		if(!groupError){
-			indErrors[[i]] <- testErrors # will this be a problem? A list of a list? 
+			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
 		}
+		#code improve maybe should replace below with sapply, but then we get the transpose which effects downstream code
 		foldMeans <- do.call(rbind, lapply(testErrors,apply,2,cvSummary))
 		foldErrors <- foldErrors + foldMeans
 		fe2ndMoment <- fe2ndMoment + foldMeans^2
@@ -270,9 +273,17 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","rid
 	stdErr <- sqrt( (nfolds/(nfolds-1))*(fe2ndMoment - foldErrors^2))
 	tauvals <- sapply(fit$models,modelTau)
 	avals <- sapply(fit$models,modelA)
-	btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr)
-	gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
-	#think about how to return and if we want to deal with individual errors. 
+	if(groupError){
+		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr)
+		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+	} else{
+		indErrors <- t(indErrors)/n
+		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr)
+		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+	}
+	
+
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
 }
 
 
