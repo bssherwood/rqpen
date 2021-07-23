@@ -2,6 +2,7 @@ rm(list=ls(all=TRUE))
 library(devtools)
 devtools::unload("rqPen")
 install_github("bssherwood/rqpen")
+library(data.table)
 library(rqPen)
 
 
