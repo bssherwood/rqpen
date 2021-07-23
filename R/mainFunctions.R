@@ -293,7 +293,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 }
 
 print.cv.rq.pen.seq <- function(x,...){
-	if(length(x$tau)==1){
+	if(length(x$fit$tau)==1){
 		cat("\nCross validation tuning parameter choices\n")
 		print(x$btr)
 	} else{
