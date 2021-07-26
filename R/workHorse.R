@@ -336,6 +336,11 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		}
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau, a=1)
 	}
+	modelIndex <- 1:length(returnVal$models)
+	avals <- sapply(returnVal$models,modelA)
+	tauvals <- sapply(returnVal$models,modelTau)
+	modelsInfo <- data.frame(modelIndex=modelIndex,a=avals,tau=tauvals)
+	returnVal$modelsInfo <- modelsInfo
 	returnVal$penalty <- "LASSO"
 	class(returnVal) <- "rq.pen.seq"
 	returnVal
@@ -391,6 +396,10 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
 	}
 	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,a=a,...)
+	avals <- sapply(returnVal$models,modelA)
+	tauvals <- sapply(returnVal$models,modelTau)
+	modelsInfo <- data.frame(modelIndex=modelIndex,a=avals,tau=tauvals)
+	returnVal$modelsInfo <- modelsInfo
 	returnVal$penalty <- "ENet"
 	returnVal$a <- a
 	
@@ -959,14 +968,29 @@ getModelCoefs <- function(x,index){
 	coefficients(x)[,index]
 }
 
-coef.rq.pen.seq <- function(x,index=NULL){
+#I should get these to return a frame with a tau, and model index so I could extract that information easily
+coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambdaIndex=NULL){
+	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelIndex) == FALSE){
+		stop("Set tau and a or set modelIndex, not both")
+	}
+	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE){
+		stop("Use lambda or lambdaIndex, not both")
+	}
 	lt <- length(x$tau)
-	na <- length(x$a)
+	na <- length(x$a)	
+	if((is.null(tau) == FALSE | is.null(a)==FALSE) & is.null(modelIndex) == TRUE){
+		
+	} else if (is.null(modelIndex)== TRUE){
+		modelIndex <- 1:length(x$models)
+	}
+	
+	
+	
 	if(lt==1 & na == 1){
 		if(is.null(index)){
-			returnVal <- coefficients(x$models)
+			returnVal <- coefficients(x$models[[1]])
 		} else{
-			returnVal <- coefficients(x$models)[,index]
+			returnVal <- coefficients(x$models[[1]])[,index]
 		}
 	} else{
 		if(is.null(index)){

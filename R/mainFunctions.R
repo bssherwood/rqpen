@@ -235,13 +235,13 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
-	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2], Nonzero=nz)
+	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2], nonzero=nz)
 }
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
+rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
 	if(is.null(weights)==FALSE){
-		stop("weights not currently implemented. Can use cv.rq.pen.old, but it supports fewer penalties and is slower.")
+		stop("weights not currently implemented. Can use older function cv.rq.pen, but it supports fewer penalties and is slower.")
 	}
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
@@ -310,6 +310,29 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
+coef.cv.rq.pen.seq(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
+	allNull <- is.null(tau) & is.null(lambda) & is.null(a)
+	lt <- length(tau)
+	la <- length(a)
+	ll <- length(lambda)
+	if(is.null(tau) | is.null(lambda) | is.null(a) & !allNull){
+		stop("All of tau, lambda and a need to be set if defaults are not used")
+	}
+	if( ll != 1 & la !=1 & ll != lt & la != lt){
+		stop("length of lambda and a must be one or the same as tau")
+	}
+	if(allNull){
+		tauType <- match.arg(default)
+		cvCrit <- match.arg(cvCrit)
+		if(tauType=="indTau"){
+			
+		} else{
+			if(cvCrit=="1se"){
+				stop("One standard error approach not implemented for group choice of tuning parameter")
+			}
+		}
+	}
+}
 
 
 print.cv.rq.pen <- function(x,...){
@@ -324,8 +347,62 @@ print.rq.pen <- function(x,...){
 	print(coefficients(x,...))
 }
 
+rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
+	n <- length(y)
+	if(is.null(foldid)){
+      foldid <- randomly_assign(n,nfolds)
+    }
+	fit <- rq.group.pen(x,y,tau,lambda=lambda,groups=groups,a=a,...)
+	nt <- length(tau)
+	na <- length(fit$a)
+	nl <- length(fit$models[[1]]$lambda)
+	if(!groupError){
+		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
+	}
+	foldErrors <- fe2ndMoment <- matrix(rep(0,nt*na*nl),ncol=nl)
+    for(i in 1:nfolds){
+		if(printProgress){
+			print(paste("Working on fold",i))
+		}
+		train_x <- x[foldid!=i,]
+		train_y <- y[foldid!=i]
+		test_x <- x[foldid==i,,drop=FALSE]
+		test_y <- y[foldid==i]
+		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,...)
+		if(is.null(cvFunc)){
+			testErrors <- check.errors(trainModel,train_x,train_y)
+		} else{
+			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+		}
+		if(!groupError){
+			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
+		}
+		#code improve maybe should replace below with sapply, but then we get the transpose which effects downstream code
+		foldMeans <- do.call(rbind, lapply(testErrors,apply,2,cvSummary))
+		foldErrors <- foldErrors + foldMeans
+		fe2ndMoment <- fe2ndMoment + foldMeans^2
+    }
+	fe2ndMoment <- fe2ndMoment/nfolds
+	foldErrors <- foldErrors/nfolds
+	stdErr <- sqrt( (nfolds/(nfolds-1))*(fe2ndMoment - foldErrors^2))
+	tauvals <- sapply(fit$models,modelTau)
+	avals <- sapply(fit$models,modelA)
+	if(groupError){
+		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr)
+		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+	} else{
+		indErrors <- t(indErrors)/n
+		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr)
+		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+	}
 
-cv.rq.pen.old <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
+	class(returnVal) <- "cv.rq.pen.seq"
+	returnVal
+}
+
+
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -334,6 +411,7 @@ cv.rq.pen.old <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",cr
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
+  warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower")
   m.c <- match.call() # This stores all the arguments in the function call as a list
 
   p <- dim(x)[2]
@@ -483,7 +561,7 @@ cv.rq.pen.old <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",cr
      inter_only_rho <- sum(check(y-sample_q,tau))
      #lambda_star <- rep(0,p)
      #lambda_star[penVars] <- init.lambda
-	   lambda_star <- init.lambda
+	 lambda_star <- init.lambda
      searching <- TRUE
      while(searching){
        if(penalty=="LASSO"){
@@ -776,11 +854,12 @@ getRho <- function(model){
 
 
 
-cv.rq.group.pen.old <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
+cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
+  warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality")
   if(penalty=="LASSO"){
 	warning("The Lasso group penalties use the L1 norm and thus the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
