@@ -310,7 +310,8 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
-coef.cv.rq.pen.seq(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
+#stopped here
+coef.cv.rq.pen.seq <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
 	allNull <- is.null(tau) & is.null(lambda) & is.null(a)
 	lt <- length(tau)
 	la <- length(a)
