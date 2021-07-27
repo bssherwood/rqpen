@@ -337,7 +337,7 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 				stop("One standard error approach not implemented for group choice of tuning parameter")
 			} else{
 				gtr <- subset(x$gtr, closeEnough(tau,x$gtr$tau))
-				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex)
+				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
 			}
 		}
 	}
