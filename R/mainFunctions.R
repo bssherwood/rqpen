@@ -310,6 +310,22 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
+coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","1se"),useDefaults=TRUE,...){
+	if(!useDefaults){
+		coefficients(x$models,...)
+	} else{
+		tauType <- match.arg(default)
+		cvCrit <- match.arg(cvCrit)
+		if(tauType=="indTau"){
+			
+		} else{
+			if(cvCrit=="1se"){
+				stop("One standard error approach not implemented for group choice of tuning parameter")
+			}
+		}
+	}
+}
+
 #stopped here
 coef.cv.rq.pen.seq <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
 	allNull <- is.null(tau) & is.null(lambda) & is.null(a)
