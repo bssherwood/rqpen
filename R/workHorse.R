@@ -426,6 +426,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 	
 	newModels <- vector(mode="list",length=nt*na)
 	pos <- 1
+	modelNames <- NULL
 	for(j in 1:nt){
 		lampen <- as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
 		ll <- length(obj$models[[j]]$lambda)
@@ -442,15 +443,18 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 				newModels[[pos]]$coefficients[,i] <- update_est
 			}
 			newModels[[pos]]$a <- a[k]
+			modelNames <- c(modelNames,paste0("tau",tau[j],"a",a[k]))
 			pos <- pos+1
 		}
 	}
+	names(newModels) <- modelNames
 	obj$models <- newModels	
 	if(penalty=="aLASSO"){
 		obj$penalty.factor <- pfs
 	}
 	obj$a <- a
 	obj$penalty <- penalty
+	obj$modelsInfo <- createModelsInfo(obj$models)
 	obj
 }
 
@@ -560,6 +564,14 @@ getA <- function(a,penalty){
 	a
 }
 
+createModelsInfo <- function(models){
+	modelIndex <- 1:length(models)
+	avals <- sapply(models,modelA)
+	tauvals <- sapply(models,modelTau)
+	modelsInfo <- data.frame(modelIndex=modelIndex,a=avals,tau=tauvals)
+	modelsInfo
+}
+
 rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg="huber",scalex=TRUE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
@@ -591,6 +603,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 	} else{
 		pos <- 1
 		models <- vector(mode="list",length=nt*na)
+		modelNames <- NULL
 		for(i in 1:nt){
 			for(j in 1:na){
 				coefs <- NULL
@@ -600,10 +613,12 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 					coefs <- cbind(coefs,coefficients(subm))
 				}
 				models[[pos]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a[j])
+				modelNames <- c(modelNames,paste0("tau",tau[i],"a",a[j]))
 				pos <- pos + 1
 			}
 		}
-		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty,a=a)
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty,a=a)		
+		returnVal$modelsInfo <- createModelsInfo(models)
 		class(returnVal) <- "rq.pen.seq"
 		returnVal
 	}
