@@ -973,7 +973,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelIndex) == FALSE){
 		stop("Set tau and a or set modelIndex, not both")
 	}
-	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE){
+	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE)){
 		stop("Use lambda or lambdaIndex, not both")
 	}
 	lt <- length(x$tau)
@@ -982,10 +982,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 		
 	} else if (is.null(modelIndex)== TRUE){
 		modelIndex <- 1:length(x$models)
-	}
-	
-	
-	
+	}	
 	if(lt==1 & na == 1){
 		if(is.null(index)){
 			returnVal <- coefficients(x$models[[1]])
