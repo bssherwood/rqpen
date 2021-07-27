@@ -196,7 +196,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se){
 	overallSpot <- apply(cvErr,1,which.min)
 	index <- 1:mn
 	
-	btr <- data.table(tau=tauvals,minCv=overallMin,lamdaIndex=overallSpot,a=avals,modelsIndex=index)
+	btr <- data.table(tau=tauvals,minCv=overallMin,lambdaIndex=overallSpot,a=avals,modelsIndex=index)
 	btr <- btr[, .SD[which.min(minCv)],by=tau]
 	
 	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <-  NULL
@@ -235,7 +235,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
-	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2], nonzero=nz)
+	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz)
 }
 
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
@@ -310,46 +310,62 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
-coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","1se"),useDefaults=TRUE,...){
+coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","1se"),useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
-		coefficients(x$models,...)
+		coefficients(x$models,tau=tau,...)
 	} else{
 		tauType <- match.arg(default)
 		cvCrit <- match.arg(cvCrit)
+		if(is.null(tau)){
+			tau <- m1$fit$tau
+		}
 		if(tauType=="indTau"){
-			
+			btr <- subset(x$btr, closeEnough(tau,x$btr$tau))
+			models <- x$fit$models[[btr$modelsIndex]]
+			if(cvCrit=="min"){
+				lambdaIndex <- btr$lambdaIndex
+			} else{
+				lambdaIndex <- btr$lambda1seIndex
+			}
+			returnVal <- coef(x$fit,lambdaIndex=1)			
+			for(i in 1:length(returnVal)){
+				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])
+			}
+			returnVal
 		} else{
 			if(cvCrit=="1se"){
 				stop("One standard error approach not implemented for group choice of tuning parameter")
+			} else{
+				gtr <- subset(x$gtr, closeEnough(tau,x$gtr$tau))
+				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex)
 			}
 		}
 	}
 }
 
-#stopped here
-coef.cv.rq.pen.seq <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
-	allNull <- is.null(tau) & is.null(lambda) & is.null(a)
-	lt <- length(tau)
-	la <- length(a)
-	ll <- length(lambda)
-	if(is.null(tau) | is.null(lambda) | is.null(a) & !allNull){
-		stop("All of tau, lambda and a need to be set if defaults are not used")
-	}
-	if( ll != 1 & la !=1 & ll != lt & la != lt){
-		stop("length of lambda and a must be one or the same as tau")
-	}
-	if(allNull){
-		tauType <- match.arg(default)
-		cvCrit <- match.arg(cvCrit)
-		if(tauType=="indTau"){
+# coef.cv.rq.pen.seq <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
+	# allNull <- is.null(tau) & is.null(lambda) & is.null(a)
+	# lt <- length(tau)
+	# la <- length(a)
+	# ll <- length(lambda)
+	# if(is.null(tau) | is.null(lambda) | is.null(a) & !allNull){
+		# stop("All of tau, lambda and a need to be set if defaults are not used")
+	# }
+	# if( ll != 1 & la !=1 & ll != lt & la != lt){
+		# stop("length of lambda and a must be one or the same as tau")
+	# }
+	# if(allNull){
+		# tauType <- match.arg(default)
+		# cvCrit <- match.arg(cvCrit)
+		# if(tauType=="indTau"){
 			
-		} else{
-			if(cvCrit=="1se"){
-				stop("One standard error approach not implemented for group choice of tuning parameter")
-			}
-		}
-	}
-}
+		# } else{
+			# if(cvCrit=="1se"){
+				# stop("One standard error approach not implemented for group choice of tuning parameter")
+			# }
+		# }
+	# }
+# }
 
 
 print.cv.rq.pen <- function(x,...){
