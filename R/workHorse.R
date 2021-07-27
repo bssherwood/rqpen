@@ -984,7 +984,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 		modelIndex <- 1:length(x$models)
 	}	
 	if(lt==1 & na == 1){
-		if(is.null(index)){
+		if(is.null(lambdaIndex)){
 			returnVal <- coefficients(x$models[[1]])
 		} else{
 			returnVal <- coefficients(x$models[[1]])[,index]
