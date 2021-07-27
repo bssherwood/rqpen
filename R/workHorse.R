@@ -1021,12 +1021,12 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 	} else{
 		if(is.null(lambdaIndex)){
 			returnVal <- lapply(targetModels,coef)
-		} else if(length(index) == 1){
-			returnVal <- sapply(targetModels,getModelCoefs,index)
+		} else if(length(lambdaIndex) == 1){
+			returnVal <- sapply(targetModels,getModelCoefs,lambdaIndex)
 		} else{
 			returnVal <- NULL
 			for(i in 1:lt){
-				returnVal <- cbind(returnVal,coefficients(targetModels[[i]])[,index[i]]) 
+				returnVal <- cbind(returnVal,coefficients(targetModels[[i]])[,lambdaIndex[i]]) 
 			}
 			colnames(returnVal) <- x$tau
 		}
