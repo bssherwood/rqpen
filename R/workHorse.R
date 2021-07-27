@@ -1004,7 +1004,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 		stop("Invalid tau or a provided")
 	}
 	if(is.null(lambda)==FALSE){
-		lambdaIndex <- which.match(lambda,x$models[[1]]$lambda)
+		lambdaIndex <- whichMatch(lambda,x$models[[1]]$lambda)
 	} else if(is.null(lambdaIndex)){
 		lambdaIndex <- 1:length(x$models[[1]]$lambda)
 	}
