@@ -991,19 +991,25 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 	lt <- length(x$tau)
 	na <- length(x$a)	
 	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
-		modelIndex <- intersect(which.match(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
+		modelIndex <- intersect(whichMatch(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
 	} else if(is.null(tau)==FALSE){
 		modelIndex <- whichMatch(tau,x$modelsInfo$tau)
 	} else if(is.null(a) == FALSE){
 		modelIndex <- whichMatch(a,x$modelsInfo$a)
 	}
-	else{
+	else if(is.null(modelIndex)){
 		modelIndex <- 1:length(x$models)
+	}
+	if(length(modelIndex)==0){
+		stop("Invalid tau or a provided")
 	}
 	if(is.null(lambda)==FALSE){
 		lambdaIndex <- which.match(lambda,x$models[[1]]$lambda)
-	} else{
+	} else if(is.null(lambdaIndex)){
 		lambdaIndex <- 1:length(x$models[[1]]$lambda)
+	}
+	if(length(lambdaIndex)==0){
+		stop("Invalid lambda provided")
 	}
 	targetModels <- x$models[modelIndex]
 	if(lt==1 & na == 1){
