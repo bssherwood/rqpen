@@ -968,6 +968,14 @@ getModelCoefs <- function(x,index){
 	coefficients(x)[,index]
 }
 
+whichMatch <- function(targets,original){
+	matches <- apply(sapply(targets,elementwise.all.equal,original),1,sum)
+	which(matches > 0)
+}
+
+elementwise.all.equal <- Vectorize(function(x, y) {isTRUE(all.equal(x, y))})
+
+
 #I should get these to return a frame with a tau, and model index so I could extract that information easily
 coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambdaIndex=NULL){
 	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelIndex) == FALSE){
@@ -978,19 +986,30 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 	}
 	lt <- length(x$tau)
 	na <- length(x$a)	
-	if((is.null(tau) == FALSE | is.null(a)==FALSE) & is.null(modelIndex) == TRUE){
-		
-	} else if (is.null(modelIndex)== TRUE){
+	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
+		modelIndex <- intersetct(which.match(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
+	} else if(is.null(tau)==FALSE){
+		modelIndex <- whichMatch(tau,x$modelsInfo$tau)
+	} else if(is.null(a) == FALSE){
+		modelIndex <- whichMatch(a,x$modelsInfo$a)
+	}
+	else{
 		modelIndex <- 1:length(x$models)
-	}	
+	}
+	if(is.null(lambda)==FALSE){
+		lambdaIndex <- which.match(lambda,x$models[[1]]$lambda)
+	} else{
+		lambdaIndex <- 1:length(x$models[[1]]$lambda)
+	}
+	targetModels <- x$models[modelIndex]
 	if(lt==1 & na == 1){
 		if(is.null(lambdaIndex)){
-			returnVal <- coefficients(x$models[[1]])
+			returnVal <- coefficients(targetModels[[1]])
 		} else{
-			returnVal <- coefficients(x$models[[1]])[,index]
+			returnVal <- coefficients(targetModels[[1]])[,lambdaIndex]
 		}
 	} else{
-		if(is.null(index)){
+		if(is.null(lambdaIndex)){
 			returnVal <- lapply(x$models,coef)
 		} else if(length(index) == 1){
 			returnVal <- sapply(x$models,getModelCoefs,index)
