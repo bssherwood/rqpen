@@ -329,7 +329,7 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 			}
 			returnVal <- coef(x$fit,lambdaIndex=1)			
 			for(i in 1:length(returnVal)){
-				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])
+				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
 			}
 			returnVal
 		} else{
