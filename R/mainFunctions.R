@@ -314,7 +314,7 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 	if(!useDefaults){
 		coefficients(x$models,tau=tau,...)
 	} else{
-		tauType <- match.arg(default)
+		tauType <- match.arg(tauType)
 		cvCrit <- match.arg(cvCrit)
 		if(is.null(tau)){
 			tau <- m1$fit$tau
