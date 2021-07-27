@@ -401,7 +401,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,a=a,...)
 	avals <- sapply(returnVal$models,modelA)
 	tauvals <- sapply(returnVal$models,modelTau)
-	modelsInfo <- data.frame(modelIndex=modelIndex,a=avals,tau=tauvals)
+	modelsInfo <- data.frame(modelIndex=1:length(returnVal$models),a=avals,tau=tauvals)
 	returnVal$modelsInfo <- modelsInfo
 	returnVal$penalty <- "ENet"
 	returnVal$a <- a
