@@ -319,6 +319,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,pfmat,...)
 	} else{
 		models <- vector(mode="list",length=nt)
+		modelnames <- NULL
 		for(i in 1:nt){
 			coefs <- NULL
 			j <- 1
@@ -333,7 +334,9 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 				j <- j + 1
 			}
 			models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor,"LASSO",1)
+			modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
 		}
+		names(models) <- modelnames
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau, a=1)
 	}
 	modelIndex <- 1:length(returnVal$models)
@@ -661,7 +664,8 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,lamb
 		
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO",a=1)
 	returnVal <- updateGroupPenRho(returnVal,2,groups)
-	returnVal$a <- NULL
+	returnVal$a <- 1
+	returnVal$modelsInfo <- data.frame(modelIndex=1:nt,a=1,tau=tau)
 	returnVal
 }
 
