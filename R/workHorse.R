@@ -969,8 +969,12 @@ getModelCoefs <- function(x,index){
 }
 
 whichMatch <- function(targets,original){
-	matches <- apply(sapply(targets,elementwise.all.equal,original),1,sum)
-	which(matches > 0)
+#bad for loop	
+	returnVals <- NULL
+	for(targ in targets){
+		returnVals <- c(returnVals, which(elementwise.all.equal(original,targ))) 
+	}
+	returnVals
 }
 
 elementwise.all.equal <- Vectorize(function(x, y) {isTRUE(all.equal(x, y))})
@@ -987,7 +991,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelIndex=NULL,lambda
 	lt <- length(x$tau)
 	na <- length(x$a)	
 	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
-		modelIndex <- intersetct(which.match(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
+		modelIndex <- intersect(which.match(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
 	} else if(is.null(tau)==FALSE){
 		modelIndex <- whichMatch(tau,x$modelsInfo$tau)
 	} else if(is.null(a) == FALSE){
