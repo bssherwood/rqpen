@@ -443,7 +443,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),...){
 				newModels[[pos]]$coefficients[,i] <- update_est
 			}
 			newModels[[pos]]$a <- a[k]
-			modelNames <- c(modelNames,paste0("tau",tau[j],"a",a[k]))
+			modelNames <- c(modelNames,paste0("tau",obj$tau[j],"a",a[k]))
 			pos <- pos+1
 		}
 	}
