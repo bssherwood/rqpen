@@ -5,7 +5,7 @@ Version: 3.0
 Date: 2020-04-09
 Author: Ben Sherwood [aut, cre], Adam Maidman [ctb], Shaobo Li [ctb] 
 Depends: R (>= 3.0.0)
-Imports: methods, quantreg, regpro, hqreg, hrqglas
+Imports: methods, quantreg, regpro, hqreg, hrqglas, data.table
 Suggests: 
     splines
 Maintainer: Ben Sherwood <ben.sherwood@ku.edu>

@@ -1,17 +1,15 @@
-1. criteria cv for cv.rq.pen with qicd algorithm 
 2. Update choice of lambda for all penalties
 3. Warm starts in cv functions
-4. Need to look into penVar 
-5. rq.group.fit returns SCAD as penalty when it is actually LASSO 
+4. Need to look into penVar  
 6. Penalized rho calculations for rq.group.pen 
 7. Penalty.factor for rq.nc
 8. update get lambda max to depend on the penalty, and maybe make it bigger for sparsity. 
 9. Cut off lambda for non-sparse sequences. 
-10. Non-convex penalties and fitted and residuals, check if they are doing that correctly. Maybe remove those as options. 
 11. Names in modelreturn when beta is only a vector and not a matrix. 
 12. Smarter approach for how to handle modelreturn. For instance, it gets run many unnecessary times for the lla approaches. 
 13. Maybe a better way to handle if the sum of non-convex group penalty derivatives are zero..., probably not though. Maybe if p < n run the unpenalized estimator and otherwise stop. 
 14. Related to above, need to figure out a way to stop this while keeping lambda the same for all estimators. Maybe some sort of bracked based approach to estimation. Could cycle through by lambda and stop then. 
+15. everything assumes tau is in some reasonable order, maybe force it to be in increasing order. 
 
 hrqglasso
 

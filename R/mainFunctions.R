@@ -63,12 +63,19 @@ qic <- function(model,n, method="BIC"){
 	}
 }
 
-qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(tau))){
+qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 	if(class(obj) == "cv.rq.pen.seq"){
 		obj <- obj$fit
 	} else if(class(obj) != "rq.pen.seq"){
 		stop("obj must be of class rq.pen.seq or cv.rq.pen.seq")
 	}
+	if(is.null(weights)==FALSE & septau == FALSE){
+		warning("Weights are only used when septau is set to true.")
+	}
+	if(is.null(weights) & septau){
+		weights <- rep(1,length(obj$tau))
+	}
+	
 	n <- obj$n
 	if(septau & length(weights)==1){
 		warning("septau set to TRUE, but only one quantile modeled")
