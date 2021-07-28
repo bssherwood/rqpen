@@ -495,8 +495,10 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			for(i in 1:ll){	
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
 				if(sum(coef_by_group_deriv)==0){
-					newModels[[pos]] <- clearModels(newModels[[pos]],i)
-					break
+				#bad code, should figure out a way to break from this but it causes an uneven number of lambda values for each tau, which is not idea
+					#newModels[[pos]] <- clearModels(newModels[[pos]],i)
+					#break
+					update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 				} else{
 					if(penalty == "gAdLASSO"){
 						gpfmat <- cbind(gpfmat,coef_by_group_deriv)
@@ -512,8 +514,8 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
 						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models[[1]])
 					}
-					newModels[[pos]]$coefficients[,i] <- update_est
 				}
+				newModels[[pos]]$coefficients[,i] <- update_est
 			}
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],newModels[[pos]]$lambda,rep(1,p),penalty,a[k])	
 			newModels[[pos]]$penalty.factor <- NULL			
