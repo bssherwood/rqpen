@@ -527,6 +527,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	}
 	obj$models <- newModels
 	obj$a <- a
+	obj$modelsInfo <- createModelsInfo(obj$models)
 	obj  <- updateGroupPenRho(obj,norm,groups)
 	obj$groups <- groups
 	obj$penalty <- penalty
@@ -676,12 +677,13 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,lamb
 		models[[i]]$penalty.factor <- NULL
 		models[[i]]$group.pen.factor <- penf
 	}
-	attributes(models)$names <- paste0("tau",tau)
+	attributes(models)$names <- paste0("tau",tau,"a",1)
 		
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO",a=1)
 	returnVal <- updateGroupPenRho(returnVal,2,groups)
 	returnVal$a <- 1
 	returnVal$modelsInfo <- data.frame(modelIndex=1:nt,a=1,tau=tau)
+	rownames(returnVal$modelsInfo) <- paste0("tau",tau,"a",1)
 	returnVal
 }
 
