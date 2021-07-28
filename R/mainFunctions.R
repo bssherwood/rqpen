@@ -310,7 +310,8 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 			tau <- m1$fit$tau
 		}
 		if(tauType=="indTau"){
-			btr <- subset(x$btr, closeEnough(tau,x$btr$tau))
+			keepers <- which(closeEnough(tau,x$btr$tau))
+			btr <- x$btr[keepers,]
 			models <- x$fit$models[btr$modelsIndex]
 			if(cvCrit=="min"){
 				lambdaIndex <- btr$lambdaIndex
@@ -327,7 +328,8 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 			if(cvCrit=="1se"){
 				stop("One standard error approach not implemented for group choice of tuning parameter")
 			} else{
-				gtr <- subset(x$gtr, closeEnough(tau,x$gtr$tau))
+				keepers <- which(closeEnough(tau,x$gtr$tau))
+				gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
 				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
 			}
 		}
