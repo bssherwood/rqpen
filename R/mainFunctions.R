@@ -119,16 +119,6 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 }
 
 
-
-# coef.rq.pen.seq <- function(object, lambda=NULL, tau=NULL){
-	# nt <- length(ojb$tau)
-	# if(nt == 1){	
-		# coefficients(object$models)
-	# } else{
-		# lapply(object$models, coefficients)
-	# }
-# }
-
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,...){
 	penalty <- match.arg(penalty)
 	if(penalty=="LASSO"){
@@ -321,7 +311,7 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 		}
 		if(tauType=="indTau"){
 			btr <- subset(x$btr, closeEnough(tau,x$btr$tau))
-			models <- x$fit$models[[btr$modelsIndex]]
+			models <- x$fit$models[btr$modelsIndex]
 			if(cvCrit=="min"){
 				lambdaIndex <- btr$lambdaIndex
 			} else{
