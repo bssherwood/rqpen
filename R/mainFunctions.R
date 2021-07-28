@@ -63,26 +63,30 @@ qic <- function(model,n, method="BIC"){
 	}
 }
 
-qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(obj$tau))){
-	n <- obj$n
-	if(length(weights)==1){
-		if(septau){
-			warning("septau set to TRUE, but only one quantile modeled")
-		}
-		qic_vals <- qic(obj$models,n,method)
-		min_spot <- which.min(qic_vals)
-		coefs <- coefficients(obj)[,min_spot]
-	} else{
-		qic_vals <- sapply(obj$models,qic,n,method)
-		if(septau){
-			min_vals <- apply(qic_vals,2,which.min)
-			coefs <- coefficients(obj,min_vals)
-		} else{
-			qic_vals <- apply(qic_vals %*% diag(weights),1,sum)
-			coefs <- coefficients(obj,which.min(qic_vals))
-		}
+qic.select <- function(obj, method="BIC",septau=FALSE,weights=rep(1,length(tau))){
+	if(class(obj) == "cv.rq.pen.seq"){
+		obj <- obj$fit
+	} else if(class(obj) != "rq.pen.seq"){
+		stop("obj must be of class rq.pen.seq or cv.rq.pen.seq")
 	}
-	return_val <- list(coefficients = coefs, ic=qic_vals, lambda=obj$lambda, penalty.factor=obj$penalty.factor)
+	n <- obj$n
+	if(septau & length(weights)==1){
+		warning("septau set to TRUE, but only one quantile modeled")
+	}
+	
+	qic_vals <- sapply(obj$models,qic,n,method)
+	min_vals <- apply(qic_vals,2,min)
+	min_spot <- apply(qic_vals,2,which.min)
+	
+	if(septau){
+		min_vals <- apply(qic_vals,2,which.min)
+		coefs <- coefficients(obj,min_vals)
+	} else{
+		qic_vals <- apply(qic_vals %*% diag(weights),1,sum)
+		coefs <- coefficients(obj,which.min(qic_vals))
+	}
+	
+	return_val <- list(coefficients = coefs, ic=qic_vals)
 	class(return_val) <- "qic.select"
 	return_val
 }
@@ -300,20 +304,18 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
-coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","1se"),useDefaults=TRUE,tau=NULL,...){
+coef.cv.rq.pen.seq <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
 		coefficients(x$models,tau=tau,...)
 	} else{
-		tauType <- match.arg(tauType)
-		cvCrit <- match.arg(cvCrit)
 		if(is.null(tau)){
 			tau <- m1$fit$tau
 		}
-		if(tauType=="indTau"){
+		if(septau){
 			keepers <- which(closeEnough(tau,x$btr$tau))
 			btr <- x$btr[keepers,]
 			models <- x$fit$models[btr$modelsIndex]
-			if(cvCrit=="min"){
+			if(cvmin){
 				lambdaIndex <- btr$lambdaIndex
 			} else{
 				lambdaIndex <- btr$lambda1seIndex
@@ -325,7 +327,7 @@ coef.cv.rq.pen.seq <- function(x,tauType=c("indTau","groupTau"),cvCrit=c("min","
 			}
 			returnVal
 		} else{
-			if(cvCrit=="1se"){
+			if(!cvmin){
 				stop("One standard error approach not implemented for group choice of tuning parameter")
 			} else{
 				keepers <- which(closeEnough(tau,x$gtr$tau))
