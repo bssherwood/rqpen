@@ -444,7 +444,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criter
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
-  warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower")
+  warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower. It will not be exported to the namespace in future versions")
   m.c <- match.call() # This stores all the arguments in the function call as a list
 
   p <- dim(x)[2]
@@ -717,6 +717,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 # lambda takes values of 1 or p
 # penalty SCAD or MCP
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries
+  warning("Recommend using rq.pen() instead. This is an older function and usually will run slower. It will not be exported to the namespace in future versions.")
   p <- ncol(x)
   n <- nrow(x)
 
@@ -892,7 +893,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
-  warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality")
+  warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality. It will not be exported to the namespace in future versions.")
   if(penalty=="LASSO"){
 	warning("The Lasso group penalties use the L1 norm and thus the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
