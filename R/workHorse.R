@@ -486,6 +486,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	gpfmat <- NULL
 	newModels <- vector(mode="list",length=nt*na)
 	pos <- 1
+	modelNames <- NULL
 	for(j in 1:nt){
 		lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
 		ll <- length(obj$models[[j]]$lambda)
@@ -521,10 +522,12 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			} else{
 				newModels[[pos]]$group.pen.factor <- group.pen.factor
 			}
-			dimnames(newModels[[pos]]$group.pen.factor) <- NULL			
+			dimnames(newModels[[pos]]$group.pen.factor) <- NULL		
+			modelNames <- c(modelNames,paste0("tau",obj$tau[j],"a",a[k]))			
 			pos <- pos + 1
 		}
 	}
+	names(newModels) <- modelNames
 	obj$models <- newModels
 	obj$a <- a
 	obj$modelsInfo <- createModelsInfo(obj$models)
@@ -570,6 +573,7 @@ createModelsInfo <- function(models){
 	avals <- sapply(models,modelA)
 	tauvals <- sapply(models,modelTau)
 	modelsInfo <- data.frame(modelIndex=modelIndex,a=avals,tau=tauvals)
+	rownames(modelsInfo) <- paste0("tau",tauvals,"a",avals)
 	modelsInfo
 }
 
