@@ -861,6 +861,82 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 	return(return_val)
 }
 
+getModels <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelsIndex) == FALSE){
+		stop("Set tau and a or set modelsIndex, not both")
+	}
+	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE)){
+		stop("Use lambda or lambdaIndex, not both")
+	}
+	lt <- length(x$tau)
+	na <- length(x$a)	
+	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
+		modelsIndex <- intersect(whichMatch(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
+	} else if(is.null(tau)==FALSE){
+		modelsIndex <- whichMatch(tau,x$modelsInfo$tau)
+	} else if(is.null(a) == FALSE){
+		modelsIndex <- whichMatch(a,x$modelsInfo$a)
+	}
+	else if(is.null(modelsIndex)){
+		modelsIndex <- 1:length(x$models)
+	}
+	if(length(modelsIndex)==0){
+		stop("Invalid tau or a provided")
+	}
+	if(is.null(lambda)==FALSE){
+		lambdaIndex <- whichMatch(lambda,x$models[[1]]$lambda)
+	} else if(is.null(lambdaIndex)){
+		lambdaIndex <- 1:length(x$models[[1]]$lambda)
+	}
+	if(length(lambdaIndex)==0){
+		stop("Invalid lambda provided")
+	}
+	targetModels <- x$models[modelsIndex]
+	list(targetModels=targetModels,lambdaIndex=lambdaIndex)
+}
+
+coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
+	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
+}
+
+plot.cv.rq.pen.seq <- function(x,...){
+	plot(x$fit,... )
+}
+
+plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
+	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
+	tm <- models$targetModels
+	li <- models$lambdaIndex
+	ml <- length(tm)
+	if(!is.null(main) & ( length(main) != ml | length(main) !=1)){
+		stop(paste("Main needs to be of length one or length ", ml, ", the number of models being plotted"))
+	}
+	par(ask=TRUE)
+	for(i in 1:ml){
+		if(is.null(main)){
+			mainText <- paste("Plot for tau = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
+		} else if(length(main)==1){
+			mainText <- main
+		} else{
+			main <- main[i]
+		}
+		if(logLambda){
+			lambdas <- rev(log(tm[[i]]$lambda[li]))
+			xtext <- "Log Lambda"
+		} else{
+			lambdas <- rev(tm[[i]]$lambda[li])
+			xtext <- "Lambda"
+		}
+		betas <- tm[[i]]$coefficients[-1,li]
+		plot(lambdas, rev(betas[1,]), type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
+		for(i in 1:dim(betas)[1]){
+			lines(lambdas, rev(betas[i,]),col=i)
+		}
+	}
+	par(ask=FALSE)	
+}
+
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
 #logLambda - lambdas plotted on log scale
@@ -882,14 +958,16 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
   }
   if(logLambda){
 	lambdas <- log(model$cv$lambda)
+	xlabText <- "Log Lambda"
   } else{
 	lambdas <- model$cv$lambda
+	xlabText <- "Lambda"
   }
   
   if(is.null(loi)==FALSE){
      lambdas <- lambdas[loi]
-  }                                    
-  plot(lambdas, betas[,1], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab="Log Lambda",...)
+  }
+  plot(lambdas, betas[,1], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xlabText,...)
   for(i in 1:dim(betas)[2]){
     lines(lambdas, betas[,i],col=i)
   }  

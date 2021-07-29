@@ -1021,40 +1021,7 @@ whichMatch <- function(targets,original){
 elementwise.all.equal <- Vectorize(function(x, y) {isTRUE(all.equal(x, y))})
 
 
-#I should get these to return a frame with a tau, and model index so I could extract that information easily
-coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
-	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelsIndex) == FALSE){
-		stop("Set tau and a or set modelsIndex, not both")
-	}
-	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE)){
-		stop("Use lambda or lambdaIndex, not both")
-	}
-	lt <- length(x$tau)
-	na <- length(x$a)	
-	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
-		modelsIndex <- intersect(whichMatch(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
-	} else if(is.null(tau)==FALSE){
-		modelsIndex <- whichMatch(tau,x$modelsInfo$tau)
-	} else if(is.null(a) == FALSE){
-		modelsIndex <- whichMatch(a,x$modelsInfo$a)
-	}
-	else if(is.null(modelsIndex)){
-		modelsIndex <- 1:length(x$models)
-	}
-	if(length(modelsIndex)==0){
-		stop("Invalid tau or a provided")
-	}
-	if(is.null(lambda)==FALSE){
-		lambdaIndex <- whichMatch(lambda,x$models[[1]]$lambda)
-	} else if(is.null(lambdaIndex)){
-		lambdaIndex <- 1:length(x$models[[1]]$lambda)
-	}
-	if(length(lambdaIndex)==0){
-		stop("Invalid lambda provided")
-	}
-	targetModels <- x$models[modelsIndex]
-	lapply(targetModels,getModelCoefs,lambdaIndex)
-}
+
 
 
 
