@@ -900,19 +900,22 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
-plot.cv.rq.pen.seq <- function(x,...){
+plot.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,...){
+	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
 	plot(x$fit,... )
 }
 
 plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
-	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
+	models <- getModels(x,tau=tau,a=a,lambda=lambda,modelsIndex=modelsIndex,lambdaIndex=lambdaIndex)
 	tm <- models$targetModels
 	li <- models$lambdaIndex
 	ml <- length(tm)
 	if(!is.null(main) & ( length(main) != ml | length(main) !=1)){
 		stop(paste("Main needs to be of length one or length ", ml, ", the number of models being plotted"))
 	}
-	par(ask=TRUE)
+	if(ml > 1){
+		par(ask=TRUE)
+	}
 	for(i in 1:ml){
 		if(is.null(main)){
 			mainText <- paste("Plot for tau = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
@@ -923,10 +926,10 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 		}
 		if(logLambda){
 			lambdas <- rev(log(tm[[i]]$lambda[li]))
-			xtext <- "Log Lambda"
+			xtext <- expression(Log(lambda))
 		} else{
 			lambdas <- rev(tm[[i]]$lambda[li])
-			xtext <- "Lambda"
+			xtext <- expression(lambda)
 		}
 		betas <- tm[[i]]$coefficients[-1,li]
 		plot(lambdas, rev(betas[1,]), type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
@@ -934,7 +937,9 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 			lines(lambdas, rev(betas[i,]),col=i)
 		}
 	}
-	par(ask=FALSE)	
+	if(ml > 1){
+		par(ask=FALSE)	
+	}
 }
 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
