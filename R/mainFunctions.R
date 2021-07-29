@@ -253,6 +253,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 		subErr <- subset(cvErr, avals==a[i])
 		gcve[i,] <- tauWeights %*% subErr
 	}
+	rownames(gcve) <- paste0("a",avals)
 	minIndex <- which(gcve==min(gcve),arr.ind=TRUE)
 	returnA <- a[minIndex[1]]
 	modelIndex <- which(avals==returnA)
@@ -892,7 +893,7 @@ getModels <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex
 		stop("Invalid lambda provided")
 	}
 	targetModels <- x$models[modelsIndex]
-	list(targetModels=targetModels,lambdaIndex=lambdaIndex)
+	list(targetModels=targetModels,lambdaIndex=lambdaIndex,modelsIndex=modelsIndex)
 }
 
 coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
@@ -900,12 +901,50 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
-plot.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,...){
+plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
+	if(septau){
+		plotsep.cv.rq.pen.seq(x,tau,a,modelsIndex,logLambda,main,...)
+	} else{
+		if(!is.null(tau)|!is.null(modelsIndex)){
+			stop("If septau is set to false then tau and modelsIndex must remain NULL")
+		}
+		plotgroup.cv.rq.pen.seq(x,a,logLambda,main,...)
+	}
+}
+
+plotgroup.cv.rq.pen.seq <- function(){
+
+}
+
+plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
 	models <- getModels(x,tau=tau,a=a,modelsIndex=modelsIndex)
 	tm <- models$targetModels
 	li <- models$lambdaIndex
+	mi <- models$modelsIndex
 	ml <- length(tm)
-	plot(x$fit,... )
+	if(ml > 1){
+		par(ask=TRUE)
+	}
+	for(i in 1:ml){
+		if(is.null(main)){
+			mainText <- paste("CV plot for tau = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
+		} else if(length(main)==1){
+			mainText <- main
+		} else{
+			main <- main[i]
+		}
+		if(logLambda){
+			lambdas <- log(tm[[i]]$lambda[li])
+			xtext <- expression(Log(lambda))
+		} else{
+			lambdas <- tm[[i]]$lambda[li]
+			xtext <- expression(lambda)
+		}
+		plot(lambdas, x$cverr[mi[i],], ylim=c(0,max(x$cverr[mi[i],]+x$cvse[mi[i],])),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",...)
+	}
+	if(ml > 1){
+		par(ask=FALSE)	
+	}
 }
 
 plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
@@ -928,16 +967,16 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 			main <- main[i]
 		}
 		if(logLambda){
-			lambdas <- rev(log(tm[[i]]$lambda[li]))
+			lambdas <- log(tm[[i]]$lambda[li])
 			xtext <- expression(Log(lambda))
 		} else{
-			lambdas <- rev(tm[[i]]$lambda[li])
+			lambdas <- tm[[i]]$lambda[li]
 			xtext <- expression(lambda)
 		}
 		betas <- tm[[i]]$coefficients[-1,li]
-		plot(lambdas, rev(betas[1,]), type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
+		plot(lambdas, betas[1,], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
 		for(i in 1:dim(betas)[1]){
-			lines(lambdas, rev(betas[i,]),col=i)
+			lines(lambdas, betas[i,],col=i)
 		}
 	}
 	if(ml > 1){
