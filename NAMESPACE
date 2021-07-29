@@ -1,5 +1,4 @@
 useDynLib("rqPen", .registration = TRUE)
-
 import(quantreg) 
 import(regpro)
 import(hqreg)
