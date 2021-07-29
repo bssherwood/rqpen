@@ -107,7 +107,8 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 		returnA <- obj$a[minIndex[1]]
 		modelsInfo <- subset(obj$modelsInfo, a==returnA)
 		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
-		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)		
+		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)
+		qic_vals <- gic
 	}
 	coefIndex <- 1:nt
 	modelsInfo <- cbind(modelsInfo, coefIndex)
