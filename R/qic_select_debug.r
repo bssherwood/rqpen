@@ -29,10 +29,10 @@ weights <- NULL
 	} else if(class(obj) != "rq.pen.seq"){
 		stop("obj must be of class rq.pen.seq or cv.rq.pen.seq")
 	}
-	if(is.null(weights)==FALSE & septau == FALSE){
+	if(is.null(weights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
 	}
-	if(is.null(weights) & septau){
+	if(is.null(weights) & !septau){
 		weights <- rep(1,length(obj$tau))
 	}
 	
@@ -63,7 +63,11 @@ weights <- NULL
 			subIC <- subset(tqic_vals, obj$modelsInfo$a==obj$a[i])
 			gic[i,] <- weights %*% subIC
 		}
-		#PICK UP HERE
+		minIndex <- which(gic==min(gic),arr.ind=TRUE)
+		returnA <- obj$a[minIndex[1]]
+		modelsInfo <- subset(obj$modelsInfo, a==returnA)
+		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
+		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)		
 	}
 	coefIndex <- 1:nt
 	modelsInfo <- cbind(modelsInfo, coefIndex)

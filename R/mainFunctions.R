@@ -69,10 +69,10 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 	} else if(class(obj) != "rq.pen.seq"){
 		stop("obj must be of class rq.pen.seq or cv.rq.pen.seq")
 	}
-	if(is.null(weights)==FALSE & septau == FALSE){
+	if(is.null(weights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
 	}
-	if(is.null(weights) & septau){
+	if(is.null(weights) & !septau){
 		weights <- rep(1,length(obj$tau))
 	}
 	
@@ -80,28 +80,46 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 	if(septau & length(weights)==1){
 		warning("septau set to TRUE, but only one quantile modeled")
 	}
+	nt <- length(obj$tau)
+	na <- length(obj$a)
+	nl <- length(obj$models[[1]]$lambda)
 	
 	qic_vals <- sapply(obj$models,qic,n,method)
-	min_vals <- apply(qic_vals,2,min)
-	min_spot <- apply(qic_vals,2,which.min)
-	
 	if(septau){
-		min_vals <- apply(qic_vals,2,which.min)
-		coefs <- coefficients(obj,min_vals)
+		minQIC <- apply(qic_vals,2,min)
+		lambdaIndex <- apply(qic_vals,2,which.min)
+		modelsInfo <- cbind(obj$modelsInfo,minQIC,lambdaIndex)
+		modelsInfo <- data.table(modelsInfo)
+		modelsInfo <- modelsInfo[, .SD[which.min(minQIC)],by=tau]
+		
+		coefs <- vector(mode="list", length=nt)
+		for(i in 1:nt){
+			coefs[[i]] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
+		}
 	} else{
-		qic_vals <- apply(qic_vals %*% diag(weights),1,sum)
-		coefs <- coefficients(obj,which.min(qic_vals))
+		gic <- matrix(rep(0,na*nl),ncol=nl)
+		tqic_vals <- t(qic_vals)
+		for(i in 1:na){
+			subIC <- subset(tqic_vals, obj$modelsInfo$a==obj$a[i])
+			gic[i,] <- weights %*% subIC
+		}
+		minIndex <- which(gic==min(gic),arr.ind=TRUE)
+		returnA <- obj$a[minIndex[1]]
+		modelsInfo <- subset(obj$modelsInfo, a==returnA)
+		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
+		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)		
 	}
+	coefIndex <- 1:nt
+	modelsInfo <- cbind(modelsInfo, coefIndex)
 	
-	return_val <- list(coefficients = coefs, ic=qic_vals)
+	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo)
 	class(return_val) <- "qic.select"
 	return_val
 }
 
 
 print.qic.select <- function(x,...){
-   cat("\n IC values by Lambda:\n")
-   print(data.frame(lambda=x$lambda,IC=x$ic))
+   print(coefficients(x))
 }
 
 # print.rq.pen.seq <- function(x,...){
