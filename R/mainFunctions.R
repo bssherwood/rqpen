@@ -261,7 +261,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
-	data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz)
+	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz),gcve=gcve)
 }
 
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
@@ -319,7 +319,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
 	}
 
-	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
 	class(returnVal) <- "cv.rq.pen.seq"
 	returnVal
 }
@@ -456,7 +456,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
 	}
 
-	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr)
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
 	class(returnVal) <- "cv.rq.pen.seq"
 	returnVal
 }
@@ -901,7 +901,10 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 }
 
 plot.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,...){
-	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
+	models <- getModels(x,tau=tau,a=a,modelsIndex=modelsIndex)
+	tm <- models$targetModels
+	li <- models$lambdaIndex
+	ml <- length(tm)
 	plot(x$fit,... )
 }
 
