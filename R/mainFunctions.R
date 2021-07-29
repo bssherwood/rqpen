@@ -64,6 +64,7 @@ qic <- function(model,n, method="BIC"){
 }
 
 qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
+# code help: Maybe think about how the qic values are returned for the septau=TRUE case
 	if(class(obj) == "cv.rq.pen.seq"){
 		obj <- obj$fit
 	} else if(class(obj) != "rq.pen.seq"){
@@ -96,6 +97,7 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 		for(i in 1:nt){
 			coefs[[i]] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
 		}
+		gic <- NULL
 	} else{
 		gic <- matrix(rep(0,na*nl),ncol=nl)
 		tqic_vals <- t(qic_vals)
@@ -108,12 +110,11 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 		modelsInfo <- subset(obj$modelsInfo, a==returnA)
 		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
 		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)
-		qic_vals <- gic
 	}
 	coefIndex <- 1:nt
 	modelsInfo <- cbind(modelsInfo, coefIndex)
 	
-	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo)
+	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
 	class(return_val) <- "qic.select"
 	return_val
 }
@@ -121,6 +122,11 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 
 print.qic.select <- function(x,...){
    print(coefficients(x))
+}
+
+predict.qic.select <- function(x, newdata, ...){
+	coefs <- do.call(cbind(coefficients(x)))
+	cbind(1,newdata) %*% coefs
 }
 
 # print.rq.pen.seq <- function(x,...){
