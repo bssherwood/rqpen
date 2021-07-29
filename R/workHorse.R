@@ -1020,12 +1020,6 @@ whichMatch <- function(targets,original){
 
 elementwise.all.equal <- Vectorize(function(x, y) {isTRUE(all.equal(x, y))})
 
-
-
-
-
-
-
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE, ...){
 # x is a n x p matrix without the intercept term
@@ -1232,7 +1226,6 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
     class(sub_fit) <-  c("rq.pen", "rqNC")
     sub_fit
 }
-
 
 
 groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, penalty="LASSO", 
