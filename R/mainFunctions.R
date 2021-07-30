@@ -915,6 +915,9 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 		a <- x$fit$a
 	}
 	na <- length(a)
+	if(na > 1){
+		par(ask=TRUE)
+	}
 	for(i in 1:na){
 		aindex <- which(x$fit$a == a[i])
 		if(is.null(main)){
@@ -934,6 +937,9 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
 		bestIndex <- subset(x$gtr, a==a[i])$lambdaIndex[1]
 		lines(rep(lambdas[bestIndex],2),c(0,max(m1$gcve[aindex,])+1),lty=2)
+	}
+	if(na > 1){
+		par(ask=FALSE)
 	}
 }
 
