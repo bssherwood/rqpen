@@ -912,7 +912,7 @@ plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,a=NULL,modelsIndex=NULL,lo
 plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 #code challenge implicitly assumes lambda is the same for all models. 
 	if(is.null(a)){
-		a <- x$a
+		a <- x$fit$a
 	}
 	na <- length(a)
 	for(i in 1:na){
