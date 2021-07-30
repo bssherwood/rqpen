@@ -951,7 +951,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		}
 		err <- x$cverr[mi[i],]
 		cvsd <- x$cvse[mi[i],]
-		plot(lambdas, err, ylim=c(0,max(x$cverr[mi[i],]+x$cvse[mi[i],])),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
 		segments(lambdas,err-cvsd,lambdas,err+cvsd)
 		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
 		segments(lambdas-.02,err+cvsd,lambdas+.02,x+cvsd)

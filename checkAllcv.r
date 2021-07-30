@@ -18,6 +18,7 @@ g <- c(1,1,1,1,2,2,3,3)
 tvals <- c(.25,.75)
 
 m1 <- rq.pen.cv(x,y)
+plotsep.cv.rq.pen.seq(m1)
 m2 <- rq.pen.cv(x,y,alg="br")
 m3 <- rq.pen.cv(x,y,penalty="Ridge")
 m4 <- rq.pen.cv(x,y,penalty="ENet",a=.5)
