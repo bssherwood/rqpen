@@ -925,10 +925,10 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 			main <- main[i]
 		}
 		if(logLambda){
-			lambdas <- log(x$models[[1]]$lambda)
+			lambdas <- log(x$fit$models[[1]]$lambda)
 			xtext <- expression(Log(lambda))
 		} else{
-			lambdas <- x$models[[1]]$lambda
+			lambdas <- x$fit$models[[1]]$lambda
 			xtext <- expression(lambda)
 		}
 		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
