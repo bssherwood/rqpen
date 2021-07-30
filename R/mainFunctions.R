@@ -936,7 +936,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 	}
 	for(i in 1:ml){
 		if(is.null(main)){
-			mainText <- paste("CV plot for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
+			mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
 		} else if(length(main)==1){
 			mainText <- main
 		} else{
@@ -951,7 +951,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		}
 		err <- x$cverr[mi[i],]
 		cvsd <- x$cvse[mi[i],]
-		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,cex.main=.8,...)
 		segments(lambdas,err-cvsd,lambdas,err+cvsd)
 		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
 		segments(lambdas-.02,err+cvsd,lambdas+.02,err+cvsd)
