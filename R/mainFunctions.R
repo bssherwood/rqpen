@@ -936,7 +936,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 	}
 	for(i in 1:ml){
 		if(is.null(main)){
-			mainText <- paste("CV plot for tau = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
+			mainText <- paste("CV plot for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
 		} else if(length(main)==1){
 			mainText <- main
 		} else{
