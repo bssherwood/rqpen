@@ -954,7 +954,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
 		segments(lambdas,err-cvsd,lambdas,err+cvsd)
 		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
-		segments(lambdas-.02,err+cvsd,lambdas+.02,x+cvsd)
+		segments(lambdas-.02,err+cvsd,lambdas+.02,err+cvsd)
 
 	}
 	if(ml > 1){
