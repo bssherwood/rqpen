@@ -955,7 +955,9 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		segments(lambdas,err-cvsd,lambdas,err+cvsd)
 		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
 		segments(lambdas-.02,err+cvsd,lambdas+.02,err+cvsd)
-
+		mInfo <- subset(x$btr, modelsIndex == mi[i])
+		lines(rep(lambdas[mInfo$lambdaIndex]),c(0,max(err+cvsd)+1),lty=2)
+		lines(rep(lambdas[mInfo$lambda1seIndex]),c(0,max(err+cvsd)+1),lty=2)
 	}
 	if(ml > 1){
 		par(ask=FALSE)	
