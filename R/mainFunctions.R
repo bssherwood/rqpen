@@ -936,7 +936,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 	}
 	for(i in 1:ml){
 		if(is.null(main)){
-			mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a)
+			mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a, "\n")
 		} else if(length(main)==1){
 			mainText <- main
 		} else{
@@ -958,7 +958,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		mInfo <- subset(x$btr, modelsIndex == mi[i])
 		lines(rep(lambdas[mInfo$lambdaIndex],2),c(0,max(err+cvsd)+1),lty=2)
 		lines(rep(lambdas[mInfo$lambda1seIndex],2),c(0,max(err+cvsd)+1),lty=2)
-		axis(side=1, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
+		axis(side=3, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
 	}
 	if(ml > 1){
 		par(ask=FALSE)	
