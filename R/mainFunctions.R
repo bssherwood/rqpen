@@ -913,6 +913,18 @@ plotgroup.cv.rq.pen.seq <- function(){
 
 }
 
+
+
+error.bars <- function (x, upper, lower, width = 0.02, ...) 
+{
+    xlim <- range(x)
+    barw <- diff(xlim) * width
+    segments(x, upper, x, lower, ...)
+    segments(x - barw, upper, x + barw, upper, ...)
+    segments(x - barw, lower, x + barw, lower, ...)
+    range(upper, lower)
+}
+
 plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
 	models <- getModels(x$fit,tau=tau,a=a,modelsIndex=modelsIndex)
 	tm <- models$targetModels
@@ -937,7 +949,13 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 			lambdas <- tm[[i]]$lambda[li]
 			xtext <- expression(lambda)
 		}
-		plot(lambdas, x$cverr[mi[i],], ylim=c(0,max(x$cverr[mi[i],]+x$cvse[mi[i],])),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",...)
+		err <- x$cverr[mi[i],]
+		cvsd <- x$cvse[mi[i],]
+		plot(lambdas, err, ylim=c(0,max(x$cverr[mi[i],]+x$cvse[mi[i],])),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		segments(lambdas,err-cvsd,lambdas,err+cvsd)
+		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
+		segments(lambdas-.02,err+cvsd,lambdas+.02,x+cvsd)
+
 	}
 	if(ml > 1){
 		par(ask=FALSE)	
