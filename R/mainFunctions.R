@@ -933,7 +933,7 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 		}
 		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
 		bestIndex <- subset(x$gtr, a==a[i])$lambdaIndex[1]
-		lines(rep(lambdas[lambdaIndex],2),c(0,max(m1$gcve[aindex,])+1),lty=2)
+		lines(rep(lambdas[bestIndex],2),c(0,max(m1$gcve[aindex,])+1),lty=2)
 	}
 }
 
