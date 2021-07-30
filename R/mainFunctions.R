@@ -909,8 +909,31 @@ plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,a=NULL,modelsIndex=NULL,lo
 	}
 }
 
-plotgroup.cv.rq.pen.seq <- function(){
-
+plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
+	if(is.null(a)){
+		a <- x$a
+	}
+	na <- length(a)
+	for(i in 1:na){
+		aindex <- which(x$a == a[i])
+		if(is.null(main)){
+			mainText <- paste("Group cross validation results for a = ",a[i])
+		} else if(length(main)==1){
+			mainText <- main
+		} else{
+			main <- main[i]
+		}
+		if(logLambda){
+			lambdas <- log(tm[[i]]$lambda[li])
+			xtext <- expression(Log(lambda))
+		} else{
+			lambdas <- tm[[i]]$lambda[li]
+			xtext <- expression(lambda)
+		}
+		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		bestIndex <- subset(x$gtr, a==a[i])$lambdaIndex
+		lines(rep(lambdas[lambdaIndex],2),c(0,max(m1$gcve[aindex,])+1),lty=2)
+	}
 }
 
 
@@ -938,9 +961,9 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		if(is.null(main)){
 			mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a, "\n")
 		} else if(length(main)==1){
-			mainText <- main
+			mainText <- paste(main, "\n")
 		} else{
-			main <- main[i]
+			main <- paste(main[i], "\n")
 		}
 		if(logLambda){
 			lambdas <- log(tm[[i]]$lambda[li])
