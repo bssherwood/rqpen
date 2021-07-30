@@ -212,9 +212,6 @@ modelNz <- function(object, index){
 	object$nz[index]
 }
 
-
-
-
 byTauResults <- function(cvErr,tauvals,avals,models,se){
 #for loops!
 	mn <- length(tauvals)
