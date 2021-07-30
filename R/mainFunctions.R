@@ -916,7 +916,7 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 	}
 	na <- length(a)
 	for(i in 1:na){
-		aindex <- which(x$a == a[i])
+		aindex <- which(x$fit$a == a[i])
 		if(is.null(main)){
 			mainText <- paste("Group cross validation results for a = ",a[i])
 		} else if(length(main)==1){
