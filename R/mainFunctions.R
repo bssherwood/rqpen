@@ -914,7 +914,7 @@ plotgroup.cv.rq.pen.seq <- function(){
 }
 
 plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
-	models <- getModels(x,tau=tau,a=a,modelsIndex=modelsIndex)
+	models <- getModels(x$fit,tau=tau,a=a,modelsIndex=modelsIndex)
 	tm <- models$targetModels
 	li <- models$lambdaIndex
 	mi <- models$modelsIndex
