@@ -951,14 +951,14 @@ plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=F
 		}
 		err <- x$cverr[mi[i],]
 		cvsd <- x$cvse[mi[i],]
-		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,cex.main=.8,...)
+		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
 		segments(lambdas,err-cvsd,lambdas,err+cvsd)
 		segments(lambdas-.02,err-cvsd,lambdas+.02,err-cvsd)
 		segments(lambdas-.02,err+cvsd,lambdas+.02,err+cvsd)
 		mInfo <- subset(x$btr, modelsIndex == mi[i])
 		lines(rep(lambdas[mInfo$lambdaIndex],2),c(0,max(err+cvsd)+1),lty=2)
 		lines(rep(lambdas[mInfo$lambda1seIndex],2),c(0,max(err+cvsd)+1),lty=2)
-		axis(side=3, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
+		axis(side=1, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
 	}
 	if(ml > 1){
 		par(ask=FALSE)	
