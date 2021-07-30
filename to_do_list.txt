@@ -1,3 +1,4 @@
+1. The issue of same lambda for all tau should allow for a tau penalty factor. 
 2. Update choice of lambda for all penalties
 3. Warm starts in cv functions
 4. Need to look into penVar  

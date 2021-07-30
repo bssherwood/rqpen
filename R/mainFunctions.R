@@ -910,6 +910,7 @@ plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,a=NULL,modelsIndex=NULL,lo
 }
 
 plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
+#code challenge implicitly assumes lambda is the same for all models. 
 	if(is.null(a)){
 		a <- x$a
 	}
@@ -924,10 +925,10 @@ plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
 			main <- main[i]
 		}
 		if(logLambda){
-			lambdas <- log(tm[[i]]$lambda[li])
+			lambdas <- log(x$models[[1]]$lambda)
 			xtext <- expression(Log(lambda))
 		} else{
-			lambdas <- tm[[i]]$lambda[li]
+			lambdas <- x$models[[1]]$lambda
 			xtext <- expression(lambda)
 		}
 		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
