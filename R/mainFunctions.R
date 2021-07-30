@@ -250,7 +250,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
 		subErr <- subset(cvErr, avals==a[i])
 		gcve[i,] <- tauWeights %*% subErr
 	}
-	rownames(gcve) <- paste0("a",avals)
+	rownames(gcve) <- paste0("a",a)
 	minIndex <- which(gcve==min(gcve),arr.ind=TRUE)
 	returnA <- a[minIndex[1]]
 	modelIndex <- which(avals==returnA)
