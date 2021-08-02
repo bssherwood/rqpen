@@ -65,10 +65,10 @@ qic <- function(model,n, method="BIC"){
 
 qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case
-	if(class(obj) == "cv.rq.pen.seq"){
+	if(class(obj) == "rq.pen.seq.cv"){
 		obj <- obj$fit
 	} else if(class(obj) != "rq.pen.seq"){
-		stop("obj must be of class rq.pen.seq or cv.rq.pen.seq")
+		stop("obj must be of class rq.pen.seq or rq.pen.seq.cv")
 	}
 	if(is.null(weights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
@@ -318,11 +318,11 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	}
 
 	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
-	class(returnVal) <- "cv.rq.pen.seq"
+	class(returnVal) <- "rq.pen.seq.cv"
 	returnVal
 }
 
-print.cv.rq.pen.seq <- function(x,...){
+print.rq.pen.seq.cv <- function(x,...){
 	if(length(x$fit$tau)==1){
 		cat("\nCross validation tuning parameter choices\n")
 		print(x$btr)
@@ -334,7 +334,7 @@ print.cv.rq.pen.seq <- function(x,...){
 	}
 }
 
-coef.cv.rq.pen.seq <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
 		coefficients(x$models,tau=tau,...)
 	} else{
@@ -368,7 +368,7 @@ coef.cv.rq.pen.seq <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 	}
 }
 
-# coef.cv.rq.pen.seq <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
+# coef.rq.pen.seq.cv <- function(x,tau=NULL,lambda=NULL,a=NULL,tauType=c("indTau","groupTau"),cvCrit=c("min","1se")){
 	# allNull <- is.null(tau) & is.null(lambda) & is.null(a)
 	# lt <- length(tau)
 	# la <- length(a)
@@ -455,7 +455,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 	}
 
 	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
-	class(returnVal) <- "cv.rq.pen.seq"
+	class(returnVal) <- "rq.pen.seq.cv"
 	returnVal
 }
 
@@ -898,18 +898,18 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
-plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
+plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
 	if(septau){
-		plotsep.cv.rq.pen.seq(x,tau,logLambda,main,...)
+		plotsep.rq.pen.seq.cv(x,tau,logLambda,main,...)
 	} else{
 		if(is.null(tau)==FALSE){
 			stop("Tau cannot be set if septau set to FALSE")
 		}
-		plotgroup.cv.rq.pen.seq(x,logLambda,main,...)
+		plotgroup.rq.pen.seq.cv(x,logLambda,main,...)
 	}
 }
 
-plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
+plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	a <- x$fit$a
 	na <- length(a)
 	# besta <- x$gtr$a[1]
@@ -938,7 +938,7 @@ plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
 	}
 }
 
-# plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
+# plotgroup.rq.pen.seq.cv <- function(x,a,logLambda,main,...){
 # #code challenge implicitly assumes lambda is the same for all models. 
 	# if(is.null(a)){
 		# a <- x$fit$a
@@ -984,7 +984,7 @@ error.bars <- function (x, upper, lower, width = 0.02, ...)
     range(upper, lower)
 }
 
-plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
+plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 	if(is.null(tau)){
 		tau <- x$fit$tau
 	}
@@ -1047,7 +1047,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
 	}
 }
 
-# plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
+# plotsep.rq.pen.seq.cv <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
 	# models <- getModels(x$fit,tau=tau,a=a,modelsIndex=modelsIndex)
 	# tm <- models$targetModels
 	# li <- models$lambdaIndex
@@ -1158,6 +1158,18 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
   for(i in 1:dim(betas)[2]){
     lines(lambdas, betas[,i],col=i)
   }  
+}
+
+beta.plot <- function(x){
+	UseMethod("beta.plot")
+} 
+
+beta.plot.rq.pen.seq <- function(x){
+
+}
+
+beta.plot.rq.pen.seq <- function(x){
+
 }
 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
