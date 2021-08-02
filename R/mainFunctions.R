@@ -926,11 +926,11 @@ plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
 	maxerr <- max(x$gcve)
 	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,type="n",main=main,...)
 	for(i in 1:na){
-		points(lambdas,x$gcve[i,],col=i,...)
+		points(lambdas,x$gcve[i,],col=i,pch=1)
 	}
 	bestlamidx <- x$gtr$lambdaIndex
 	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
-	legend("topleft",a,col=1:na)
+	legend("topleft",paste("a=",a),col=1:na,pch=1)
 }
 
 # plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
