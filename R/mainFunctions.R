@@ -1025,7 +1025,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
 		
 		plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
 		for(j in 1:na){
-			points(lambdas,suberr[j,],col=j,...)
+			points(lambdas,suberr[j,],col=j)
 		}
 		
 		#then get index and plot error bars for this. 
@@ -1034,7 +1034,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
 		segments(lambdas-.01,besterr-cvsd,lambdas+.01,besterr-cvsd)
 		segments(lambdas-.01,besterr+cvsd,lambdas+.01,besterr+cvsd)
 		if(na>1){
-			legend("topleft",paste("a=",subinfo$a),col=1:na)
+			legend("topleft",paste("a=",subinfo$a),col=1:na,pch=1)
 		}
 		lidx <- subbtr$lambdaIndex
 		lidxse <- subbtr$lambda1seIndex
