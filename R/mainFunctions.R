@@ -902,6 +902,9 @@ plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 	if(septau){
 		plotsep.cv.rq.pen.seq(x,tau,logLambda,main,...)
 	} else{
+		if(is.null(tau)==FALSE){
+			stop("Tau cannot be set if septau set to FALSE")
+		}
 		plotgroup.cv.rq.pen.seq(x,logLambda,main,...)
 	}
 }
@@ -930,7 +933,9 @@ plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
 	}
 	bestlamidx <- x$gtr$lambdaIndex[1]
 	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
-	legend("topleft",paste("a=",a),col=1:na,pch=1)
+	if(na > 1){
+		legend("topleft",paste("a=",a),col=1:na,pch=1)
+	}
 }
 
 # plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
@@ -977,6 +982,69 @@ error.bars <- function (x, upper, lower, width = 0.02, ...)
     segments(x - barw, upper, x + barw, upper, ...)
     segments(x - barw, lower, x + barw, lower, ...)
     range(upper, lower)
+}
+
+plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
+	if(is.null(tau)){
+		tau <- x$fit$tau
+	}
+	keepers <- which(closeEnough(tau,x$fit$modelsInfo$tau))
+	minfo <- x$fit$modelsInfo[keepers,]
+	avals <- unique(minfo$a)
+	na <- length(avals)
+	nt <- length(tau)
+	if(! length(main) %in% c(0,1,nt)){
+		stop("main needs to be null or length one or the length of tau")
+	}
+	if(nt > 1){
+		par(ask=TRUE)
+	}
+	if(logLambda){
+		lambdas <- log(x$fit$models[[1]]$lambda)
+		xtext <- expression(Log(lambda))
+	} else{
+		lambdas <- x$fit$models[[1]]$lambda
+		xtext <- expression(lambda)
+	}
+	for(i in 1:nt){
+		if(is.null(main)){
+			mainText <- paste("Cross validation results for ", expression(tau)," = ", tau[i])
+		} else if(length(main)==1){
+			mainText <- main
+		} else{
+			mainText <- main[i]
+		}
+		subkeepers <- which(closeEnough(tau[i],minfo$tau))
+		subinfo <- minfo[subkeepers,]
+		suberr <- x$cverr[subkeepers,]
+		
+		bestkeep <- which(closeEnough(tau[i],x$btr$tau))
+		subbtr <- x$btr[bestkeep,]
+		besterr <- x$cverr[subbtr$modelsIndex,]
+		cvsd <- x$cvse[bestidx,]
+		
+		plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
+		for(j in 1:na){
+			points(lambdas,suberr[j,],col=j,...)
+		}
+		
+		#then get index and plot error bars for this. 
+		#get the best and create the segments for that
+		segments(lambdas,besterr-cvsd,lambdas,besterr+cvsd)
+		segments(lambdas-.01,besterr-cvsd,lambdas+.01,besterr-cvsd)
+		segments(lambdas-.01,besterr+cvsd,lambdas+.01,besterr+cvsd)
+		if(na>1){
+			legend("topleft",paste("a=",subinfo$a),col=1:na)
+		}
+		lidx <- subbtr$lambdaIndex
+		lidxse <- subbtr$lambda1seIndex
+		
+		lines(rep(lambdas[lidx],2),c(-5,max(besterr+cvsd)+1),lty=2)
+		lines(rep(lambdas[lidxse],2),c(-5,max(besterr+cvsd)+1),lty=2)
+	}
+	if(nt > 1){
+		par(ask=FALSE)
+	}
 }
 
 # plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
