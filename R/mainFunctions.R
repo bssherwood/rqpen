@@ -1177,11 +1177,8 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL){
 		stop("only specify lambdaIndex or lambda")
 	}
 	if(is.null(lambdaIndex)){
-		lambdaIndex <- which(x$models[[1]$lambda==lambda)
-	}
-	
-	
-	
+		lambdaIndex <- which(x$models[[1]]$lambda==lambda)
+	}	
 }
 
 bytau.plot.rq.pen.seq.cv <- function(x){
