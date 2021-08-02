@@ -898,50 +898,74 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
-plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
+plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
 	if(septau){
-		plotsep.cv.rq.pen.seq(x,tau,a,modelsIndex,logLambda,main,...)
+		plotsep.cv.rq.pen.seq(x,tau,logLambda,main,...)
 	} else{
 		if(!is.null(tau)|!is.null(modelsIndex)){
 			stop("If septau is set to false then tau and modelsIndex must remain NULL")
 		}
-		plotgroup.cv.rq.pen.seq(x,a,logLambda,main,...)
+		plotgroup.cv.rq.pen.seq(x,logLambda,main,...)
 	}
 }
 
-plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
-#code challenge implicitly assumes lambda is the same for all models. 
-	if(is.null(a)){
-		a <- x$fit$a
-	}
+plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
+	a <- x$fit$a
 	na <- length(a)
-	if(na > 1){
-		par(ask=TRUE)
+	# besta <- x$gtr$a[1]
+	# bestaidx <- which(a==besta)
+	# a <- a[-bestaidx]
+	# a <- c(besta,a)
+	if(logLambda){
+		lambdas <- log(x$fit$models[[1]]$lambda)
+		xtext <- expression(Log(lambda))
+	} else{
+		lambdas <- x$fit$models[[1]]$lambda
+		xtext <- expression(lambda)
 	}
+	maxerr <- max(x$gcve)
+	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,main=mainText,type="n",...)
 	for(i in 1:na){
-		aindex <- which(x$fit$a == a[i])
-		if(is.null(main)){
-			mainText <- paste("Group cross validation results for a = ",a[i])
-		} else if(length(main)==1){
-			mainText <- main
-		} else{
-			main <- main[i]
-		}
-		if(logLambda){
-			lambdas <- log(x$fit$models[[1]]$lambda)
-			xtext <- expression(Log(lambda))
-		} else{
-			lambdas <- x$fit$models[[1]]$lambda
-			xtext <- expression(lambda)
-		}
-		plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
-		bestIndex <- subset(x$gtr, a==a[i])$lambdaIndex[1]
-		lines(rep(lambdas[bestIndex],2),c(-5,max(m1$gcve[aindex,])+1),lty=2)
+		points(lambdas,x$gcve[i,],col=i,...)
 	}
-	if(na > 1){
-		par(ask=FALSE)
-	}
+	bestlamidx <- x$gtr$lambdaIndex
+	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
+	legend("topleft",a,col=1:na)
 }
+
+# plotgroup.cv.rq.pen.seq <- function(x,a,logLambda,main,...){
+# #code challenge implicitly assumes lambda is the same for all models. 
+	# if(is.null(a)){
+		# a <- x$fit$a
+	# }
+	# na <- length(a)
+	# if(na > 1){
+		# par(ask=TRUE)
+	# }
+	# for(i in 1:na){
+		# aindex <- which(x$fit$a == a[i])
+		# if(is.null(main)){
+			# mainText <- paste("Group cross validation results for a = ",a[i])
+		# } else if(length(main)==1){
+			# mainText <- main
+		# } else{
+			# main <- main[i]
+		# }
+		# if(logLambda){
+			# lambdas <- log(x$fit$models[[1]]$lambda)
+			# xtext <- expression(Log(lambda))
+		# } else{
+			# lambdas <- x$fit$models[[1]]$lambda
+			# xtext <- expression(lambda)
+		# }
+		# plot(lambdas, m1$gcve[aindex,],ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		# bestIndex <- subset(x$gtr, a==a[i])$lambdaIndex[1]
+		# lines(rep(lambdas[bestIndex],2),c(-5,max(m1$gcve[aindex,])+1),lty=2)
+	# }
+	# if(na > 1){
+		# par(ask=FALSE)
+	# }
+# }
 
 
 
@@ -955,45 +979,45 @@ error.bars <- function (x, upper, lower, width = 0.02, ...)
     range(upper, lower)
 }
 
-plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
-	models <- getModels(x$fit,tau=tau,a=a,modelsIndex=modelsIndex)
-	tm <- models$targetModels
-	li <- models$lambdaIndex
-	mi <- models$modelsIndex
-	ml <- length(tm)
-	if(ml > 1){
-		par(ask=TRUE)
-	}
-	for(i in 1:ml){
-		if(is.null(main)){
-			mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a, "\n")
-		} else if(length(main)==1){
-			mainText <- paste(main, "\n")
-		} else{
-			main <- paste(main[i], "\n")
-		}
-		if(logLambda){
-			lambdas <- log(tm[[i]]$lambda[li])
-			xtext <- expression(Log(lambda))
-		} else{
-			lambdas <- tm[[i]]$lambda[li]
-			xtext <- expression(lambda)
-		}
-		err <- x$cverr[mi[i],]
-		cvsd <- x$cvse[mi[i],]
-		plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
-		segments(lambdas,err-cvsd,lambdas,err+cvsd)
-		segments(lambdas-.01,err-cvsd,lambdas+.01,err-cvsd)
-		segments(lambdas-.01,err+cvsd,lambdas+.01,err+cvsd)
-		mInfo <- subset(x$btr, modelsIndex == mi[i])
-		lines(rep(lambdas[mInfo$lambdaIndex],2),c(-5,max(err+cvsd)+1),lty=2)
-		lines(rep(lambdas[mInfo$lambda1seIndex],2),c(-5,max(err+cvsd)+1),lty=2)
-		axis(side=3, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
-	}
-	if(ml > 1){
-		par(ask=FALSE)	
-	}
-}
+# plotsep.cv.rq.pen.seq <- function(x,tau=NULL,a=NULL,modelsIndex=NULL,logLambda=FALSE,main=NULL,...){
+	# models <- getModels(x$fit,tau=tau,a=a,modelsIndex=modelsIndex)
+	# tm <- models$targetModels
+	# li <- models$lambdaIndex
+	# mi <- models$modelsIndex
+	# ml <- length(tm)
+	# if(ml > 1){
+		# par(ask=TRUE)
+	# }
+	# for(i in 1:ml){
+		# if(is.null(main)){
+			# mainText <- paste("Cross validation results for ", expression(tau)," = ", tm[[i]]$tau, " and a = ", tm[[i]]$a, "\n")
+		# } else if(length(main)==1){
+			# mainText <- paste(main, "\n")
+		# } else{
+			# main <- paste(main[i], "\n")
+		# }
+		# if(logLambda){
+			# lambdas <- log(tm[[i]]$lambda[li])
+			# xtext <- expression(Log(lambda))
+		# } else{
+			# lambdas <- tm[[i]]$lambda[li]
+			# xtext <- expression(lambda)
+		# }
+		# err <- x$cverr[mi[i],]
+		# cvsd <- x$cvse[mi[i],]
+		# plot(lambdas, err, ylim=c(0,max(err+cvsd)),ylab="Cross Validation Error",xlab=xtext,main=mainText,col="red",pch=16,...)
+		# segments(lambdas,err-cvsd,lambdas,err+cvsd)
+		# segments(lambdas-.01,err-cvsd,lambdas+.01,err-cvsd)
+		# segments(lambdas-.01,err+cvsd,lambdas+.01,err+cvsd)
+		# mInfo <- subset(x$btr, modelsIndex == mi[i])
+		# lines(rep(lambdas[mInfo$lambdaIndex],2),c(-5,max(err+cvsd)+1),lty=2)
+		# lines(rep(lambdas[mInfo$lambda1seIndex],2),c(-5,max(err+cvsd)+1),lty=2)
+		# axis(side=3, at = lambdas, labels=paste(tm[[i]]$nzero),tick=FALSE,line=0)
+	# }
+	# if(ml > 1){
+		# par(ask=FALSE)	
+	# }
+# }
 
 plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
 	models <- getModels(x,tau=tau,a=a,lambda=lambda,modelsIndex=modelsIndex,lambdaIndex=lambdaIndex)
