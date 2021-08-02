@@ -1161,7 +1161,7 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 }
 
 bytau.plot <- function(x,...){
-	UseMethod("beta.plot")
+	UseMethod("bytau.plot")
 } 
 
 bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
