@@ -1160,11 +1160,11 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
   }  
 }
 
-bytau.plot <- function(x){
+bytau.plot <- function(x,...){
 	UseMethod("beta.plot")
 } 
 
-bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL){
+bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	if(is.null(a) & length(x$a)>1){
 		stop("Need to specify value for a")
 	} else if(is.null(a)){
@@ -1178,11 +1178,67 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL){
 	}
 	if(is.null(lambdaIndex)){
 		lambdaIndex <- which(x$models[[1]]$lambda==lambda)
-	}	
+	}
+	if(length(lambdaIndex)>1){
+		stop("Function only supports a single value of lambda or lambdaIndex")
+	}
+	coefs <- do.call(rbind,coefficients(x,a=a,lambdaIndex=lambdaIndex))
+	par(ask=TRUE)
+	p <- ncol(coefs)
+	tau <- x$tau
+	for(i in 1:p){
+		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],...)
+	}
+	par(ask=FALSE)
 }
 
-bytau.plot.rq.pen.seq.cv <- function(x){
+bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
+	coefs <- do.call(rbind,coefficients(x,septau,cvmin,useDefaults,tau=x$fit$tau,...))
+	if(nrow(coefs) != length(x$fit$tau)){
+		stop("Too many coefficients returned, function only works with one lambda value")
+	}
+	par(ask=TRUE)
+	p <- ncol(coefs)
+	tau <- x$tau
+	for(i in 1:p){
+		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],...)
+	}
+	par(ask=FALSE)
+	
+}
 
+coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+	if(!useDefaults){
+		coefficients(x$models,tau=tau,...)
+	} else{
+		if(is.null(tau)){
+			tau <- m1$fit$tau
+		}
+		if(septau){
+			keepers <- which(closeEnough(tau,x$btr$tau))
+			btr <- x$btr[keepers,]
+			models <- x$fit$models[btr$modelsIndex]
+			if(cvmin){
+				lambdaIndex <- btr$lambdaIndex
+			} else{
+				lambdaIndex <- btr$lambda1seIndex
+			}
+			returnVal <- vector(mode="list", length=length(models))
+			names(returnVal) <- names(models)
+			for(i in 1:length(returnVal)){
+				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
+			}
+			returnVal
+		} else{
+			if(!cvmin){
+				stop("One standard error approach not implemented for group choice of tuning parameter")
+			} else{
+				keepers <- which(closeEnough(tau,x$gtr$tau))
+				gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
+				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
+			}
+		}
+	}
 }
 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
