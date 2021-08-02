@@ -37,6 +37,7 @@ m7 <- rq.pen.cv(x,y,penalty="MCP",tau=c(.1,.3,.7),a=c(3,4,5))
 m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
 m2 <- rq.group.pen.cv(x,y,penalty="gAdLASSO",tau=c(.1,.3,.7),groups=g)
 m3 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
+plot(m3,septau=FALSE)
 m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 
 

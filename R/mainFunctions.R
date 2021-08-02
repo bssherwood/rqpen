@@ -928,7 +928,7 @@ plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
 	for(i in 1:na){
 		points(lambdas,x$gcve[i,],col=i,pch=1)
 	}
-	bestlamidx <- x$gtr$lambdaIndex
+	bestlamidx <- x$gtr$lambdaIndex[1]
 	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
 	legend("topleft",paste("a=",a),col=1:na,pch=1)
 }
