@@ -1187,7 +1187,8 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	p <- ncol(coefs)
 	tau <- x$tau
 	for(i in 1:p){
-		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],...)
+		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],pch=16,...)
+		lines(tau,coefs[,i])
 	}
 	par(ask=FALSE)
 }
@@ -1201,7 +1202,8 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 	p <- ncol(coefs)
 	tau <- x$fit$tau
 	for(i in 1:p){
-		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],...)
+		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],pch=16,...)
+		lines(tau,coefs[,i])
 	}
 	par(ask=FALSE)
 	
