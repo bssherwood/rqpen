@@ -894,7 +894,7 @@ getModels <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex
 }
 
 coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
-	models <- getModels(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL)
+	models <- getModels(x,tau,a,lambda,modelsIndex,lambdaIndex)
 	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
@@ -1160,15 +1160,31 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
   }  
 }
 
-beta.plot <- function(x){
+bytau.plot <- function(x){
 	UseMethod("beta.plot")
 } 
 
-beta.plot.rq.pen.seq <- function(x){
-
+bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL){
+	if(is.null(a) & length(x$a)>1){
+		stop("Need to specify value for a")
+	} else if(is.null(a)){
+		a <- x$a
+	}
+	if(is.null(lambdaIndex) & is.null(lambda)){
+		stop("need to specify a value for lambda")
+	}
+	if(!is.null(lambdaIndex) & !is.null(lambda)){
+		stop("only specify lambdaIndex or lambda")
+	}
+	if(is.null(lambdaIndex)){
+		lambdaIndex <- which(x$models[[1]$lambda==lambda)
+	}
+	
+	
+	
 }
 
-beta.plot.rq.pen.seq <- function(x){
+bytau.plot.rq.pen.seq.cv <- function(x){
 
 }
 

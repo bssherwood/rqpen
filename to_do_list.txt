@@ -13,6 +13,7 @@
 15. everything assumes tau is in some reasonable order, maybe force it to be in increasing order. 
 16. rq.pen does not work with tau.pen set to true. Should revisit this for multiple values of tau. 
 17. ggplot version of plots. 
+18. Maybe think of a way to show how the bytau plots change with lambda. 
 
 hrqglasso
 
