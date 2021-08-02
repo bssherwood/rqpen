@@ -1021,7 +1021,7 @@ plotsep.cv.rq.pen.seq <- function(x,tau,logLambda,main,...){
 		bestkeep <- which(closeEnough(tau[i],x$btr$tau))
 		subbtr <- x$btr[bestkeep,]
 		besterr <- x$cverr[subbtr$modelsIndex,]
-		cvsd <- x$cvse[bestidx,]
+		cvsd <- x$cvse[subbtr$modelsIndex,]
 		
 		plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
 		for(j in 1:na){
