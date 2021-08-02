@@ -920,8 +920,11 @@ plotgroup.cv.rq.pen.seq <- function(x,logLambda,main,...){
 		lambdas <- x$fit$models[[1]]$lambda
 		xtext <- expression(lambda)
 	}
+	if(is.null(main)){
+		main <- "Cross validation results summarized for all tau"
+	}
 	maxerr <- max(x$gcve)
-	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,main=mainText,type="n",...)
+	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,type="n",main=main,...)
 	for(i in 1:na){
 		points(lambdas,x$gcve[i,],col=i,...)
 	}
