@@ -902,9 +902,6 @@ plot.cv.rq.pen.seq <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 	if(septau){
 		plotsep.cv.rq.pen.seq(x,tau,logLambda,main,...)
 	} else{
-		if(!is.null(tau)|!is.null(modelsIndex)){
-			stop("If septau is set to false then tau and modelsIndex must remain NULL")
-		}
 		plotgroup.cv.rq.pen.seq(x,logLambda,main,...)
 	}
 }
