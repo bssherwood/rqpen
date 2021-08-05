@@ -136,7 +136,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param coef.cuttoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
 #' @param max.iter Maximum number of iterations of non-linear programming algorithms.
 #' @param converge.eps Convergence threshold for non-linear programming algorithms. 
-#' @param ... 
+#' @param gamma tuning parameter for Huber loss, not applicable for non-huber algorithms. 
+#' @param ...
 #'
 #' @return
 #' @export
@@ -144,15 +145,15 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @examples
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
+	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10, ...){
 	penalty <- match.arg(penalty)
 	if(penalty=="LASSO"){
-		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,...)
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
 			stop("huber alg is only option for Ridge penalty")
 		}
-		fit <- rq.enet(x,y,tau,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)
+		fit <- rq.enet(x,y,tau,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,...)
 	} else if(penalty == "ENet"){
 		if(alg != "huber"){
 			stop("huber alg is only option for ENet penalty")
@@ -162,7 +163,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		}
 		fit <- rq.enet(x,y,tau,lambda,a=a,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)
+		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,...)
 	}
 	fit$call <- match.call()
 	fit

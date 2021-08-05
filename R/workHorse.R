@@ -295,7 +295,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 #
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
+						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	if(alg == "lp"){
 	#use br as the default for linear programming 
 		alg <- "br"
@@ -328,7 +328,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		if(length(lambda)==1){
 			stop("The Huber algorithm requires at least 2 values of lambda")
 		}
-		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,max.iter,converge.eps,...)
+		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma=gamma,...)
 	} else{
 		models <- vector(mode="list",length=nt)
 		modelnames <- NULL
@@ -337,7 +337,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 			j <- 1
 			for(lam in lambda){
 				sublam <- lam*penalty.factor*tau.penalty.factor[i]
-				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, coef.cutoff=coef.cutoff, ...)
+				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, coef.cutoff=coef.cutoff,...)
 				coefs <- cbind(coefs,coefficients(subm))
 				j <- j + 1
 			}
@@ -358,7 +358,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	returnVal
 }
 
-rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),a=0,max.iter=10000,converge.eps=1e-7,...){
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -389,7 +389,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	if(length(lambda)==1){
 			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
 	}
-	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,a=a,max.iter=max.iter,converge.eps=converge.eps,...)
+	returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,a=a,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)
 	avals <- sapply(returnVal$models,modelA)
 	tauvals <- sapply(returnVal$models,modelTau)
 	modelsInfo <- data.frame(modelIndex=1:length(returnVal$models),a=avals,tau=tauvals)
@@ -404,7 +404,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 #update how this does penalty factor. That should be passed to this function. 
 #still need to think about penalty factor here 
 rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalty.factor,tau.penalty.factor,scalex=TRUE,
-					coef.cuttoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
+					coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	nt <- length(obj$tau)
 	na <- length(a)
 	if(penalty=="SCAD"){
@@ -428,10 +428,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 			newModels[[pos]] <- obj$models[[j]]
 			for(i in 1:ll){
 				if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],scalex=scalex,alg=obj$alg,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])[,2]
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
 
 				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,scalex=scalex,coef.cuttoff=1e-8,max.iter=10000,converge.eps=1e-7,...)$models[[1]])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 			}
@@ -577,7 +577,7 @@ createModelsInfo <- function(models){
 }
 
 rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg="huber",scalex=TRUE,
-					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cuttoff=1e-8,max.iter=10000,converge.eps=1e-7,...) {
+					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -601,14 +601,14 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 	#QICD implementation not provided in rq.lasso
 		if(penalty=="aLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
-						tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,...)
+						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
+						converge.eps=converge.eps,gamma=gamma)
 		} else{
 			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
-						tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,...)
+						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
+						converge.eps=converge.eps,gamma=gamma)
 		}
-		rq.lla(init.model,x,y,penalty,a,...)
+		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma)
 	} else{
 		pos <- 1
 		models <- vector(mode="list",length=nt*na)
@@ -618,7 +618,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 				coefs <- NULL
 				for(lam in lambda){
 					sublam <- lam
-					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", a=a[j], ...)
+					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
 				models[[pos]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor=rep(1,p),penalty,a[j])
