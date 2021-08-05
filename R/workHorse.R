@@ -425,14 +425,15 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 		lampen <- penalty.factor*tau.penalty.factor[j]#as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
 		ll <- length(obj$models[[j]]$lambda)
 		for(k in 1:na){	
-			pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
+			#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
 			newModels[[pos]] <- obj$models[[j]]
 			for(i in 1:ll){
+				llapenf <- derivf(as.numeric(abs(coefficients(obj$models[[j]]))[-1,i]),lampen,a=a[k])
 				if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=pfs[,i],scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=llapenf,scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
 
 				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=pfs[,i],alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=llapenf,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 			}
@@ -443,9 +444,9 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 	}
 	names(newModels) <- modelNames
 	obj$models <- newModels	
-	if(penalty=="aLASSO"){
-		obj$penalty.factor <- pfs
-	}
+	#if(penalty=="aLASSO"){
+	##	obj$penalty.factor <- pfs
+	#}
 	obj$a <- a
 	obj$penalty <- penalty
 	obj$modelsInfo <- createModelsInfo(obj$models)
