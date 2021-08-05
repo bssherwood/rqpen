@@ -3,7 +3,7 @@ library(devtools)
 devtools::unload("rqPen")
 install_github("bssherwood/rqpen")
 library(rqPen)
-library(hrqglas)
+library(hrqglas) #blah
 
 
 library(hqreg)
