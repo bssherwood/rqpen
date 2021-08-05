@@ -940,18 +940,18 @@ getGroupPen <- function(coefs,groups,lambda,group.pen.factor,penalty,norm,a){
    pens	
 }
 
-rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,max.iter,converge.eps,a=1,...){
+rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,max.iter,converge.eps,a=1,gamma,...){
 	dims <- dim(x)
 	p <- dims[2]
 	if(scalex){
-		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
+		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,gamma=gamma,...)
 	} else{
-		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
+		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,gamma=gamma,...)
 	}
 	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",a)
 }
 
-rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),max.iter,converge.eps,a=1,...){
+rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),max.iter,converge.eps,a=1,gamma,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -965,7 +965,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 		subtau <- tau[i]
 		penf <- penalty.factor*tau.penalty.factor[i]
 		for(j in 1:na){			
-			models[[pos]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penf,scalex=scalex,max.iter,converge.eps,a=a[j],...)
+			models[[pos]] <- rq.lasso.huber.onetau(x,y,tau=subtau,lambda=lambda,penalty.factor=penf,scalex=scalex,max.iter,converge.eps,a=a[j],gamma=gamma,...)
 			pos <- pos+1
 			modelnames <- c(modelnames,paste0("tau",tau[i],"a",a[j]))
 		}
