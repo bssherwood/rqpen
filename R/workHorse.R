@@ -358,7 +358,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	returnVal
 }
 
-rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10){
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
