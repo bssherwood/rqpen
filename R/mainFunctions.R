@@ -129,7 +129,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @examples
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-	coef.cuttoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
+	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
 	penalty <- match.arg(penalty)
 	if(penalty=="LASSO"){
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,...)
