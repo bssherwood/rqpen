@@ -78,6 +78,21 @@ predict.qic.select <- function(x, newdata, ...){
 	cbind(1,newdata) %*% coefs
 }
 
+
+print.rq.pen.seq <- function(x,...){
+  nt <- length(x$tau)
+  na <- length(x$a)
+  if(nt==1 & na==1){
+    print(data.frame(nzero=x$models[[1]]$nzero,lambda=x$lambda))
+  } else if(nt > 1 & na > 1){
+    print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
+  } else if( na > 1){
+    print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
+  } else{
+    print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
+  }	
+}
+
 # print.rq.pen.seq <- function(x,...){
 	# if(length(x$tau)==1){
 		# cat("\n df by lambda:\n")
