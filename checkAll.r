@@ -17,29 +17,27 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
 g <- c(1,1,1,1,2,2,3,3)
 tvals <- c(.25,.75)
 
-m1 <- rq.lasso(x,y)
-m2 <- rq.lasso(x,y,alg="br")
+m1 <- rq.pen(x,y)
+m2 <- rq.pen(x,y,alg="br")
 m1$models
 m2$models
 
-m1 <- rq.enet(x,y)
-m2 <- rq.enet(x,y,a=.5)
-m1$models
+m2 <- rq.pen(x,y,penalty="ENet",a=.5)
 m2$models
 
-m1 <- rq.nc(x,y)
-m2 <- rq.nc(x,y,alg="br")
-m3 <- rq.nc(x,y,alg="QICD")
+m1 <- rq.pen(x,y,penalty="SCAD")
+m2 <- rq.pen(x,y,penalty="SCAD",alg="br")
+m3 <- rq.pen(x,y,penalty="SCAD",alg="QICD")
 m1$models
 m2$models
 m3$models
 
-m1 <- rq.nc(x,y,penalty="aLASSO")
+m1 <- rq.pen(x,y,penalty="aLASSO")
 m1$models
 
-m1 <- rq.nc(x,y,penalty="MCP")
-m2 <- rq.nc(x,y,alg="br", penalty="MCP")
-m3 <- rq.nc(x,y,alg="QICD",penalty="MCP")
+m1 <- rq.pen(x,y,penalty="MCP")
+m2 <- rq.pen(x,y,alg="br", penalty="MCP")
+m3 <- rq.pen(x,y,alg="QICD",penalty="MCP")
 m1$models
 m2$models
 m3$models
