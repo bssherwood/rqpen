@@ -421,9 +421,10 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 	newModels <- vector(mode="list",length=nt*na)
 	pos <- 1
 	modelNames <- NULL
+	ll <- length(obj$lambda)
+
 	for(j in 1:nt){
 		lampen <- penalty.factor*tau.penalty.factor[j]#as.numeric(obj$models[[j]]$penalty.factor %*% t(obj$models[[j]]$lambda))
-		ll <- length(obj$models[[j]]$lambda)
 		for(k in 1:na){	
 			#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
 			newModels[[pos]] <- obj$models[[j]]
