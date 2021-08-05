@@ -21,6 +21,7 @@
 16. rq.pen does not work with tau.pen set to true. Should revisit this for multiple values of tau. 
 17. ggplot version of plots. 
 18. Maybe think of a way to show how the bytau plots change with lambda. 
+19. Issues with ... and rq.pen, for now just got rid of it. 
 
 hrqglasso
 
