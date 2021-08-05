@@ -1,3 +1,10 @@
+#Making things nice
+1. codemetar: currenlty not available on CRAN. https://devguide.ropensci.org/building.html
+2. readme badges..., probably not
+3. Need to update ?'rqPen-package'
+
+
+# Practical stuff
 1. The issue of same lambda for all tau should allow for a tau penalty factor. 
 2. Update choice of lambda for all penalties
 3. Warm starts in cv functions

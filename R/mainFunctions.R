@@ -1,54 +1,3 @@
-kernel_estimates <- function(x,y,h,...){
-  kernel_estimates <- NULL
-  if(is.null(dim(x))){
-    n <- length(x)
-    d <- 1
-  } else{
-    n <- dim(x)[1]
-    d <- dim(x)[2]
-  }
-  for(i in 1:n){
-     if(d == 1){
-        kernel_estimates <- c(kernel_estimates,kernesti.regr(x[i],x,y,h=h,...))
-     } else{
-        kernel_estimates <- c(kernel_estimates,kernesti.regr(x[i,],x,y,h=h,...))
-     }
-  }
-  kernel_estimates
-}
-
-
-
-model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
-#func: "check" (Quantile Check), "SqErr" (Squared Error), "AE" (Absolute Value)
-  if(model$intercept){
-    test_x <- cbind(1,test_x)
-  }
-  fits <- test_x %*% coefficients(model)
-  eval_func <- switch(which(c("check","SqErr","AE")==func), check, square, abs)
-  if(is.null(test_w)){
-	  mean(eval_func(test_y-fits,...)) 
-  } else{
-	  weighted.mean(eval_func(test_y-fits,...), test_w)
-  }
-}
-
-
-
-
-
-qbic <- function(model, largeP=FALSE){
-  tau <- model$tau
-  n <- model$n
-  nzero <- sum(model$coefficients !=0)
-  if(largeP){
-    bic <- log(model$rho) + nzero*log(n)*log(length(model$coefficients))/(2*n)
-  }else{
-    bic <- log(model$rho) + nzero*log(n)/(2*n)
-  }
-  bic
-}
-
 qic <- function(model,n, method="BIC"){
 	tau <- model$tau
 	df <- sum(model$coefficients != 0)
@@ -155,17 +104,52 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 }
 
 
-rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,...){
+#' Title
+#'
+#' @param x matrix of predictors
+#' @param y vector of responses
+#' @param tau vector of quantiles
+#' @param lambda vector of lambda, if not set will be generated automatically
+#' @param penalty choice of penalty
+#' @param a additional tuning parameter, not used for lasso or ridge penalties
+#' @param nlambda number of lambda, ignored if lambda is set
+#' @param eps If not pre-specified the lambda vector will be from lambda_max to lambda_max times eps
+#' @param penalty.factor penalty factor for the predictors
+#' @param alg algorithm used
+#' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the orginal scale. 
+#' @param tau.penalty.factor A penalty factor for each quantile.
+#' @param coef.cuttoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
+#' @param max.iter Maximum number of iterations of non-linear programming algorithms.
+#' @param converge.eps Convergence threshold for non-linear programming algorithms. 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
+	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
+	coef.cuttoff=1e-8,max.iter=10000,converge.eps=1e-7,...){
 	penalty <- match.arg(penalty)
 	if(penalty=="LASSO"){
-		fit <- rq.lasso(x,y,tau,lambda,...)
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,...)
 	} else if(penalty=="Ridge"){
-		fit <- rq.enet(x,y,tau,lambda,a=0,...)
+		if(alg != "huber"){
+			stop("huber alg is only option for Ridge penalty")
+		}
+		fit <- rq.enet(x,y,tau,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)
 	} else if(penalty == "ENet"){
+		if(alg != "huber"){
+			stop("huber alg is only option for ENet penalty")
+		}
+		if(is.null(a)){
+			stop("Specify a value for a for Enet penalty")
+		}
 		fit <- rq.enet(x,y,tau,lambda,a=a,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-		fit <- rq.nc(x,y,tau,penalty,a,lambda,...)
+		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)
 	}
+	fit$call <- match.call()
 	fit
 }
 
