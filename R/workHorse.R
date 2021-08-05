@@ -976,19 +976,7 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 }
 
 
-print.rq.pen.seq <- function(x,...){
-	nt <- length(x$tau)
-	na <- length(x$a)
-    if(nt==1 & na==1){
-		print(data.frame(nzero=x$models[[1]]$nzero,lambda=x$models[[1]]$lambda))
-	} else if(nt > 1 & na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
-	} else if( na > 1){
-		print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
-	} else{
-			print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
-	}	
-}
+
 
 getModelCoefs <- function(x,index){
 	coefficients(x)[,index]
