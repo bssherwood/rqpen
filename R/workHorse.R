@@ -601,11 +601,11 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 	#QICD implementation not provided in rq.lasso
 		if(penalty=="aLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
-						tau.penalty.factor=tau.penalty,factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
+						tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
 						converge.eps=converge.eps,...)
 		} else{
 			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
-						tau.penalty.factor=tau.penalty,factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
+						tau.penalty.factor=tau.penalty.factor,coef.cuttoff=coef.cutoff,max.iter=max.iter,
 						converge.eps=converge.eps,...)
 		}
 		rq.lla(init.model,x,y,penalty,a,...)
