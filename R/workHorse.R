@@ -395,6 +395,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	modelsInfo <- data.frame(modelIndex=1:length(returnVal$models),a=avals,tau=tauvals)
 	returnVal$modelsInfo <- modelsInfo
 	returnVal$penalty <- "ENet"
+	returnVal$lambda <- lambda
 	returnVal$a <- a
 	
 	class(returnVal) <- "rq.pen.seq"
@@ -577,7 +578,7 @@ createModelsInfo <- function(models){
 }
 
 rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg="huber",scalex=TRUE,
-					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10) {
+					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -602,13 +603,13 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		if(penalty=="aLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
 						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,gamma=gamma)
+						converge.eps=converge.eps,gamma=gamma,...)
 		} else{
 			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
 						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,gamma=gamma)
+						converge.eps=converge.eps,gamma=gamma,...)
 		}
-		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma)
+		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...)
 	} else{
 		pos <- 1
 		models <- vector(mode="list",length=nt*na)
