@@ -167,6 +167,8 @@ rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=
 }
 
 transform_coefs <- function(coefs,mu_x,sigma_x,intercept=TRUE){
+  print(length(coefs))
+  print(length(sigma_x))
   new_coefs <- coefs
   if(intercept){
 	  intercept <- coefs[1]
