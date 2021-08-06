@@ -130,6 +130,7 @@ mcp_deriv <- function(x, lambda=1, a=3){
 	u
 }
 
+
 alasso_wt <- function(x,lambda=1,a=1){
 	lambda*(1/abs(x))^a
 }
@@ -407,18 +408,20 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	returnVal	
 }
 
-#update how this does penalty factor. That should be passed to this function. 
-#still need to think about penalty factor here 
-rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalty.factor,tau.penalty.factor,scalex=TRUE,
+#kind of hacky code with respect to penalty calculation 
+rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.factor,tau.penalty.factor,scalex=TRUE,
 					coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	nt <- length(obj$tau)
 	na <- length(a)
 	if(penalty=="SCAD"){
 		derivf <- scad_deriv
+		penf <- scad
 	} else if(penalty=="MCP"){
-		derivf <- mcp_deriv
+		derivf <- mcp
+		penf <- mcp
 	} else if(penalty=="aLASSO"){
 		derivf <- alasso_wt
+		penf <- alasso
 	} else{
 		stop("Penalty must be SCAD, MCP or aLASSO")
 	}
@@ -433,6 +436,7 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 		for(k in 1:na){	
 			#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
 			newModels[[pos]] <- obj$models[[j]]
+			penSums <- NULL
 			for(i in 1:ll){
 				llapenf <- derivf(as.numeric(abs(coefficients(obj$models[[j]]))[-1,i]),lampen,a=a[k])
 				if(obj$alg=="huber"){
@@ -442,8 +446,15 @@ rq.lla <- function(obj,x,y,penalty="SCAD",a=ifelse(penalty=="SCAD",3.7,3),penalt
 					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=llapenf,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
+				if(penalty=="aLASSO"){
+					subPenSum <- sum(l
+				} else{
+					subPenSum <- sum(f(update_est,lampen,a[k]))
+				}
+				penSums <- c(penSums, subPenSum)
 			}
 			newModels[[pos]]$a <- a[k]
+			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,newModels[[pos]]$tau,obj$lambda,local.penalty.factor=penalty.factor*tau.penalty.factor[j],penalty,a[k])
 			modelNames <- c(modelNames,paste0("tau",obj$tau[j],"a",a[k]))
 			pos <- pos+1
 		}
@@ -683,18 +694,17 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	g <- length(unique(groups))
 	nt <- length(tau)
 	
-	penf <- group.pen.factor
 	models <- vector(mode="list",length=nt)
 	for(i in 1:nt){
 		subtau <- tau[i]
-		penfi <- penf*tau.penalty.factor[i]
-		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penfi,scalex=scalex,lambda.discard=FALSE,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,...)
+		penf <- group.pen.factor*tau.penalty.factor[i]
+		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,lambda.discard=FALSE,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
 	}
 	attributes(models)$names <- paste0("tau",tau,"a",1)
 		
 	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO",a=1,lambda=lambda)
-	returnVal <- updateGroupPenRho(returnVal,2,groups)
+	returnVal <- updateGroupPenRho(returnVal,2,groups,group.pen.factor,tau.penalty.factor)
 	returnVal$a <- 1
 	returnVal$modelsInfo <- data.frame(modelIndex=1:nt,a=1,tau=tau)
 	rownames(returnVal$modelsInfo) <- paste0("tau",tau,"a",1)
@@ -821,19 +831,21 @@ getPenfunc <- function(penalty){
 
 
 
-updateGroupPenRho <- function(obj,norm,groups){
+updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.factor){
 	
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a
+		taupos <- which(obj$tau == obj$models[[j]]$tau)
 		if(length(obj$lambda)==1){
-			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
+			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
 		} else{
 			for(i in 1:length(obj$lambda)){
-				if(obj$penalty=="gAdLASSO"){
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
-				} else{			
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
-				}
+				obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[taupos],obj$penalty,norm,a))
+				#if(obj$penalty=="gAdLASSO"){
+				#	obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
+				#} else{			
+				#	obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+				#}
 			}
 		}
 	}	
