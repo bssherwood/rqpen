@@ -146,6 +146,9 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	penalty <- match.arg(penalty)
+	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
+		stop("Penalty factors must be non-negative.")
+	}
 	if(penalty=="LASSO"){
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,...)
 	} else if(penalty=="Ridge"){
