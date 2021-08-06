@@ -229,7 +229,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	tauvals <- sapply(fit$models,modelTau)
 	avals <- sapply(fit$models,modelA)
 	if(groupError){
-		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr)
+		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr,fit$lambda)
 		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
 	} else{
 		indErrors <- t(indErrors)/n

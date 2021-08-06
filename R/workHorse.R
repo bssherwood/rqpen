@@ -1073,15 +1073,11 @@ modelA <- function(object){
 	object$a	
 }
 
-modelLambda <- function(object, index){
-	object$lambda[index]
-}
-
 modelNz <- function(object, index){
 	object$nz[index]
 }
 
-byTauResults <- function(cvErr,tauvals,avals,models,se){
+byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 #for loops!
 	mn <- length(tauvals)
 	overallMin <- apply(cvErr,1,min)
@@ -1096,7 +1092,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se){
 		subse <- se[btr[[5]][i],btr[[3]][i]] #5 is model index and 3 is lambda index
 		cvse <- c(cvse,subse)
 		se1Above <- btr[[2]][1] + subse
-		subLambda <- models[[btr[[5]][i]]]$lambda[btr[[3]][i]]
+		subLambda <- lambda[btr[[3]][i]]
 		lambdaVals <- c(lambdaVals, subLambda)
 		subLambda1sePos <- which(cvErr[btr[[5]][1],] <= se1Above)[1]
 		lambda1seIndex <- c(lambda1seIndex,subLambda1sePos)
