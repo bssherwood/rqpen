@@ -12,6 +12,8 @@ qic <- function(model,n, method="BIC"){
 	}
 }
 
+
+
 qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case
 	if(class(obj) == "rq.pen.seq.cv"){
@@ -281,7 +283,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	fit <- rq.pen(x,y,tau,lambda=lambda,penalty=penalty,a=a,...)
 	nt <- length(tau)
 	na <- length(fit$a)
-	nl <- length(fit$models[[1]]$lambda)
+	nl <- length(fit$lambda)
 	if(!groupError){
 		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
 	}
@@ -1546,30 +1548,259 @@ plot.cv.rq.group.pen <- function (x,y=NULL,...)
     plot(x$cv[, 1], x$cv[, 2])
 }
 
-qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
-	if(linear){
-		eval_function<- function(x,y,tau){ 
-							q1 <- rq(y ~ x, tau)
-							sum((fitted(q1)-quantile(y,tau))^2)
-						}
-		eval_results <- apply(x,2,eval_function,y,tau,...)
+rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
+                         coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE, ...){
+# x is a n x p matrix without the intercept term
+# y is a n x 1 vector
+# lambda takes values of 1 or p
+# coef.cutoff is a threshold to set to zero. 
+# Choose the method used to estimate the coefficients ("br", "fn" or any other method used by quantreg)
+### According to quantreg manual and my experience, "fn" is much faster for big n
+### The "n" can grow rapidly using lin. prog. approach  
+# penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
+   if(is.null(dim(x))){
+      stop('x needs to be a matrix with more than 1 column')
+   }
+   p <- dim(x)[2]
+   if(p == 1){
+	  stop('x needs to be a matrix with more than 1 column')
+   }
+   n <- dim(x)[1]
+   if(n != length(y)){
+      stop('length of y and rows of x do not match')
+   }
+   if(is.null(lambda)==TRUE | (length(lambda) != 1 & length(lambda) != dim(x)[2])){
+      stop(paste('input of lambda must be of length 1 or', dim(x)[2]))
+   }
+   if( sum(lambda < 0) > 0){
+      stop(paste('lambda must be positive and we have a lambda of ', lambda, sep=""))
+   }
+   if(scalex){
+	  original_x <- x
+	  x <- scale(x)
+	  mu_x <- attributes(x)$`scaled:center`
+	  sigma_x <- attributes(x)$`scaled:scale`
+   }
+
+   if(is.null(penVars) !=TRUE){# & length(lambda) == 1){
+      if(length(lambda)==1){
+		  mult_lambda <- rep(0,p)
+		  mult_lambda[penVars] <- lambda
+		  lambda <- mult_lambda
+	  } else{
+		lambda[-penVars] <- 0
+	  }
+   }
+   lambda <- lambda*n # need this to account for the fact that rq does not normalize the objective function
+   if(length(lambda)==1){
+      pen_x <- rbind(diag(rep(lambda,p)),diag(rep(-lambda,p)))
+   } else{
+      pen_x <- rbind(diag(lambda), diag(-lambda))
+      pen_x <- pen_x[rowSums(pen_x==0)!=dim(pen_x)[2],]#drop all zero rows
+   }
+   aug_n <- dim(pen_x)[1]
+   aug_x <- rbind(x,pen_x)
+   if(intercept){
+      aug_x <- cbind(c(rep(1,n),rep(0,aug_n)), aug_x)
+   }
+   aug_y <- c(y, rep(0,aug_n))
+   if(is.null(weights)){
+     model <- rq(aug_y ~ aug_x+0, tau=tau, method=method)
+   } else{
+     if(length(weights) != n){
+       stop("Length of weights does not match length of y")
+     }
+     orig_weights <- weights
+     weights <- c(weights, rep(1,aug_n))
+     model <- rq(aug_y ~ aug_x+0, tau=tau, weights=weights, method=method)
+   }
+   p_star <- p+intercept
+   coefs <- coefficients(model)[1:p_star]
+   return_val <- NULL
+   return_val$coefficients <- coefs
+   if(is.null(colnames(x))){
+     x_names <- paste("x",1:p,sep="")
+   } else{
+     x_names <- colnames(x)
+   }
+   if(intercept){
+     x_names <- c("intercept",x_names)
+   }
+   attributes(return_val$coefficients)$names <- x_names
+   return_val$coefficients[abs(return_val$coefficients) < coef.cutoff] <- 0
+   if(scalex){
+   #need to update for penVars
+	 return_val$coefficients <- transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
+	 if(intercept){
+		fits <- cbind(1,original_x) %*% return_val$coefficients
+	 } else{
+		fits <- original_x %*% return_val$coefficients
+	 }
+	 res <- y - fits
+	 return_val$PenRho <- sum(sapply(res,check,tau))+get_coef_pen(return_val$coefficients,lambda,intercept,penVars)	 
+   } else{
+	 return_val$PenRho <- model$rho
+	 res <- model$residuals[1:n]   
+   }
+   if(is.null(weights)){   
+     return_val$rho <- sum(sapply(res,check,tau))
+   } else{
+     return_val$rho <- sum(orig_weights*sapply(res,check,tau))
+   }
+   return_val$tau <- tau
+   return_val$n <- n                  
+   return_val$intercept <- intercept
+   class(return_val) <- c("rq.pen", "rqLASSO")
+   return_val
+}
+
+predict.rq.pen <- function(object, newx,...){
+  coefs <- object$coefficients
+  if(object$intercept){
+     newx <- cbind(1,newx)
+  }
+  newx %*% coefs
+}
+
+predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
+  if(lambda == "lambda.min"){
+     target_pos <- which(object$cv$lambda == object$lambda.min)
+  } else{
+     target_pos <- which(object$cv$lambda == lambda)
+  }
+  predict(object$models[[target_pos]],newx,...)
+}
+
+
+coef.cv.rq.group.pen <- function(object, lambda='min',...){
+  if(lambda=='min'){
+     lambda <- object$lambda.min
+  }
+  target_model <- which(object$cv[,1] == lambda)
+  object$beta[,target_model]
+}
+
+rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.pen=FALSE,scalex=TRUE, ...){
+	penalty <- match.arg(penalty)
+	alg <- match.arg(alg)
+	dims <- dim(x)
+	n <- dims[1]
+	p <- dims[2]
+	g <- length(unique(groups))
+	nt <- length(tau)
+	na <- length(a)
+	lpf <- length(group.pen.factor)
+	if(penalty != "gLASSO"){
+		a <- getA(a,penalty)
 	} else{
-		eval_function2 <- function(x,y,tau,...){ 
-							 b <- bs(x,...)
-							 q1 <- rq(y ~ b, tau)
-							 sum((fitted(q1)-quantile(y,tau))^2)
-						 }
-		eval_results <- apply(x,2,eval_function2,y,tau,...)
+		if(is.null(a)==FALSE){
+			warning("The tuning parameter a is not used for group lasso")
+		}
 	}
-	#if(n.cores==1){
+	pfmat <- FALSE
+	if(g==p){
+		warning("p groups for p predictors, not really using a group penalty")
+	}
+	penalty <- match.arg(penalty)
+	alg <- match.arg(alg)
+	if(norm != 1 & norm != 2){
+		stop("norm must be 1 or 2")
+	}
+	if(penalty=="gLASSO" & norm==1){
+		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
+	}
+	if(norm == 1 & penalty == "gAdLASSO"){
+		warning("Group adapative lasso with 1 norm results in a lasso estimator where lambda weights are the same for each coefficient in a group. However, it does not force groupwise sparsity, there can be zero and non-zero coefficients within a group.")
+	}
+	if(norm == 2 & alg != "huber"){
+		stop("If setting norm = 2 then algorithm must be huber")
+	}
+	if(penalty=="gAdLASSO" & alg != "huber"){
+		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
+	}
+	if(penalty=="gAdLASSO" & alg == "qicd"){
+		stop("No qicd algorithm for adaptive lasso.")
+	}
+	if(sum(tau <= 0 | tau >=1)>0){
+		stop("tau needs to be between 0 and 1")
+	}
+	if(sum(group.pen.factor<0)>0){
+		stop("penalty factors must be positive")
+	}
+	if(nt==1){
+		if(lpf!=g){
+			stop("group penalty factor must be of length g")
+		}
+		if(tau.pen){
+			penalty.factor <- group.pen.factor*sqrt(tau*(1-tau))
+			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
+		}
+	} else{
+		if(length(group.pen.factor) == g*nt){
+			pfmat <- TRUE
+		}
+		else if(length(group.pen.factor) !=g){
+			stop("penalty factor must be a vector with g groups or a nt by g matrix, where nt is the number of taus and g is the number of groups")
+		}
+		if(tau.pen){
+			pfmat <- TRUE
+			if(length(group.pen.factor)==p){
+				group.pen.factor <- matrix(rep(group.pen.factor,nt),nrow=nt,byrow=TRUE)
+			} else{
+				group.pen.factor <- group.pen.factor*sqrt(tau*(1-tau))
+			}
+		}
 		
-	#} else{
-	#	p <- dim(x)[2]
-	#	mc_func <- function(idx,...){ eval_function(x[,idx],y,...)}
-	#	mc_results <- mclapply(1:p, mc_func, mc.cores=n.cores, ...)
-	#	eval_results <- do.call(c,mc_results)
-	#}
-	order( eval_results, decreasing=TRUE)
+	}
+	if(is.null(lambda)){
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex)
+		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	}
+			
+	if(pfmat){
+		#maybe some applies mapvalues
+	} else{
+		penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
+	}
+	
+	if(norm == 1){
+		if(penalty == "gAdLASSO"){
+			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
+		} else{
+			if(alg == "qicd"){
+				init.alg <- "lp"
+			} else{
+				init.alg <- alg
+			}
+			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
+		}
+		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
+	} else{
+		if(penalty == "gLASSO"){
+			return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
+		} else{
+			if(penalty == "gAdLASSO"){
+				init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
+			} else{
+				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
+			}
+			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
+		}
+	}
+	class(return_val) <- "rq.pen.seq"
+	return_val
+}
+
+print.cv.rq.pen <- function(x,...){
+   cat("\nCoefficients:\n")
+   print(coefficients(x,...))
+   cat("\nCross Validation (or BIC) Results\n")
+   print(x$cv)
+}
+
+print.rq.pen <- function(x,...){
+    cat("\nCoefficients:\n")
+	print(coefficients(x,...))
 }
 
 
