@@ -167,8 +167,8 @@ rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=
 }
 
 transform_coefs <- function(coefs,mu_x,sigma_x,intercept=TRUE){
-  print(length(coefs))
-  print(length(sigma_x))
+  #print(length(coefs))
+  #print(length(sigma_x))
   new_coefs <- coefs
   if(intercept){
 	  intercept <- coefs[1]
@@ -628,7 +628,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 			for(j in 1:na){
 				coefs <- NULL
 				for(lam in lambda){
-					sublam <- lam*penalty.factor*tau.penalty.factor[j]
+					sublam <- lam*penalty.factor*tau.penalty.factor[i]
 					penvars <- which(sublam != 0)
 					subm <- rq.nc.fit(x,y,tau[i],lambda=lam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff,converge_criteria=converge.eps,penVars=penvars,internal=TRUE,...)
 					coefs <- cbind(coefs,coefficients(subm))
