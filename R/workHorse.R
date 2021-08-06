@@ -676,7 +676,7 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma...){
+rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
