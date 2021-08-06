@@ -1096,7 +1096,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 		lambdaVals <- c(lambdaVals, subLambda)
 		subLambda1sePos <- which(cvErr[btr[[5]][1],] <= se1Above)[1]
 		lambda1seIndex <- c(lambda1seIndex,subLambda1sePos)
-		subLambda1se <- models[[btr[[5]][i]]]$lambda[subLambda1sePos]
+		subLambda1se <- lambda[subLambda1sePos]
 		lambda1se <- c(lambda1se,subLambda1se)
 		nz <- c(nz, models[[btr[[5]][i]]]$nz[btr[[3]][i]])
 	}
