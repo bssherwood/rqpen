@@ -149,6 +149,9 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
 		stop("Penalty factors must be non-negative.")
 	}
+	if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
+		stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
+	}
 	if(penalty=="LASSO"){
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,...)
 	} else if(penalty=="Ridge"){
