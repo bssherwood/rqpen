@@ -1356,7 +1356,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 			warning("The tuning parameter a is not used for group lasso")
 		}
 	}
-	pfmat <- FALSE
 	if(g==p){
 		warning("p groups for p predictors, not really using a group penalty")
 	}
@@ -1399,7 +1398,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
 	
 	if(penalty == "gLASSO"){
-		return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...)
+		return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...)
 	} else{
 		if(penalty == "gAdLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,tau.penalty.factor=tau.penalty.factor,
