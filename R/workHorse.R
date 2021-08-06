@@ -628,7 +628,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 				for(lam in lambda){
 					sublam <- lam*penalty.factor*tau.penalty.factor[j]
 					penvars <- which(sublam != 0)
-					subm <- rq.nc.fit(x,y,tau[i],lambda=lam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff,converge_criteria=converge.eps,penVars=penvars,...)
+					subm <- rq.nc.fit(x,y,tau[i],lambda=lam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff,converge_criteria=converge.eps,penVars=penvars,internal=TRUE,...)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
 				models[[pos]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,local.penalty.factor=penalty.factor*tau.penalty.factor[j],penalty,a[j])

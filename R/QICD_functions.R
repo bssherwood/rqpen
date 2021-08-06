@@ -99,7 +99,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
   if( is.null(initial_beta) ){
     # initial_beta <- LASSO.fit(y, x, tau, lambda, intercept, coef.cutoff)
     initial_beta <- coefficients( cv.rq.pen(x, y, tau=tau, intercept=intercept, 
-                            penalty="LASSO", criteria="BIC") )
+                            penalty="LASSO", criteria="BIC",internal=TRUE) )
   }
 
   if( intercept ){

@@ -462,7 +462,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 }
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),...){
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),internal=FALSE,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -471,7 +471,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criter
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
-  warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower. It will not be exported to the namespace in future versions")
+  if(!internal){
+	warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower. It will not be exported to the namespace in future versions")
+  }
   m.c <- match.call() # This stores all the arguments in the function call as a list
 
   p <- dim(x)[2]
@@ -627,7 +629,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criter
        if(penalty=="LASSO"){
          init_fit <- rq.lasso.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,...)
        } else{
-         init_fit <- rq.nc.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,...)
+         init_fit <- rq.nc.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,internal=TRUE,...)
        }
        if(sum(init_fit$coefficients[p_range])==0){
          searching <- FALSE     
@@ -738,13 +740,15 @@ re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
 
 rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                       penalty="SCAD",a=3.7,iterations=1,converge_criteria=1e-06,
-                      alg=ifelse(p<50,"LP","QICD"),penVars=NULL,...){
+                      alg=ifelse(p<50,"LP","QICD"),penVars=NULL,internal=FALSE,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
 # penalty SCAD or MCP
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries
-  warning("Recommend using rq.pen() instead. This is an older function and usually will run slower. It will not be exported to the namespace in future versions.")
+  if(!internal){
+	warning("Recommend using rq.pen() instead. This is an older function and usually will run slower. It will not be exported to the namespace in future versions.")
+  }
   p <- ncol(x)
   n <- nrow(x)
 
