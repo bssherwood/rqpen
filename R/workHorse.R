@@ -489,8 +489,8 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	pos <- 1
 	modelNames <- NULL
 	for(j in 1:nt){
-		lampen <- group.pen.factor %*% t(obj$models[[j]]$lambda)
-		ll <- length(obj$models[[j]]$lambda)
+		lampen <- group.pen.factor %*% t(obj$lambda)
+		ll <- length(obj$lambda)
 		for(k in 1:na){
 			newModels[[pos]] <- obj$models[[j]]	
 			endHit <- FALSE
@@ -522,7 +522,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 			}
-			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],newModels[[pos]]$lambda,rep(1,p),penalty,a[k])	
+			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
 			newModels[[pos]]$penalty.factor <- NULL			
 			if(penalty == "gAdLASSO"){
 				newModels[[pos]]$group.pen.factor <- gpfmat 
@@ -831,14 +831,14 @@ updateGroupPenRho <- function(obj,norm,groups){
 	
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a
-		if(length(obj$models[[j]]$lambda)==1){
-			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$models[[j]]$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
+		if(length(obj$lambda)==1){
+			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor,obj$penalty,norm,a)) 
 		} else{
-			for(i in 1:length(obj$models[[j]]$lambda)){
+			for(i in 1:length(obj$lambda)){
 				if(obj$penalty=="gAdLASSO"){
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
 				} else{			
-					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$models[[j]]$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
+					obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
 				}
 			}
 		}
@@ -1061,3 +1061,226 @@ nonzero.cv.rq.group.pen <- function (obj)
     tapply(coefs, obj$groups, sum) != 0
 }
 
+subtract <- function(predicted,obs){
+	obs-predicted
+}
+
+modelTau <- function(object){
+	object$tau
+}
+
+modelA <- function(object){
+	object$a	
+}
+
+modelLambda <- function(object, index){
+	object$lambda[index]
+}
+
+modelNz <- function(object, index){
+	object$nz[index]
+}
+
+byTauResults <- function(cvErr,tauvals,avals,models,se){
+#for loops!
+	mn <- length(tauvals)
+	overallMin <- apply(cvErr,1,min)
+	overallSpot <- apply(cvErr,1,which.min)
+	index <- 1:mn
+	
+	btr <- data.table(tau=tauvals,minCv=overallMin,lambdaIndex=overallSpot,a=avals,modelsIndex=index)
+	btr <- btr[, .SD[which.min(minCv)],by=tau]
+	
+	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <-  NULL
+	for(i in 1:nrow(btr)){
+		subse <- se[btr[[5]][i],btr[[3]][i]] #5 is model index and 3 is lambda index
+		cvse <- c(cvse,subse)
+		se1Above <- btr[[2]][1] + subse
+		subLambda <- models[[btr[[5]][i]]]$lambda[btr[[3]][i]]
+		lambdaVals <- c(lambdaVals, subLambda)
+		subLambda1sePos <- which(cvErr[btr[[5]][1],] <= se1Above)[1]
+		lambda1seIndex <- c(lambda1seIndex,subLambda1sePos)
+		subLambda1se <- models[[btr[[5]][i]]]$lambda[subLambda1sePos]
+		lambda1se <- c(lambda1se,subLambda1se)
+		nz <- c(nz, models[[btr[[5]][i]]]$nz[btr[[3]][i]])
+	}
+	
+	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex, nonzero=nz)
+	btr <- setcolorder(btr, c(1,2,6,3,8,9,4,7,5,10))
+	btr
+}
+
+groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
+# improve note: maybe code in for loop could be improved upon by checking at each iteration if the better cv value has been found or not
+	nl <- length(models$lambda)
+	na <- length(a)
+	gcve <- matrix(rep(0,na*nl),ncol=nl)
+	for(i in 1:na){
+		subErr <- subset(cvErr, avals==a[i])
+		gcve[i,] <- tauWeights %*% subErr
+	}
+	rownames(gcve) <- paste0("a",a)
+	minIndex <- which(gcve==min(gcve),arr.ind=TRUE)
+	returnA <- a[minIndex[1]]
+	modelIndex <- which(avals==returnA)
+	targetModels <- models[modelIndex]
+	tauvals <- sapply(targetModels,modelTau)
+	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
+	nz <- sapply(targetModels, modelNz, minIndex[1,2])
+	minCv <- cvErr[modelIndex,minIndex[1,2]]
+	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz),gcve=gcve)
+}
+
+re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
+	p <- length(nonpen_coefs)
+	new_coefs <- rep(NA,p)
+	if(intercept){
+		penVars <- penVars+1
+		pen_output <- 2:(length(penVars)+1)
+	} else{
+		pen_output <- 1:length(penVars)
+	}
+	new_coefs[penVars] <- nonpen_coefs[pen_output]
+	new_coefs[-penVars] <- nonpen_coefs[-pen_output]
+	new_coefs
+}
+
+getModels <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+	if( (is.null(tau)==FALSE | is.null(a)==FALSE) & is.null(modelsIndex) == FALSE){
+		stop("Set tau and a or set modelsIndex, not both")
+	}
+	if( (is.null(lambda)==FALSE & is.null(lambdaIndex)==FALSE)){
+		stop("Use lambda or lambdaIndex, not both")
+	}
+	lt <- length(x$tau)
+	na <- length(x$a)	
+	if((is.null(tau) == FALSE & is.null(a)==FALSE)){
+		modelsIndex <- intersect(whichMatch(tau,x$modelsInfo$tau),whichMatch(a,x$modelsInfo$a))
+	} else if(is.null(tau)==FALSE){
+		modelsIndex <- whichMatch(tau,x$modelsInfo$tau)
+	} else if(is.null(a) == FALSE){
+		modelsIndex <- whichMatch(a,x$modelsInfo$a)
+	}
+	else if(is.null(modelsIndex)){
+		modelsIndex <- 1:length(x$models)
+	}
+	if(length(modelsIndex)==0){
+		stop("Invalid tau or a provided")
+	}
+	if(is.null(lambda)==FALSE){
+		lambdaIndex <- whichMatch(lambda,x$lambda)
+	} else if(is.null(lambdaIndex)){
+		lambdaIndex <- 1:length(x$lambda)
+	}
+	if(length(lambdaIndex)==0){
+		stop("Invalid lambda provided")
+	}
+	targetModels <- x$models[modelsIndex]
+	list(targetModels=targetModels,lambdaIndex=lambdaIndex,modelsIndex=modelsIndex)
+}
+
+
+plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
+	a <- x$fit$a
+	na <- length(a)
+	# besta <- x$gtr$a[1]
+	# bestaidx <- which(a==besta)
+	# a <- a[-bestaidx]
+	# a <- c(besta,a)
+	if(logLambda){
+		lambdas <- log(x$fit$lambda)
+		xtext <- expression(Log(lambda))
+	} else{
+		lambdas <- x$fit$lambda
+		xtext <- expression(lambda)
+	}
+	if(is.null(main)){
+		main <- "Cross validation results summarized for all tau"
+	}
+	maxerr <- max(x$gcve)
+	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,type="n",main=main,...)
+	for(i in 1:na){
+		points(lambdas,x$gcve[i,],col=i,pch=1)
+	}
+	bestlamidx <- x$gtr$lambdaIndex[1]
+	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
+	if(na > 1){
+		legend("topleft",paste("a=",a),col=1:na,pch=1)
+	}
+}
+
+
+
+
+error.bars <- function (x, upper, lower, width = 0.02, ...) 
+{
+    xlim <- range(x)
+    barw <- diff(xlim) * width
+    segments(x, upper, x, lower, ...)
+    segments(x - barw, upper, x + barw, upper, ...)
+    segments(x - barw, lower, x + barw, lower, ...)
+    range(upper, lower)
+}
+
+plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
+	if(is.null(tau)){
+		tau <- x$fit$tau
+	}
+	keepers <- which(closeEnough(tau,x$fit$modelsInfo$tau))
+	minfo <- x$fit$modelsInfo[keepers,]
+	avals <- unique(minfo$a)
+	na <- length(avals)
+	nt <- length(tau)
+	if(! length(main) %in% c(0,1,nt)){
+		stop("main needs to be null or length one or the length of tau")
+	}
+	if(nt > 1){
+		par(ask=TRUE)
+	}
+	if(logLambda){
+		lambdas <- log(x$fit$lambda)
+		xtext <- expression(Log(lambda))
+	} else{
+		lambdas <- x$fit$lambda
+		xtext <- expression(lambda)
+	}
+	for(i in 1:nt){
+		if(is.null(main)){
+			mainText <- paste("Cross validation results for ", expression(tau)," = ", tau[i])
+		} else if(length(main)==1){
+			mainText <- main
+		} else{
+			mainText <- main[i]
+		}
+		subkeepers <- which(closeEnough(tau[i],minfo$tau))
+		subinfo <- minfo[subkeepers,]
+		suberr <- x$cverr[subkeepers,]
+		
+		bestkeep <- which(closeEnough(tau[i],x$btr$tau))
+		subbtr <- x$btr[bestkeep,]
+		besterr <- x$cverr[subbtr$modelsIndex,]
+		cvsd <- x$cvse[subbtr$modelsIndex,]
+		
+		plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
+		for(j in 1:na){
+			points(lambdas,suberr[j,],col=j)
+		}
+		
+		#then get index and plot error bars for this. 
+		#get the best and create the segments for that
+		segments(lambdas,besterr-cvsd,lambdas,besterr+cvsd)
+		segments(lambdas-.01,besterr-cvsd,lambdas+.01,besterr-cvsd)
+		segments(lambdas-.01,besterr+cvsd,lambdas+.01,besterr+cvsd)
+		if(na>1){
+			legend("topleft",paste("a=",subinfo$a),col=1:na,pch=1)
+		}
+		lidx <- subbtr$lambdaIndex
+		lidxse <- subbtr$lambda1seIndex
+		
+		lines(rep(lambdas[lidx],2),c(-5,max(besterr+cvsd)+1),lty=2)
+		lines(rep(lambdas[lidxse],2),c(-5,max(besterr+cvsd)+1),lty=2)
+	}
+	if(nt > 1){
+		par(ask=FALSE)
+	}
+}
