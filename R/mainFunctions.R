@@ -230,14 +230,14 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	avals <- sapply(fit$models,modelA)
 	if(groupError){
 		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr,fit$lambda)
-		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights,fit$lambda)
 	} else{
 		indErrors <- t(indErrors)/n
-		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr)
-		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr,fit$lambda)
+		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights,fit$lambda)
 	}
 
-	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve, call=match.call())
 	class(returnVal) <- "rq.pen.seq.cv"
 	returnVal
 }

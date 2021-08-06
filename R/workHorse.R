@@ -1106,9 +1106,9 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 	btr
 }
 
-groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights){
+groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda){
 # improve note: maybe code in for loop could be improved upon by checking at each iteration if the better cv value has been found or not
-	nl <- length(models$lambda)
+	nl <- length(lambda)
 	na <- length(a)
 	gcve <- matrix(rep(0,na*nl),ncol=nl)
 	for(i in 1:na){
