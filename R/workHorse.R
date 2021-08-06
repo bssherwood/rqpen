@@ -693,7 +693,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	}
 	attributes(models)$names <- paste0("tau",tau,"a",1)
 		
-	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO",a=1)
+	returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau,penalty="gLASSO",a=1,lambda=lambda)
 	returnVal <- updateGroupPenRho(returnVal,2,groups)
 	returnVal$a <- 1
 	returnVal$modelsInfo <- data.frame(modelIndex=1:nt,a=1,tau=tau)

@@ -2,6 +2,7 @@ rm(list=ls(all=TRUE))
 library(devtools)
 devtools::unload("rqPen")
 install_github("bssherwood/rqpen")
+3
 library(rqPen)
 library(hrqglas)
 
