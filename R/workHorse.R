@@ -358,7 +358,9 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	returnVal
 }
 
-rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
+rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
+			penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
+			a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -613,6 +615,9 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		}
 		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...)
 	} else{
+		if(length(unique(penalty.factor))!=1 & length(unique(tau.penalty.factor))!=1){
+			warning("The QICD algorithm takes predictor and tau penalty factors and turns them into a zero or 1. Zero if the weight is zero and one otherwise. Other algorithms are better if you want a more nuanced approach.")
+		}
 		pos <- 1
 		models <- vector(mode="list",length=nt*na)
 		modelNames <- NULL
@@ -621,7 +626,8 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 				coefs <- NULL
 				for(lam in lambda){
 					sublam <- lam*penalty.factor*tau.penalty.factor[j]
-					subm <- rq.nc.fit(x,y,tau[i],lambda=sublam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff,...)
+					penvars <- which(sublam != 0)
+					subm <- rq.nc.fit(x,y,tau[i],lambda=lam, alg="QICD", a=a[j], coef.cutoff=coef.cutoff,converge_criteria=converge.eps,penVars=penvars,...)
 					coefs <- cbind(coefs,coefficients(subm))
 				}
 				models[[pos]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,local.penalty.factor=penalty.factor*tau.penalty.factor[j],penalty,a[j])
