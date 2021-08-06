@@ -1121,7 +1121,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda){
 	modelIndex <- which(avals==returnA)
 	targetModels <- models[modelIndex]
 	tauvals <- sapply(targetModels,modelTau)
-	lambdavals <- sapply(targetModels,modelLambda,minIndex[1,2])
+	lambdavals <- lambda[minIndex[1,2]]
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
 	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz),gcve=gcve)
