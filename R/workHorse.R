@@ -469,7 +469,8 @@ clearModels <- function(model,pos){
 	model
 }
 
-rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,...){
+rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,
+						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	p <- ncol(x)
@@ -489,7 +490,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	pos <- 1
 	modelNames <- NULL
 	for(j in 1:nt){
-		lampen <- group.pen.factor %*% t(obj$lambda)
+		lampen <- group.pen.factor %*% t(obj$lambda)*tau.penalty.factor[j]
 		ll <- length(obj$lambda)
 		for(k in 1:na){
 			newModels[[pos]] <- obj$models[[j]]	
@@ -497,9 +498,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			for(i in 1:ll){	
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
 				if(sum(coef_by_group_deriv)==0){
-				#bad code, should figure out a way to break from this but it causes an uneven number of lambda values for each tau, which is not idea
-					#newModels[[pos]] <- clearModels(newModels[[pos]],i)
-					#break
+				#maybe need to think of a better way to do this, but maybe not. Should I be doing this for rq.nc?
 					if(!endHit){
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 						endHit <- TRUE
@@ -511,13 +510,13 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					if(obj$alg=="huber"){
 						if(norm == 1){
 							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,...)$models[[1]])[,2]
+							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
 						} else{
-							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,...)$models[[1]])
+							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])
 						}
 					} else{
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,...)$models[[1]])
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])
 					}
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
@@ -677,7 +676,7 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,lambda.discard=FALSE,...){
+rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -686,16 +685,11 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,lamb
 	
 	penf <- group.pen.factor
 	models <- vector(mode="list",length=nt)
-	
 	for(i in 1:nt){
 		subtau <- tau[i]
-		if(pfmat){
-			penf <- group.pen.factor[i,]
-		}
-		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,lambda.discard=lambda.discard,...)
+		penfi <- penf*tau.penalty.factor[i]
+		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penfi,scalex=scalex,lambda.discard=FALSE,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
-		models[[i]]$penalty.factor <- NULL
-		models[[i]]$group.pen.factor <- penf
 	}
 	attributes(models)$names <- paste0("tau",tau,"a",1)
 		

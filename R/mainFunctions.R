@@ -1386,68 +1386,71 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(sum(group.pen.factor<0)>0){
 		stop("penalty factors must be positive")
 	}
-	if(nt==1){
-		if(lpf!=g){
-			stop("group penalty factor must be of length g")
-		}
-		if(tau.pen){
-			penalty.factor <- group.pen.factor*sqrt(tau*(1-tau))
-			warning("tau.pen set to true for a single value of tau should return simliar answers as tau.pen set to false. Makes more sense to use it when fitting multiple taus at the same time")
-		}
-	} else{
-		if(length(group.pen.factor) == g*nt){
-			pfmat <- TRUE
-		}
-		else if(length(group.pen.factor) !=g){
-			stop("penalty factor must be a vector with g groups or a nt by g matrix, where nt is the number of taus and g is the number of groups")
-		}
-		if(tau.pen){
-			pfmat <- TRUE
-			if(length(group.pen.factor)==p){
-				group.pen.factor <- matrix(rep(group.pen.factor,nt),nrow=nt,byrow=TRUE)
-			} else{
-				group.pen.factor <- group.pen.factor*sqrt(tau*(1-tau))
-			}
-		}
-		
-	}
+	
+	if(lpf!=g){
+		stop("group penalty factor must be of length g")
+	}	
+	
 	if(is.null(lambda)){
 		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
-			
-	if(pfmat){
-		#maybe some applies mapvalues
-	} else{
-		penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
-	}
+
+	penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
 	
-	if(norm == 1){
+	if(penalty == "gLASSO"){
+		return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...)
+	} else{
 		if(penalty == "gAdLASSO"){
-			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
+			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,tau.penalty.factor=tau.penalty.factor,
+									a=0,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)
 		} else{
-			if(alg == "qicd"){
-				init.alg <- "lp"
+			if(norm == 1){
+				if(alg == "qicd"){
+					init.alg <- "lp"
+				} else{
+					init.alg <- alg
+				}
+				init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,
+							tau.penalty.factor=tau.penalty.factor,max.iter=max.iter,coef.cutoff=coef.cutoff,converge.eps=converge.eps,
+							gamma=gamma,...)
 			} else{
-				init.alg <- alg
+				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...)
 			}
-			init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,...)
 		}
-		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...)
-	} else{
-		if(penalty == "gLASSO"){
-			return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
-		} else{
-			if(penalty == "gAdLASSO"){
-				init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
-			} else{
-				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
-			}
-			return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
-		}
+		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,tau.penalty.factor=tau.penalty.factor,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)
 	}
+		
+	# if(norm == 1){
+		# if(penalty == "gAdLASSO"){
+			# init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,tau.penalty.factor=tau.penalty.factor,
+									# a=0,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)
+		# } else{
+			# if(alg == "qicd"){
+				# init.alg <- "lp"
+			# } else{
+				# init.alg <- alg
+			# }
+			# init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,
+							# tau.penalty.factor=tau.penalty.factor,max.iter=max.iter,coef.cutoff=coef.cutoff,converge.eps=converge.eps,
+							# gamma=gamma,...)
+		# }
+		# return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,tau.penalty.factor=tau.penalty.factor,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)
+	# } else{
+		# if(penalty == "gLASSO"){
+			# return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,...)
+		# } else{
+			# if(penalty == "gAdLASSO"){
+				# init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,...)
+			# } else{
+				# init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,pfmat,scalex,...)
+			# }
+			# return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,...) 
+		# }
+	# }
 	class(return_val) <- "rq.pen.seq"
-	
+	return_val$call <- match.call()	
+	return_val$lambda <- lambda
 	return_val
 }
 
