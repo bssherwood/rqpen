@@ -551,7 +551,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				newModels[[pos]] <- clearModels(newModels,i)
 			}
 			
-			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
+			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda[1:i],rep(1,p),penalty,a[k])	
 			newModels[[pos]]$penalty.factor <- NULL	
 			if(penalty=="gAdLASSO"){
 				newModels[[pos]]$PenRho <- newModels[[pos]]$rho + penVals
