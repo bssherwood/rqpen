@@ -548,7 +548,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				}
 			}
 			if(i < ll){
-				newModels[[pos]] <- clearModels(newModels,i)
+				newModels[[pos]] <- clearModels(newModels[[pos]],i)
 			}
 			
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda[1:i],rep(1,p),penalty,a[k])	
