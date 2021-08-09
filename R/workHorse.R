@@ -445,7 +445,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 						endHit <- TRUE
 					}
 				}
-				if(obj$alg=="huber"){
+				else if(obj$alg=="huber"){
 					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=llapenf,scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
 
 				} else{
@@ -487,6 +487,7 @@ clearModels <- function(model,pos){
 	model
 }
 
+
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,
 						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...){
 	#for loop calculation of penalty factors that could maybe be removed
@@ -503,7 +504,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	if(norm ==2 & obj$alg != "huber"){
 		stop("Huber approximation is the only available algorithm for 2-norm based penalties.")
 	}
-	gpfmat <- NULL
 	newModels <- vector(mode="list",length=nt*na)
 	pos <- 1
 	modelNames <- NULL
@@ -513,6 +513,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 		for(k in 1:na){
 			newModels[[pos]] <- obj$models[[j]]	
 			endHit <- FALSE
+			penVals <- NULL
 			for(i in 1:ll){	
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
 				if(sum(coef_by_group_deriv)==0){
@@ -522,9 +523,6 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						endHit <- TRUE
 					}
 				} else{
-					if(penalty == "gAdLASSO"){
-						gpfmat <- cbind(gpfmat,coef_by_group_deriv)
-					}
 					if(obj$alg=="huber"){
 						if(norm == 1){
 							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
@@ -533,19 +531,22 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])
 						}
 					} else{
+					#norm must be 1 as huber is only valid approach for norm 2
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
 						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])
 					}
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
+				if(penalty == "gAdLASSO"){
+					penVals <- c(penVals,sum(getGroupPen(update_est,groups,1,coef_by_group_deriv,"lasso",norm,1)))
+				}
 			}
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
-			newModels[[pos]]$penalty.factor <- NULL			
-			if(penalty == "gAdLASSO"){
-				newModels[[pos]]$group.pen.factor <- gpfmat 
-			} else{
-				newModels[[pos]]$group.pen.factor <- group.pen.factor
+			newModels[[pos]]$penalty.factor <- NULL	
+			if(penalty=="gAdLASSO"){
+				newModels[[pos]]$PenRho <- newModels[[pos]]$rho + penVals
 			}
+			
 			dimnames(newModels[[pos]]$group.pen.factor) <- NULL		
 			modelNames <- c(modelNames,paste0("tau",obj$tau[j],"a",a[k]))			
 			pos <- pos + 1
@@ -555,10 +556,30 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	obj$models <- newModels
 	obj$a <- a
 	obj$modelsInfo <- createModelsInfo(obj$models)
-	obj  <- updateGroupPenRho(obj,norm,groups)
+	if(penalty != "gAdLASSO"){
+	#special case of adaptive lasso done in the above for loops
+	#code improve: could make this less clunky. 
+		obj  <- updateGroupPenRho(obj,norm,groups,group.pen.factor,tau.penalty.factor)
+	}
 	obj$groups <- groups
 	obj$penalty <- penalty
 	#obj$class <- c(obj$class, "rq.group.pen.seq")
+	obj
+}
+
+updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.factor){
+	
+	for(j in 1:length(obj$models)){
+		a <- obj$models[[j]]$a
+		taupos <- which(obj$tau == obj$models[[j]]$tau)
+		if(length(obj$lambda)==1){
+			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
+		} else{
+			for(i in 1:length(obj$lambda)){
+				obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a))
+			}
+		}
+	}	
 	obj
 }
 
@@ -847,12 +868,7 @@ updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.facto
 			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
 		} else{
 			for(i in 1:length(obj$lambda)){
-				obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[taupos],obj$penalty,norm,a))
-				#if(obj$penalty=="gAdLASSO"){
-				#	obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor[,i],obj$penalty,norm,a))
-				#} else{			
-				#	obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor,obj$penalty,norm,a))
-				#}
+				obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a))
 			}
 		}
 	}	
