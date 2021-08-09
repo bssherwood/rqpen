@@ -578,17 +578,18 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 }
 
 updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.factor){
+#code improvement: double for loop 
 	
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a
 		taupos <- which(obj$tau == obj$models[[j]]$tau)
-		if(length(obj$lambda)==1){
-			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
-		} else{
-			for(i in 1:length(obj$lambda)){
-				obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a))
-			}
+		#if(length(obj$lambda)==1){
+		#	obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
+		#} else{
+		for(i in 1:length(obj$models[[j]]$rho)){
+			obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a))
 		}
+		#}
 	}	
 	obj
 }
