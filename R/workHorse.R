@@ -522,6 +522,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 						endHit <- TRUE
 					} else{
+						i <- i -1 
 						break
 					}
 				} else{
@@ -546,6 +547,10 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					break
 				}
 			}
+			if(i < ll){
+				newModels[[pos]] <- clearModels(newModels,i)
+			}
+			
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
 			newModels[[pos]]$penalty.factor <- NULL	
 			if(penalty=="gAdLASSO"){
