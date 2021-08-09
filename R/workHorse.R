@@ -493,6 +493,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	p <- ncol(x)
+	n <- nrow(x)
 	g <- max(groups)
 	penalty <- match.arg(penalty)
 	obj$penalty <- penalty
@@ -517,10 +518,11 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			for(i in 1:ll){	
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
 				if(sum(coef_by_group_deriv)==0){
-				#maybe need to think of a better way to do this, but maybe not. Should I be doing this for rq.nc?
-					if(!endHit){
+					if(n > p + 1){
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 						endHit <- TRUE
+					} else{
+						break
 					}
 				} else{
 					if(obj$alg=="huber"){
@@ -539,6 +541,9 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				newModels[[pos]]$coefficients[,i] <- update_est
 				if(penalty == "gAdLASSO"){
 					penVals <- c(penVals,sum(getGroupPen(update_est,groups,1,coef_by_group_deriv,penalty,norm,1)))
+				}
+				if(endHit){
+					break
 				}
 			}
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
