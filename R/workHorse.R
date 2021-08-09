@@ -447,14 +447,15 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 				if(penalty=="aLASSO"){
-					subPenSum <- sum(l
+					subPenSum <- sum(llapenf*abs(update_est[-1]))
 				} else{
-					subPenSum <- sum(f(update_est,lampen,a[k]))
+					subPenSum <- sum(f(update_est[-1],lampen,a[k]))
 				}
 				penSums <- c(penSums, subPenSum)
 			}
 			newModels[[pos]]$a <- a[k]
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,newModels[[pos]]$tau,obj$lambda,local.penalty.factor=penalty.factor*tau.penalty.factor[j],penalty,a[k])
+			newModels[[pos]]$PenRho <- penSums + newModels[[pos]]$rho
 			modelNames <- c(modelNames,paste0("tau",obj$tau[j],"a",a[k]))
 			pos <- pos+1
 		}
