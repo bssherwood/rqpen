@@ -538,7 +538,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 				if(penalty == "gAdLASSO"){
-					penVals <- c(penVals,sum(getGroupPen(update_est,groups,1,coef_by_group_deriv,"lasso",norm,1)))
+					penVals <- c(penVals,sum(getGroupPen(update_est,groups,1,coef_by_group_deriv,penalty,norm,1)))
 				}
 			}
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,obj$tau[j],obj$lambda,rep(1,p),penalty,a[k])	
