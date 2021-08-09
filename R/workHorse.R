@@ -436,8 +436,15 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 			#pfs <- matrix(derivf(as.numeric(abs(coefficients(obj$models[[j]])[-1,])),lampen,a=a[k]),ncol=ll)
 			newModels[[pos]] <- obj$models[[j]]
 			penSums <- NULL
+			endHit <- FALSE
 			for(i in 1:ll){
 				llapenf <- derivf(as.numeric(abs(coefficients(obj$models[[j]]))[-1,i]),lampen,a=a[k])
+				if(sum(llapenf)==0){
+					if(!endHit){
+						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
+						endHit <- TRUE
+					}
+				}
 				if(obj$alg=="huber"){
 					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=llapenf,scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
 
