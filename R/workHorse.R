@@ -731,7 +731,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	for(i in 1:nt){
 		subtau <- tau[i]
 		penf <- group.pen.factor*tau.penalty.factor[i]
-		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,lambda.discard=FALSE,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,...)
+		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
 	}
 	attributes(models)$names <- paste0("tau",tau,"a",1)
