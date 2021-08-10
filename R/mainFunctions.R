@@ -160,7 +160,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	}
 	if(scale(x)){
 		for(i in 1:length(fit$models)){
-			models[[i]]$coefficients <- apply(models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)`scaled:scale`)
+			models[[i]]$coefficients <- apply(models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
 		}
 	}
 	fit$call <- match.call()
