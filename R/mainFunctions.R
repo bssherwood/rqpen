@@ -160,7 +160,11 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	}
 	if(scalex){
 		for(i in 1:length(fit$models)){
-			fit$models[[i]]$coefficients <- apply(fit$models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
+			if(!is.null(dim(fit$models[[i]]$coefficients))){
+				fit$models[[i]]$coefficients <- apply(fit$models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
+			} else{
+				fit$models[[i]]$coefficients <- transform_coefs(fit$models[[i]]$coefficients,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
+			}
 		}
 	}
 	fit$call <- match.call()
