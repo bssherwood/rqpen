@@ -522,6 +522,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			endHit <- FALSE
 			penVals <- NULL
 			for(i in 1:ll){	
+				print(paste("working on lambda index", i))
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
 				if(sum(coef_by_group_deriv)==0){
 					if(n > p + 1){
