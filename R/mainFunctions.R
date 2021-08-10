@@ -360,12 +360,12 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 	tauvals <- sapply(fit$models,modelTau)
 	avals <- sapply(fit$models,modelA)
 	if(groupError){
-		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr)
-		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+		btr <- byTauResults(foldErrors,tauvals,avals,fit$models,stdErr,fit$lambda)
+		gtr <- groupTauResults(foldErrors, tauvals,fit$a,avals,fit$models,tauWeights,fit$lambda)
 	} else{
 		indErrors <- t(indErrors)/n
-		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr)
-		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights)
+		btr <- byTauResults(indErrors,tauvals,avals,fit$models,stdErr,fit$lambda)
+		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights,fit$lambda)
 	}
 
 	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
@@ -1371,7 +1371,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(penalty != "gLASSO"){
 		a <- getA(a,penalty)
 	} else{
-		if(is.null(a)==FALSE){
+		if(is.null(a)==FALSE & a != 1){
 			warning("The tuning parameter a is not used for group lasso")
 		}
 	}
