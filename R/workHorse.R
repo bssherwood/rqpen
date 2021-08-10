@@ -416,7 +416,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 		derivf <- scad_deriv
 		penf <- scad
 	} else if(penalty=="MCP"){
-		derivf <- mcp
+		derivf <- mcp_deriv
 		penf <- mcp
 	} else if(penalty=="aLASSO"){
 		derivf <- alasso_wt
