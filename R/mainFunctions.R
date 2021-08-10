@@ -137,7 +137,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
 		stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
 	}
-	if(scale(x)){
+	if(scalex){
 		x <- scale(x)
 	}
 	if(penalty=="LASSO"){
