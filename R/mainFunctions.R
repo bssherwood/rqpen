@@ -167,8 +167,10 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 			}
 		}
 	}
-	lmax <- max(sapply(fit$models,lambdanum))
-	fit$lambda <- fit$lambda[1:lmax]
+	if(lambda.discard){
+		lmax <- max(sapply(fit$models,lambdanum))
+		fit$lambda <- fit$lambda[1:lmax]
+	}
 	fit$call <- match.call()
 	fit
 }
@@ -226,7 +228,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
 		test_y <- y[foldid==i]
-		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,...)
+		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,train_x,train_y)
 		} else{
