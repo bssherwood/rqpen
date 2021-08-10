@@ -458,6 +458,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 				}
 				penSums <- c(penSums, subPenSum)
 				if(endHit & lambda.discard){
+					newModels[[pos]] <- clearModels(newModels[[pos]],i)
 					break
 				}
 			}
@@ -480,12 +481,11 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 }
 
 clearModels <- function(model,pos){
-	endpos <- pos - 1
-	model$coefficients <- model$coefficients[,1:endpos]
-	model$lambda <- model$lambda[1:endpos]
-	model$rho <- model$rho[1:endpos]
-	model$PenRho <- model$PenRho[1:endpos]
-	model$nzero <- model$nzero[1:endpos]
+	model$coefficients <- model$coefficients[,1:pos]
+	model$lambda <- model$lambda[1:pos]
+	model$rho <- model$rho[1:pos]
+	model$PenRho <- model$PenRho[1:pos]
+	model$nzero <- model$nzero[1:pos]
 	model
 }
 
