@@ -167,6 +167,8 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 			}
 		}
 	}
+	lmax <- max(sapply(fit$models,lambdanum))
+	fit$lambda <- fit$lambda[1:lmax]
 	fit$call <- match.call()
 	fit
 }

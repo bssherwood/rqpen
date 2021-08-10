@@ -1,3 +1,7 @@
+lambdanum <- function(model){
+	length(model$rho)
+}
+
 kernel_estimates <- function(x,y,h,...){
   kernel_estimates <- NULL
   if(is.null(dim(x))){
