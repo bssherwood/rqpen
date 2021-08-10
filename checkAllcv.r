@@ -23,7 +23,7 @@ plot(m1,septau=FALSE)
 m2 <- rq.pen.cv(x,y,alg="br")
 m3 <- rq.pen.cv(x,y,penalty="Ridge")
 m4 <- rq.pen.cv(x,y,penalty="ENet",a=.5)
-m5 <- rq.pen.cv(x,y,penalty="aLASSO")
+
 m6 <- rq.pen.cv(x,y,penalty="SCAD")
 m7 <- rq.pen.cv(x,y,penalty="MCP")
 

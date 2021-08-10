@@ -294,11 +294,10 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 
 
 
-# If tau.pen is set to true then the reported lambdas are actually lambda*sqrt(tau*(1-tau))
-#
+# discard.lambda not used
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),
 						alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
+						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,discard.lambda=TRUE,...){
 	if(alg == "lp"){
 	#use br as the default for linear programming 
 		alg <- "br"
@@ -361,10 +360,10 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	returnVal
 }
 
-#coef.cutoff is actually ignored, but used here so ... works correctly, possibly bad code. 
+#coef.cutoff is actually ignored, but used here so ... works correctly, possibly bad code. In addition lambda.discard ignored
 rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 			penalty.factor = rep(1, ncol(x)),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-			a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,coef.cutoff=NULL,...){
+			a=0,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,coef.cutoff=NULL,lambda.discard=TRUE,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -408,9 +407,9 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	returnVal	
 }
 
-#kind of hacky code with respect to penalty calculation 
+#kind of hacky code with respect to rhoPen calculation 
 rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.factor,tau.penalty.factor,scalex=TRUE,
-					coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
+					coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
 	nt <- length(obj$tau)
 	na <- length(a)
 	if(penalty=="SCAD"){
@@ -446,10 +445,10 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 					}
 				}
 				else if(obj$alg=="huber"){
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=llapenf,scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,...)$models[[1]])[,2]
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=llapenf,scalex=scalex,alg=obj$alg,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=FALSE,...)$models[[1]])[,2]
 
 				} else{
-					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=llapenf,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,...)$models[[1]])
+					update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=llapenf,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=FALSE,...)$models[[1]])
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
 				if(penalty=="aLASSO"){
@@ -458,6 +457,9 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 					subPenSum <- sum(f(update_est[-1],lampen,a[k]))
 				}
 				penSums <- c(penSums, subPenSum)
+				if(endHit & lambda.discard){
+					break
+				}
 			}
 			newModels[[pos]]$a <- a[k]
 			newModels[[pos]] <- rq.pen.modelreturn(newModels[[pos]]$coefficients,x,y,newModels[[pos]]$tau,obj$lambda,local.penalty.factor=penalty.factor*tau.penalty.factor[j],penalty,a[k])
@@ -489,7 +491,7 @@ clearModels <- function(model,pos){
 
 
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,
-						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...){
+						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	p <- ncol(x)
@@ -522,7 +524,12 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 						endHit <- TRUE
 					} else{
-						i <- i -1 
+						if(lambda.discard){
+							i <- i -1 
+						} else{
+							newModels[[pos]]$coefficients[,i:ll] <- update_est
+							i <- ll
+						}
 						break
 					}
 				} else{
@@ -544,6 +551,10 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					penVals <- c(penVals,sum(getGroupPen(update_est,groups,1,coef_by_group_deriv,penalty,norm,1)))
 				}
 				if(endHit){
+					if(!lambda.discard){
+						newModels[[pos]]$coefficients[,i:ll] <- update_est 
+						i <- ll
+					}
 					break
 				}
 			}
@@ -634,7 +645,7 @@ createModelsInfo <- function(models){
 }
 
 rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg="huber",scalex=TRUE,
-					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...) {
+					penalty.factor = rep(1, ncol(x)),tau.penalty.factor=rep(1,length(tau)),coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...) {
 	#should look at how ncvreg generates the lambda sequence and combine that with the Huber based approach
 	penalty <- match.arg(penalty)
 	nt <- length(tau)
@@ -659,13 +670,13 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		if(penalty=="aLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
 						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,gamma=gamma,...)
+						converge.eps=converge.eps,gamma=gamma,lambda.discard=lambda.discard,...)
 		} else{
 			init.model <- rq.lasso(x,y,tau,alg=alg,lambda=lambda,scalex=scalex,penalty.factor=penalty.factor,
 						tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,
-						converge.eps=converge.eps,gamma=gamma,...)
+						converge.eps=converge.eps,gamma=gamma,lambda.discard=lambda.discard,...)
 		}
-		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,...)
+		rq.lla(init.model,x,y,penalty,a,penalty.factor,tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else{
 		if(length(unique(penalty.factor))!=1 & length(unique(tau.penalty.factor))!=1){
 			warning("The QICD algorithm takes predictor and tau penalty factors and turns them into a zero or 1. Zero if the weight is zero and one otherwise. Other algorithms are better if you want a more nuanced approach.")

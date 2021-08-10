@@ -129,7 +129,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @examples
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,...){
+	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
 		stop("Penalty factors must be non-negative.")
@@ -137,13 +137,16 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
 		stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
 	}
+	if(scale(x)){
+		x <- scale(x)
+	}
 	if(penalty=="LASSO"){
-		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,...)
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
 			stop("huber alg is only option for Ridge penalty")
 		}
-		fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex,tau.penalty.factor,a=0,max.iter,converge.eps,gamma,...)
+		fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a=0,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty == "ENet"){
 		if(alg != "huber"){
 			stop("huber alg is only option for ENet penalty")
@@ -151,14 +154,22 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		if(is.null(a)){
 			stop("Specify a value for a for Enet penalty")
 		}
-		fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex,tau.penalty.factor,a,max.iter,converge.eps,gamma,...)
+		fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=scalex,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,...)
+		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,lambda.discard=lambda.discard,...)
+	}
+	if(scale(x)){
+		for(i in 1:length(fit$models)){
+			models[[i]]$coefficients <- apply(models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)`scaled:scale`)
+		}
 	}
 	fit$call <- match.call()
 	fit
 }
 
+updateCoefs <- function(obj,mu_x,sigma_x){
+	transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
+}
 predict.models <- function(object, newx){
 	cbind(1,newx) %*% object$coefficients
 }
