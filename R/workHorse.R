@@ -454,7 +454,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 				if(penalty=="aLASSO"){
 					subPenSum <- sum(llapenf*abs(update_est[-1]))
 				} else{
-					subPenSum <- sum(f(update_est[-1],lampen,a[k]))
+					subPenSum <- sum(penf(update_est[-1],lampen,a[k]))
 				}
 				penSums <- c(penSums, subPenSum)
 				if(endHit & lambda.discard){
