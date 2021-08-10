@@ -18,6 +18,8 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(25,3)
 g <- rep(seq(1:5),6)
 tvals <- c(.25,.75)
 
+h1 <- hrq_glasso(x,y,g)
+
 r1 <- rq.group.pen(x,y,groups=g)
 r2 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO")
 r3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD")

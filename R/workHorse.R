@@ -599,9 +599,9 @@ updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.facto
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a
 		taupos <- which(obj$tau == obj$models[[j]]$tau)
-		#if(length(obj$lambda)==1){
-		#	obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$models[[j]]$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
-		#} else{
+		if(length(obj$models[[j]]$rho)==1){
+			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,obj$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
+		} else{
 		for(i in 1:length(obj$models[[j]]$rho)){
 			obj$models[[j]]$PenRho[i] <- obj$models[[j]]$rho[i] + sum(getGroupPen(obj$models[[j]]$coefficients[-1,i],groups,obj$lambda[i],obj$group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a))
 		}
