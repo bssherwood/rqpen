@@ -437,7 +437,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 			penSums <- NULL
 			endHit <- FALSE
 			for(i in 1:ll){
-				llapenf <- derivf(as.numeric(abs(coefficients(obj$models[[j]]))[-1,i]),lampen,a=a[k])
+				llapenf <- derivf(as.numeric(abs(coefficients(obj$models[[j]]))[-1,i]),lampen*obj$lambda[i],a=a[k])
 				if(sum(llapenf)==0){
 					if(!endHit){
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
