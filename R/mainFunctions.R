@@ -1215,7 +1215,7 @@ plot.cv.rq.group.pen <- function (x,y=NULL,...)
 }
 
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
-                         coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE, ...){
+                         coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE,lambda.discard=TRUE, ...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
