@@ -1371,8 +1371,10 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(penalty != "gLASSO"){
 		a <- getA(a,penalty)
 	} else{
-		if(is.null(a)==FALSE & a != 1){
-			warning("The tuning parameter a is not used for group lasso")
+		if(is.null(a)==FALSE){
+			if(a != 1){
+				warning("The tuning parameter a is not used for group lasso")
+			}
 		}
 	}
 	if(g==p){
