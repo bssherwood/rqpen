@@ -1295,11 +1295,14 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		besterr <- x$cverr[subbtr$modelsIndex,]
 		cvsd <- x$cvse[subbtr$modelsIndex,]
 		
-		plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
-		for(j in 1:na){
-			points(lambdas,suberr[j,],col=j)
+		if(is.null(dim(suberr))){
+			plot(lambdas,suberr,ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,...) 
+		} else{
+			plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
+			for(j in 1:na){
+				points(lambdas,suberr[j,],col=j)
+			}
 		}
-		
 		#then get index and plot error bars for this. 
 		#get the best and create the segments for that
 		segments(lambdas,besterr-cvsd,lambdas,besterr+cvsd)
