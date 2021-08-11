@@ -336,8 +336,8 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 			fit$models[[i]] <- clearModels(fit$models[[i]],min_nl)
 		}
 		fit$lambda <- fit$lambda[1:min_nl]
-	}
-	
+		nl <- min_nl
+	}	
 	
 	if(!groupError){
 		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
