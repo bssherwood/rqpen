@@ -1,5 +1,5 @@
 qic <- function(model,n, method="BIC"){
-	tau <- model$tau
+	tau <- model$debug
 	df <- sum(model$coefficients != 0)
 	if(method=="PBIC"){
 		log(model$rho*n) + df*log(n)*log(length(model$coefficients))/(2*n)
@@ -328,6 +328,17 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 	nt <- length(tau)
 	na <- length(fit$a)
 	nl <- length(fit$lambda)
+	min_nl <- min(sapply(fit$models,lambdanum))
+	if(min_nl != nl){
+		warning("Different models had a different number of lambdas. To avoid this set lambda.discard=FALSE. Results presented are for the shortest lambda sequence")
+		#code improvement, bad for loop
+		for(i in 1:length(fit$models)){
+			fit$models[[i]] <- clearModels(fit$models[[i]],min_nl)
+		}
+		fit$lambda <- fit$lambda[1:nl]
+	}
+	
+	
 	if(!groupError){
 		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
 	}

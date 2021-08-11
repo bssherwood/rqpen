@@ -23,7 +23,7 @@
 21. Figuring a stopping point for small lambdas. Non-sparse models are slower to fit. This problem is more complex with multiple tau and a.
 22. Investigate a smart way to do initial estimates for beta, maybe by tau and tuning parameter. hrq_glasso does have a beta0 for initialization, so that might be a good place to start. 
 23. Allow users to specify lp algorithm of interest for group penalties. 
-24. Maybe add something where if non-convex estimators do not change with lambda that the lambda sequence should stop. 
+24. Maybe add something where if non-convex estimators do not change with lambda that the lambda sequence should stop. Would need a check that the lambda value is "large"
 
 hrqglasso
 
