@@ -335,7 +335,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		for(i in 1:length(fit$models)){
 			fit$models[[i]] <- clearModels(fit$models[[i]],min_nl)
 		}
-		fit$lambda <- fit$lambda[1:nl]
+		fit$lambda <- fit$lambda[1:min_nl]
 	}
 	
 	
