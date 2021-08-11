@@ -1443,6 +1443,10 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	class(return_val) <- "rq.pen.seq"
 	return_val$call <- match.call()	
 	return_val$lambda <- lambda
+	if(lambda.discard){
+		lmax <- max(sapply(return_val$models,lambdanum))
+		return_val$lambda <- return_val$lambda[1:lmax]
+	}
 	return_val
 }
 

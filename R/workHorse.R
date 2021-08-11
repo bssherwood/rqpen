@@ -533,7 +533,10 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 							i <- i -1 
 						} else{
 							newModels[[pos]]$coefficients[,i:ll] <- update_est
-							i <- ll
+							if(i !=ll){
+								i <- ll
+								warning(paste("Last ",ll-i+1," coefficients are the same. The value of lambda became too small for lla algorithm to work well. To avoid this, set lambda.discard = TRUE or choose different values for lambda."))
+							}
 						}
 						break
 					}
