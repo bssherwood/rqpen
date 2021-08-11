@@ -22,7 +22,7 @@ h1 <- hrq_glasso(x,y,g)
 
 r1 <- rq.group.pen(x,y,groups=g)
 r2 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO")
-r3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD")
+r3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD") #still a problem here with the updates of coefficients, I think. 
 r4 <- rq.group.pen(x,y,groups=g,penalty="gMCP")
 r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
 
