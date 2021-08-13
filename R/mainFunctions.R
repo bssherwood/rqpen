@@ -229,7 +229,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #'
 #' @details 
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
-#' \deqn{\sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+#' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 #' Where \eqref{w_q} and \eqref{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
 #' \itemize{
 #' \item{LASSO}{\eqref{P(\beta,\lambda,a)=\lambda|\beta|}}
@@ -263,7 +263,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{a}{Value of a for the penalized loss function.}
 #' }
 #' 
-#' If the Huber algorithm is used than \eqref{\rho_\tau()} is replaced by a Huber-type approximation. Specifically, it is replaced with the function 
+#' If the Huber algorithm is used than \eqref{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqref{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
 #' \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
 #' Where if \eqref{\tau=.5}, we get the usual Huber loss function. 
 #' @export
@@ -329,7 +329,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 #'
 #' @param x rq.pen.seq object
 #' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
-#' @param a Tuning parmater of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
+#' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
 #' @param lambda Tuning parameter of \eqref{\lambda}. Default is NULL, which returns coefficients for all values of \eqref{\lambda}.
 #' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
@@ -397,22 +397,38 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' @param ... Additional arguments passed to rq.pen()
 #' 
 #' @details 
-#' Provide some details on how cross validation is done. 
+#' Two cross validation results are returned. One that considers the best combination of a and lambda for each quantile. The second considers the best combination of the tuning 
+#' parameters for all quantiles. Let \eqref{y_{b,i}} and \eqref{x_{b,i}} index the observations in 
+#' fold b. Let \eqref{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqref{n_b} be the number of observations in fold
+#' b. Then the cross validation error for fold b is 
+#' \deqn{\frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau,a,\lambda}^{-b}).}
+#' NEED TO PICK UP HERE
+#' Consider a fixed quantile \eqref{\tau} then the by tau results (btr), and assume that \eqref{n/k} is an integer, then the btr choose the best a and 
+#' lambda that minimize the average cross-validation error of
+#' \deqn{\frac{1}{n/k} \sum_{i=1}^{n/k} \rho_\tau(y_i-x_i^\top\hat{beta}_{\lambd,a}).}
+#' However, if you want to select the value of 
 #' 
-#'
 #' @return
 #' \itemize{
 #' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 #' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
 #' \item{fit}{The rq.pen.seq object fit to the full data.}
-#' \item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a.}
-#' \item{gtr}{Quantile of the model.}
-#' \item{gcve}{Value of a for the penalized loss function.}
+#' \item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
+#' \item{gtr}{A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
+#' \item{gcve}{Group, across all quantiles, cross-validation error results for each value of a and lambda.}
 #' \item{call}{Original call to the function.}
 #' }
 #' @export
 #'
 #' @examples
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' r1 <- rq.pen.cv(x,y) #lasso fit for median
+#' r2 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75)) # Elastic net fit for multiple values of a and tau
+#' #same as above but more weight given to median when calculating group cross validation error. 
+#' r3 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75),tauWeights=c(.25,.5,.25))
+#' r4 <- rq.pen.cv(x,y,cvFunc=median) # uses median cross-validation error instead of mean. 
+#' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(0,7))) #Cross-validation with no penalty on the first variable.
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
 	if(is.null(foldid)){
