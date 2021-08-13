@@ -2,6 +2,34 @@ lambdanum <- function(model){
 	length(model$rho)
 }
 
+updateCoefs <- function(obj,mu_x,sigma_x){
+  transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
+}
+
+quick.predict <- function(coefs,newx){
+  cbind(1,newx) %*% coefs
+}
+
+predict.models <- function(object, newx){
+  cbind(1,newx) %*% object$coefficients
+}
+
+predict.errors <- function(object, newx, newy){
+  preds <- predict(object,newx)
+  errors <- lapply(preds,subtract,newy)
+}
+
+check.errors <- function(object,newx,newy){
+  lapply(object$models,check.errors.model,newx,newy)
+}
+
+check.errors.model <- function(object,newx,newy){
+  preds <- predict.models(object,newx)
+  errors <- newy- preds
+  check(errors,object$tau)
+}
+
+
 kernel_estimates <- function(x,y,h,...){
   kernel_estimates <- NULL
   if(is.null(dim(x))){
@@ -1128,7 +1156,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 	btr <- data.table(tau=tauvals,minCv=overallMin,lambdaIndex=overallSpot,a=avals,modelsIndex=index)
 	btr <- btr[, .SD[which.min(minCv)],by=tau]
 	
-	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <-  NULL
+	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <- nzse <- NULL
 	for(i in 1:nrow(btr)){
 		subse <- se[btr[[5]][i],btr[[3]][i]] #5 is model index and 3 is lambda index
 		cvse <- c(cvse,subse)
@@ -1140,9 +1168,10 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 		subLambda1se <- lambda[subLambda1sePos]
 		lambda1se <- c(lambda1se,subLambda1se)
 		nz <- c(nz, models[[btr[[5]][i]]]$nz[btr[[3]][i]])
+		nzse <- c(nzse, models[[btr[[5]][i]]]$nz[lambda1seIndex])
 	}
 	
-	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex, nonzero=nz)
+	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex, nonzero=nz, nzse=nzse)
 	btr <- setcolorder(btr, c(1,2,6,3,8,9,4,7,5,10))
 	btr
 }

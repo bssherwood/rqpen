@@ -10,6 +10,7 @@ importFrom("graphics", "lines", "plot")
 importFrom("stats", "coefficients", "predict", "quantile", "residuals",
              "sd", "xtabs", "fitted","weighted.mean")
 importFrom("methods", "is")
+importFrom(Rdpack,reprompt)
 export(kernel_estimates)
 export(kernel_weights)
 export(randomly_assign)

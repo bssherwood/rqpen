@@ -1,4 +1,27 @@
-qic <- function(model,n, method="BIC"){
+#' Calculate information criterion for penalized quantile regression models
+#'
+#' @param model model from a rq.pen.seq() object
+#' @param n Sample size
+#' @param method Choice of BIC, AIC or PBIC, a large p BIC. 
+#'
+#' @return Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
+#' \deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
+#' for every value of \eqn{\lambda}. 
+#' @export
+#'
+#' @examples
+#' set.seed(1)
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,tau=c(.25,.75))
+#' qic(m1$models[[1]]) # returns the IC values for \tau=.25
+#' qic(m1$models[[2]]) # returns the IC values for \tau=.75
+#' @references 
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+#' \insertRef{qrbic}{rqPen}
+qic <- function(model,n, method=c("BIC","AIC","PBIC")){
+  method <- match.arg(method)
 	tau <- model$debug
 	df <- sum(model$coefficients != 0)
 	if(method=="PBIC"){
@@ -14,8 +37,39 @@ qic <- function(model,n, method="BIC"){
 
 
 
-qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
-# code help: Maybe think about how the qic values are returned for the septau=TRUE case
+#' Selects tuning parameter \eqref{\lambda} and a according to information criterion of choice. For a given \eqref{\hat{\beta}} the information criterion is calculated
+#' as
+#' \deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+#' If septau set to FALSE then calculations are made across the quantiles. Let \eqref{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqref{d_q} and \eqref{b_q} 
+#' be d and b values from the qth quantile model. Note, for all of these we are assuming \lambda and a are the same. Then the summary across all quantiles is 
+#' \deqn{\sum_{q=1}^Q w_q \sum_{i=1}^n [ \rho_\tau(y_i-x_i^\top\hat{\beta}^q) + d_q*b_q/(2n)],}
+#' where \eqn{w_q} is the weight assigned for the qth quantile model. 
+#'
+#' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
+#' @param method Choice of BIC, AIC or PBIC, a large p BIC.
+#' @param septau If optimal values of \eqref{\lambda} and a can vary with \eqref{\tau}. Default is TRUE. 
+#' @param weights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqref{w_q=1} for all quantiles.
+#'
+#' @return 
+#' \itemize{
+#' \item{coefficients}{Coefficients of the selected models.}
+#' \item{ic}{Information criterion values for all considered models.}
+#' \item{modelsInfo}{Model info for the selected models related to the original object obj.}
+#' \item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
+#' }
+#' @export
+#' @examples
+#' set.seed(1)
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75))
+#' qic.select(m1)
+#' #' @references 
+#' \insertRef{qrbic}{rqPen}
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
+# code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with differnt values of lambda
 	if(class(obj) == "rq.pen.seq.cv"){
 		obj <- obj$fit
 	} else if(class(obj) != "rq.pen.seq"){
@@ -71,16 +125,52 @@ qic.select <- function(obj, method="BIC",septau=FALSE,weights=NULL){
 }
 
 
+#' Print a qic.select object
+#'
+#' @param x qic.select object
+#' @param ... optional arguments
+#'
+#' @return Prints the coefficients of the qic.select object
+#' @export
+#'
+#' @examples
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.qic.select <- function(x,...){
    print(coefficients(x))
 }
 
+#' Predictions from a qic.select object
+#'
+#' @param x qic.select object
+#' @param newdata Data matrix to make predictions from. 
+#' @param ... optional arguments
+#'
+#' @return A matrix of predicted values.
+#' @export
+#'
+#' @examples
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,tau=c(.25,.75))
+#' q1 <- qic.select(m1)
+#' newx <- matrix(runif(80),ncol)
+#' preds <- predict(q1,newx)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(x, newdata, ...){
 	coefs <- do.call(cbind(coefficients(x)))
 	cbind(1,newdata) %*% coefs
 }
 
 
+#' Print a rq.pen.seq object
+#'
+#' @param x rq.pen.seq object
+#' @param ... optional arguments
+#'
+#' @return If only one model, prints a data.frame of the number of nonzero coefficients and lambda. Otherwise prints information about the quantiles being modeled and choices for a.
+#' @export
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.rq.pen.seq <- function(x,...){
   nt <- length(x$tau)
   na <- length(x$a)
@@ -95,6 +185,19 @@ print.rq.pen.seq <- function(x,...){
   }	
 }
 
+
+#' Returns Coefficients of a cv.rq.pen object
+#' 
+#' Warning: this function will be depracated and not exported in future versions of rqPen, due to the switch from cv.rq.pen() to rq.pen.cv().
+#'
+#' @param object cv.rq.pen object 
+#' @param lambda Value of lambda, default is to use the minimum value. 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.cv.rq.pen <- function(object, lambda='min',...){
   if(lambda=='min'){
      lambda <- object$lambda.min
@@ -104,29 +207,76 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 }
 
 
-#' Title
+#' Fit a quantile regression model using a penalized quantile loss function. 
 #'
 #' @param x matrix of predictors
 #' @param y vector of responses
 #' @param tau vector of quantiles
 #' @param lambda vector of lambda, if not set will be generated automatically
 #' @param penalty choice of penalty
-#' @param a additional tuning parameter, not used for lasso or ridge penalties
+#' @param a Additional tuning parameter, not used for lasso or ridge penalties. However, will be set to the elastic net values of 1 and 0 respectively. Defaults are ENet(0), aLASSO(1), SCAD(3.7) and MCP(3).
 #' @param nlambda number of lambda, ignored if lambda is set
 #' @param eps If not pre-specified the lambda vector will be from lambda_max to lambda_max times eps
 #' @param penalty.factor penalty factor for the predictors
-#' @param alg algorithm used
-#' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the orginal scale. 
+#' @param alg Algorithm used.
+#' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the original scale. 
 #' @param tau.penalty.factor A penalty factor for each quantile.
 #' @param coef.cuttoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
 #' @param max.iter Maximum number of iterations of non-linear programming algorithms.
 #' @param converge.eps Convergence threshold for non-linear programming algorithms. 
 #' @param gamma tuning parameter for Huber loss, not applicable for non-huber algorithms. 
+#' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights. 
 #'
-#' @return
+#' @details 
+#' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
+#' \deqn{\sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+#' Where \eqref{w_q} and \eqref{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
+#' \itemize{
+#' \item{LASSO}{\eqref{P(\beta,\lambda,a)=\lambda|\beta|}}
+#' \item{SCAD}{\eqref{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
+#' \item{MCP}{\eqref{P(\beta,\lambda,a)=MCP(\beta,\lambda,a)}}
+#' \item{Ridge}{\eqref{P(\beta,\lambda,a)}=\lambda\beta^2}
+#' \item{Elastic Net}{\eqref{P(\beta,\lambda,a)}=a*\lambda|\beta|+(1-a)*\lambda*\beta^2}
+#' \item{Adaptive LASSO}{\eqref{P(\beta,\lambda,a)}=\frac{\lambda |\beta|}{|\beta_0|^a}}
+#' }
+#' For Adaptive LASSO the values of \eqref{\beta_0} come from a Ridge solution with the same value of \eqref{\lambda}. 
+#' @return An rq.pen.seq object. 
+#' \itemize{
+#' \item{models}{A list of each model fit for each tau and a combination.}
+#' \item{n}{Sample size.}
+#' \item{p}{Number of predictors.}
+#' \item{alg}{Algorithm used.}
+#' \item{tau}{Quantiles modeled.}
+#' \item{a}{Tuning parameters a used.}
+#' \item{modelsInfo}{Information about the quantile and a value for each model.}
+#' \item{lambda}{Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+#' \item{penalty}{Penalty used.}
+#' \item{call}{Original call.}
+#' }
+#' Each model in the models list has the following values. 
+#' \itemize{
+#' \item{coefficients}{Coefficients for each value of lambda.}
+#' \item{rho}{The unpenalized objective function for each value of lambda.}
+#' \item{PenRho}{The penalized objective function for each value of lambda.}
+#' \item{nzero}{The number of nonzero coefficients for each value of lambda.}
+#' \item{tau}{Quantile of the model.}
+#' \item{a}{Value of a for the penalized loss function.}
+#' }
+#' 
+#' If the Huber algorithm is used than \eqref{\rho_\tau()} is replaced by a Huber-type approximation. Specifically, it is replaced with the function 
+#' \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
+#' Where if \eqref{\tau=.5}, we get the usual Huber loss function. 
 #' @export
 #'
 #' @examples
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' r1 <- rq.pen(x,y) #Lasso fit for median
+#' r2 <- rq.pen(x,y,tau=c(.25,.5,.75)) # Lasso for multiple quantiles
+#' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1)) # Elastic net fit for multiple quantiles
+#' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7))) # First variable is not penalized
+#' tvals <- c(.1,.2,.3,.4,.5)
+#' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=START HERE)
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
@@ -175,37 +325,96 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	fit
 }
 
-updateCoefs <- function(obj,mu_x,sigma_x){
-	transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
-}
-predict.models <- function(object, newx){
-	cbind(1,newx) %*% object$coefficients
+#' Returns coefficients of a rq.pen.seq object
+#'
+#' @param x rq.pen.seq object
+#' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
+#' @param a Tuning parmater of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
+#' @param lambda Tuning parameter of \eqref{\lambda}. Default is NULL, which returns coefficients for all values of \eqref{\lambda}.
+#' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
+#' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
+#'
+#' @return A list of a matrix of coefficients for each tau and a combination
+#' @export
+#'
+#' @examples
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75),lambda=c(.1,.05,.01))
+#' allCoefs <- coef(m1)
+#' targetCoefs <- coef(m1,tau=.25,a=.5,lambda=.1)
+#' idxApproach <- coef(m1,modelsIndex=2)
+#' bothIdxApproach <- coef(m1,modelsIndex=2,lambdaIndex=1)
+coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+  models <- getModels(x,tau,a,lambda,modelsIndex,lambdaIndex)
+  lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
-predict.errors <- function(object, newx, newy){
-	preds <- predict(object,newx)
-	errors <- lapply(preds,subtract,newy)
+
+#' Title
+#'
+#' @param x rq.pen.seq object
+#' @param newx Matrix of predictors 
+#' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
+#' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
+#' @param lambda Tuning parameter of \eqref{\lambda}. Default is NULL, which returns coefficients for all values of \eqref{\lambda}.
+#' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
+#' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
+#'
+#' @return A list of a matrix of predictions for each tau and a combination
+#' @export
+#'
+#' @examples
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75),lambda=c(.1,.05,.01))
+#' newx <- runif(80,ncol=8)
+#' allCoefs <- predict(m1,newx)
+#' targetCoefs <- predict(m1,newx,tau=.25,a=.5,lambda=.1)
+#' idxApproach <- predict(m1,newx,modelsIndex=2)
+#' bothIdxApproach <- predict(m1,newx,modelsIndex=2,lambdaIndex=1)
+predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+  coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
+	lapply(object$models, quick.predict,newx=newx)
 }
 
-check.errors <- function(object,newx,newy){
-	lapply(object$models,check.errors.model,newx,newy)
-}
-
-check.errors.model <- function(object,newx,newy){
-	preds <- predict.models(object,newx)
-	errors <- newy- preds
-	check(errors,object$tau)
-}
-
-predict.rq.pen.seq <- function(object, newx){
-	lapply(object$models, predict.models,newx=newx)
-}
-
-rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
+#' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqref{\lambda} and a.
+#'
+#' @param x Matrix of predictors.
+#' @param y Vector of responses.
+#' @param tau Quantiles to be modeled. 
+#' @param lambda Values of \eqref{\lambda}. Default will automatically select the \eqref{\lambda} values. 
+#' @param penalty Choice of penalty between LASSO, Ridge, Elastic Net (ENet), Adaptive Lasso (aLASSO), SCAD and MCP.
+#' @param a Tuning parameter of a. LASSO and Ridge has no second tuning parameter, but for notation is set to 1 or 0 respectively, the values for elastic net. Defaults are Ridge ()
+#' @param cvFunc Loss function for cross-validation. Defaults to quantile loss, but user can specify their own function.
+#' @param nfolds Number of folds.
+#' @param foldid Ids for folds. If set will override nfolds.
+#' @param nlambda Number of lambda, ignored if lambda is set.
+#' @param groupError If set to false then reported error is the sum of all errors, not the sum of error for each fold.  
+#' @param cvSummary Function to summarize the errors across the folds, default is mean. User can specify another function, such as median.
+#' @param tauWeights Weights for the different tau models. 
+#' @param printProgress If set to TRUE prints which partition is being worked on. 
+#' @param ... Additional arguments passed to rq.pen()
+#' 
+#' @details 
+#' Provide some details on how cross validation is done. 
+#' 
+#'
+#' @return
+#' \itemize{
+#' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
+#' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
+#' \item{fit}{The rq.pen.seq object fit to the full data.}
+#' \item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a.}
+#' \item{gtr}{Quantile of the model.}
+#' \item{gcve}{Value of a for the penalized loss function.}
+#' \item{call}{Original call to the function.}
+#' }
+#' @export
+#'
+#' @examples
+rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
-	if(is.null(weights)==FALSE){
-		stop("weights not currently implemented. Can use older function cv.rq.pen, but it supports fewer penalties and is slower.")
-	}
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
     }
@@ -216,6 +425,18 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty=c("LASSO","Rid
 	nt <- length(tau)
 	na <- length(fit$a)
 	nl <- length(fit$lambda)
+	
+	min_nl <- min(sapply(fit$models,lambdanum))
+	if(min_nl != nl){
+		warning("Different models had a different number of lambdas. To avoid this set lambda.discard=FALSE. Results presented are for the shortest lambda sequence")
+		#code improvement, bad for loop
+		for(i in 1:length(fit$models)){
+			fit$models[[i]] <- clearModels(fit$models[[i]],min_nl)
+		}
+		fit$lambda <- fit$lambda[1:min_nl]
+		nl <- min_nl
+	}		
+	
 	if(!groupError){
 		indErrors <- matrix(rep(0,nt*na*nl),nrow=nl)
 	}
@@ -773,10 +994,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 	return(return_val)
 }
 
-coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
-	models <- getModels(x,tau,a,lambda,modelsIndex,lambdaIndex)
-	lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
-}
+
 
 plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
 	if(septau){
@@ -1366,6 +1584,33 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 }
 
 
+#' Title
+#'
+#' @param x 
+#' @param y 
+#' @param tau 
+#' @param groups 
+#' @param penalty 
+#' @param lambda 
+#' @param nlambda 
+#' @param eps 
+#' @param alg 
+#' @param a 
+#' @param norm 
+#' @param group.pen.factor 
+#' @param tau.penalty.factor 
+#' @param scalex 
+#' @param coef.cutoff 
+#' @param max.iter 
+#' @param converge.eps 
+#' @param gamma 
+#' @param lambda.discard 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
 						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), 
 						a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.penalty.factor=rep(1,length(tau)),
@@ -1461,6 +1706,15 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	return_val
 }
 
+#' Title
+#'
+#' @param x 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 print.cv.rq.pen <- function(x,...){
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
@@ -1468,6 +1722,15 @@ print.cv.rq.pen <- function(x,...){
    print(x$cv)
 }
 
+#' Title
+#'
+#' @param x 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 print.rq.pen <- function(x,...){
     cat("\nCoefficients:\n")
 	print(coefficients(x,...))
