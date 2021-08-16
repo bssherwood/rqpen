@@ -1244,7 +1244,7 @@ plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 #' @param vars Variables of interest
 #' @param logLambda Whether lambda should be reported on the log scale
 #' @param tau Quantiles of interest
-#' @param a Tuning parameter a values of interset.
+#' @param a Tuning parameter a values of interest.
 #' @param lambda Values of lambda of interest. 
 #' @param modelsIndex Specific models of interest.
 #' @param lambdaIndex Specific lambda values of interest. 
@@ -1272,7 +1272,7 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 	tm <- models$targetModels
 	li <- models$lambdaIndex
 	ml <- length(tm)
-	if(!is.null(main) & ( length(main) != ml | length(main) !=1)){
+	if(!is.null(main) & length(main) != ml & length(main) !=1){
 		stop(paste("Main needs to be of length one or length ", ml, ", the number of models being plotted"))
 	}
 	if(ml > 1){
