@@ -269,14 +269,18 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @export
 #'
 #' @examples
-#' x <- matrix(runif(800),ncol=8)
+#' n <- 100
+#' p <- 8
+#' x <- matrix(runif(n*p),ncol=p)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' r1 <- rq.pen(x,y) #Lasso fit for median
 #' r2 <- rq.pen(x,y,tau=c(.25,.5,.75)) # Lasso for multiple quantiles
 #' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1)) # Elastic net fit for multiple quantiles
 #' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7))) # First variable is not penalized
 #' tvals <- c(.1,.2,.3,.4,.5)
-#' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=START HERE)
+#' Similiar to penalty proposed by Belloni and Chernouzhukov. To be exact you would divide the tau.penalty.factor by n. 
+#' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
@@ -345,13 +349,14 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 #' targetCoefs <- coef(m1,tau=.25,a=.5,lambda=.1)
 #' idxApproach <- coef(m1,modelsIndex=2)
 #' bothIdxApproach <- coef(m1,modelsIndex=2,lambdaIndex=1)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
   models <- getModels(x,tau,a,lambda,modelsIndex,lambdaIndex)
   lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
 
-#' Title
+#' Predictions from rq.pen.seq object
 #'
 #' @param x rq.pen.seq object
 #' @param newx Matrix of predictors 
@@ -373,6 +378,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 #' targetCoefs <- predict(m1,newx,tau=.25,a=.5,lambda=.1)
 #' idxApproach <- predict(m1,newx,modelsIndex=2)
 #' bothIdxApproach <- predict(m1,newx,modelsIndex=2,lambdaIndex=1)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
 	lapply(object$models, quick.predict,newx=newx)
@@ -401,12 +407,14 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' parameters for all quantiles. Let \eqref{y_{b,i}} and \eqref{x_{b,i}} index the observations in 
 #' fold b. Let \eqref{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqref{n_b} be the number of observations in fold
 #' b. Then the cross validation error for fold b is 
-#' \deqn{\frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau,a,\lambda}^{-b}).}
-#' NEED TO PICK UP HERE
-#' Consider a fixed quantile \eqref{\tau} then the by tau results (btr), and assume that \eqref{n/k} is an integer, then the btr choose the best a and 
-#' lambda that minimize the average cross-validation error of
-#' \deqn{\frac{1}{n/k} \sum_{i=1}^{n/k} \rho_\tau(y_i-x_i^\top\hat{beta}_{\lambd,a}).}
-#' However, if you want to select the value of 
+#' \deqn{\mbox{CV}(b,\tau) = \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau,a,\lambda}^{-b}).}
+#' Note that \eqn{\rho_\tau()} can be replaced by a different function by setting the cvFunc parameter. The function returns two different cross-validation summaries. The first is btr, by tau results. 
+#' It provides the values of \code{lambda} and \code{a} that minimize the average, or whatever function is used for \code{cvSummary}, of \eqn{\mbox{CV}(b)}. In addition it provides the 
+#' sparsest solution that is within one standard error of the minimum results. 
+#' 
+#' The other approach is the group tau results, gtr. Consider the case of estimating Q quantiles of \eqn{\tau_1,\ldots,\tau_Q} It returns the values of \code{\lambda} and \code{a} that minimizes the average, or again whatever function is used for \code{cvSummary}, of 
+#' \deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. I THINK WRITING THIS WAY GIVES 
+#' ME AN IDEA ON HOW TO DO STANDARD ERROR FOR THIS SETTTING. 
 #' 
 #' @return
 #' \itemize{
@@ -429,6 +437,8 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' r3 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75),tauWeights=c(.25,.5,.25))
 #' r4 <- rq.pen.cv(x,y,cvFunc=median) # uses median cross-validation error instead of mean. 
 #' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(0,7))) #Cross-validation with no penalty on the first variable.
+#' 
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
 	if(is.null(foldid)){
@@ -498,6 +508,15 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
 	returnVal
 }
 
+#' Prints a rq.pen.seq.cv object
+#'
+#' @param x A req.pen.seq.cv object. 
+#' @param ... Additional arguments. 
+#'
+#' @return Print of btr and gtr from a rq.pen.seq.cv object. If only one quantile is modeled then only btr is returned. 
+#' @export
+#'
+#' @examples
 print.rq.pen.seq.cv <- function(x,...){
 	if(length(x$fit$tau)==1){
 		cat("\nCross validation tuning parameter choices\n")
@@ -509,6 +528,20 @@ print.rq.pen.seq.cv <- function(x,...){
 		print(x$gtr)
 	}
 }
+
+#' List of coefficients from a rq.pen.seq.cv object
+#'
+#' @param x The rq.pen.seq.cv object. 
+#' @param septau Whether the tuning parameters are optimized separately for each quantile, default is TRUE.
+#' @param cvmin If minimum of cross-validation should be used, set to false if you want to use one standard error rule.  
+#' @param useDefaults Set to FALSE if you want to specify the coefficients by lambda and model index. See coef.rq.pen.seq() for more details. 
+#' @param tau Quantiles of interest. 
+#' @param ... Additional parameters passed to coef.rq.pen.seq(), only applicable if useDefaults is set to FALSE. 
+#'
+#' @return A list of the coefficients for each quantile. 
+#' @export
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 
 coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
@@ -544,6 +577,18 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 	}
 }
 
+#' Prints a cv.rq.pen object.  
+#'
+#' @param x cv.rq.pen object
+#' @param ... Optional arguments, not used. 
+#' 
+#' @details Warning this function is deprecated and will not be exported in future releases. 
+#'
+#' @return Prints cross validation or information criterion values by lambda. 
+#' @export
+#'
+#' @examples
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.cv.rq.pen <- function(x,...){
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
@@ -551,11 +596,66 @@ print.cv.rq.pen <- function(x,...){
    print(x$cv)
 }
 
+
+#' Prints an rq.pen object
+#' 
+#' @description Warning this function is deprecated and will not be exported in future releases. 
+#'
+#' @param x The rq.pen object
+#' @param ... Additional parameters sent to function
+#'
+#' @return Prints the coefficients of the object.
+#' @export
+#'
+#' @examples
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.rq.pen <- function(x,...){
     cat("\nCoefficients:\n")
 	print(coefficients(x,...))
 }
 
+#' Performs cross validation for a group penalty. 
+#'#'
+#' @param x Matrix of predictors. 
+#' @param y Vector of responses. 
+#' @param tau Vector of quantiles. 
+#' @param groups Vector of group assignments for the predictors.
+#' @param lambda Vector of lambda values, if set to NULL they will be generated automatically.
+#' @param a Vector of the other tuning parameter values. 
+#' @param cvFunc Function used for cross-validation error, default is quantile loss. 
+#' @param nfolds Number of folds used for cross validation. 
+#' @param foldid Fold assignments, if not set this will be randomly created. 
+#' @param groupError If errors are to be reported as a group or as the average for each fold. 
+#' @param cvSummary The 
+#' @param tauWeights Weights for the tau penalty. 
+#' @param printProgress If set to TRUE will print which fold the process is working on. 
+#' @param ... Additional parameters that will be sent to rq.group.pen().
+#'
+#' @return
+#' \itemize{
+#' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
+#' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
+#' \item{fit}{The rq.pen.seq object fit to the full data.}
+#' \item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
+#' \item{gtr}{A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
+#' \item{gcve}{Group, across all quantiles, cross-validation error results for each value of a and lambda.}
+#' \item{call}{Original call to the function.}
+#' }
+#' @export
+#'
+#' @examples
+#' set.seed(1)
+#' x <- matrix(rnorm(100*8,sd=1),ncol=8)
+#' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
+#' g <- c(1,1,1,1,2,2,3,3)
+#' tvals <- c(.25,.75)
+#' m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
+#' \dontrun{
+#' m2 <- rq.group.pen.cv(x,y,penalty="gAdLASSO",tau=c(.1,.3,.7),groups=g)
+#' m3 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
+#' m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
+#' }
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
 	if(is.null(foldid)){
@@ -616,13 +716,57 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		gtr <- groupTauResults(indErrors, tauvals,fit$a,avals,fit$models,tauWeights,fit$lambda)
 	}
 
-	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve)
+	returnVal <- list(cverr = foldErrors, cvse = stdErr, fit = fit, btr=btr, gtr=gtr$returnTable, gcve=gtr$gcve,call=match.call())
 	class(returnVal) <- "rq.pen.seq.cv"
 	returnVal
 }
+ 
 
 
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criteria = "CV",intercept=TRUE,cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),internal=FALSE,...){
+#' Cross Validated quantile regression
+#'
+#' @param x Matrix of predictors.
+#' @param y Vector of response values.
+#' @param tau  Conditional quantile being modelled.
+#' @param lambda  Vector of lambdas. Default is for lambdas to be automatically generated.
+#' @param weights Weights for the objective function.
+#' @param penalty Type of penalty: "LASSO", "SCAD" or "MCP".
+#' @param intercept Whether model should include an intercept. Constant does not need to be included in "x".
+#' @param criteria How models will be evaluated. Either cross-validation "CV", BIC "BIC" or large P BIC "PBIC".
+#' @param cvFunc If cross-validation is used how errors are evaluated. Check function "check", "SqErr" (Squared Error) or "AE" (Absolute Value).
+#' @param nfolds  K for K-folds cross-validation.
+#' @param foldid  Group id for cross-validation. Function will randomly generate groups if not specified.
+#' @param nlambda Number of lambdas for which models are fit.
+#' @param eps Smallest lambda used.
+#' @param init.lambda Initial lambda used to find the maximum lambda. Not needed if lambda values are set.
+#' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
+#' @param alg Algorithm that will be used, either linear programming (LP) or coordinate descent (QICD) algorithm from Peng and Wang (2015).
+#' @param internal If this is an internal call to this function. 
+#' @param ... Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.
+#' 
+#' @description 
+#' Warning: this function is depracated and will not be exported in future rqPen releases. Produces penalized quantile regression models for a range of lambdas and penalty of choice. 
+#' If lambda is unselected than an iterative algorithm is used to find a maximum lambda such  that the penalty is large enough to produce an intercept only model. Then range of lambdas 
+#' goes from the maximum lambda found to "eps" on the log scale. For non-convex penalties local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
+#'
+#' @return Returns the following:
+#' \itemize{
+#' \item{models}{List of penalized models fit. Number of models will match number of lambdas and correspond to cv$lambda.}
+#' \item{cv}{Data frame with "lambda" and second column is the evaluation based on the criteria selected.}
+#' \item{lambda.min}{Lambda which provides the smallest statistic for the selected criteria.}
+#' \item{penalty}{Penalty selected.}
+#' }
+#' 
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' x <- matrix(rnorm(800),nrow=100)
+#' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#' cv_model <- cv.rq.pen(x,y)
+#' }
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria = "CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),internal=FALSE,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
@@ -883,6 +1027,54 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",criter
   return_val
 }
 
+#' Non-convex penalized quantile regression
+#' 
+#' @param x Matrix of predictors.
+#' @param y Vector of response values.
+#' @param tau  Conditional quantile being modelled.
+#' @param lambda  Vector of lambdas. Default is for lambdas to be automatically generated.
+#' @param weights Weights for the objective function.
+#' @param intercept Whether model should include an intercept. Constant does not need to be included in "x".
+#' @param penalty Type of penalty: "LASSO", "SCAD" or "MCP".
+#' @param a Additional tuning parameter for SCAD and MCP
+#' @param iterations Number of iterations to be done for iterative LLA algorithm.
+#' @param converge_criteria Difference in betas from iteration process that would satisfy convergence.
+#' @param alg Defaults for small p to linear programming (LP), see Wang, Wu and Li (2012) for details. Otherwise a coordinate descent algorithm is used (QICD), see Peng and Wang (2015) for details. Both methods rely on the One-step sparse estimates algorithm.
+#' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
+#' @param internal Whether call to this function has been made internally or not. 
+#' @param ... Additional items to be sent to rq.lasso.fit.
+#' 
+#' @description 
+#' Warning: this function is deprecated and will not be exported in future releases. Produces penalized quantile regression models for a range of lambdas and penalty of choice. If lambda is unselected than an iterative algorithm is used to 
+#' find a maximum lambda such that the penalty is large enough to produce an intercept only model. Then range of lambdas goes from the maximum lambda found to "eps" on the 
+#' log scale. Local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
+#'
+#' @return Returns the following:
+#' \itemize{
+#' \item{coefficients}{Coefficients from the penalized model.}
+#' \item{PenRho}{Penalized objective function value.}
+#' \item{residuals}{ Residuals from the model.}
+#' \item{rho}{ Objective function evaluation without the penalty.}
+#' \item{coefficients}{ Coefficients from the penalized model.} 
+#' \item{tau}{ Conditional quantile being modeled.}
+#' \item{n}{ Sample size.}  
+#' \item{penalty}{ Penalty used, SCAD or MCP.} 
+#' \item{penalty}{Penalty selected.}
+#' }
+#' @export
+#'
+#' @examples
+#' x <- matrix(rnorm(800),nrow=100)
+#' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#' scadModel <- rq.nc.fit(x,y,lambda=1)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman. 
+#' @references 
+#' \itemize{
+#' \item Wang, L., Wu, Y. and Li, R. (2012). Quantile regression of analyzing heterogeneity in ultra-high dimension. \emph{J. Am. Statist. Ass}, \bold{107}, 214--222.
+#' \item Wu, Y. and Liu, Y. (2009). Variable selection in quantile regression. \emph{Statistica Sinica}, \bold{19}, 801--817.
+#' \item Zou, H. and Li, R. (2008). One-step sparse estimates in nonconcave penalized likelihood models. \emph{Ann. Statist.}, \bold{36}, 1509--1533.
+#' \item Peng, B. and Wang, L. (2015). An iterative coordinate-descent algorithm for high-dimensional nonconvex penalized quantile regression. \emph{J. Comp. Graph.}, \bold{24}, 676--694.
+#' }
 rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                       penalty="SCAD",a=3.7,iterations=1,converge_criteria=1e-06,
                       alg=ifelse(p<50,"LP","QICD"),penVars=NULL,internal=FALSE,...){
@@ -1012,6 +1204,29 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 
 
 
+#' Plots cross validation results from a rq.pen.seq.cv object
+#'
+#' @param x The rq.pen.seq.cv object
+#' @param septau If set to true then optimal tuning parameters are selected seperately for each quantile and there will be a different plot for each quanitle. 
+#' @param tau Quantiles of interest.
+#' @param logLambda Whether log(lambda) is used for the x-axis
+#' @param main Title to the plot
+#' @param ... Additional parameters sent to the plot function. 
+#' 
+#' @description Provides plots of cross-validation results by lambda. If septau is set to TRUE then plots the cross-validation results for each quantile. If septau is set to FALSE
+#' then provides one plot for cross-validation results across all quantiles. 
+#'
+#' @return Plots of the cross validation results by lambda. 
+#' @export
+#'
+#' @examples
+#' set.seed(1)
+#' x <- matrix(rnorm(100*8,sd=1),ncol=8)
+#' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
+#' m1 <- rq.pen.cv(x,y,tau=c(.1,.3,.7))
+#' plot(m1)
+#' plot(m1,septau=FALSE)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
 	if(septau){
 		plotsep.rq.pen.seq.cv(x,tau,logLambda,main,...)
@@ -1023,6 +1238,35 @@ plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 	}
 }
 
+#' Plot of coefficients of rq.pen.seq object as a function of lambda
+#'
+#' @param x rq.pen.seq object
+#' @param vars Variables of interest
+#' @param logLambda Whether lambda should be reported on the log scale
+#' @param tau Quantiles of interest
+#' @param a Tuning parameter a values of interset.
+#' @param lambda Values of lambda of interest. 
+#' @param modelsIndex Specific models of interest.
+#' @param lambdaIndex Specific lambda values of interest. 
+#' @param main Title of the plots. Can be a list of multiple titles if multiple plots are created. 
+#' @param ... Additional arguments sent to plot
+#'
+#' @return Returns plot(s) of coefficients as they change with lambda.  
+#' @export
+#'
+#' @examples
+#' set.seed(1)
+#' x <- matrix(rnorm(100*8,sd=10),ncol=8)
+#' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
+#' m1 <- rq.pen(x,y,tau=c(.1,.5,.7),penalty="SCAD",a=c(3,4))
+#' plot(m1,a=3,tau=.7)
+#' plot(m1)
+#' mlist <- list()
+#' for(i in 1:6){
+#' mlist[[i]] <- paste("Plot",i)
+#' }
+#' plot(m1,main=mlist)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
 	models <- getModels(x,tau=tau,a=a,lambda=lambda,modelsIndex=modelsIndex,lambdaIndex=lambdaIndex)
 	tm <- models$targetModels
@@ -1049,7 +1293,9 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 			lambdas <- x$lambda
 			xtext <- expression(lambda)
 		}
-		betas <- tm[[i]]$coefficients[-1,li]
+	  maxli <- ncol(tm[[i]]$coefficients)
+	  subli <- li[which(li<=maxli)]
+		betas <- tm[[i]]$coefficients[-1,subli]
 		plot(lambdas, betas[1,], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
 		for(i in 1:dim(betas)[1]){
 			lines(lambdas, betas[i,],col=i)
