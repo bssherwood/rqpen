@@ -1296,9 +1296,9 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 	  maxli <- ncol(tm[[i]]$coefficients)
 	  subli <- li[which(li<=maxli)]
 		betas <- tm[[i]]$coefficients[-1,subli]
-		plot(lambdas, betas[1,], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
+		plot(lambdas[subli], betas[1,], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
 		for(i in 1:dim(betas)[1]){
-			lines(lambdas, betas[i,],col=i)
+			lines(lambdas[subli], betas[i,],col=i)
 		}
 	}
 	if(ml > 1){
