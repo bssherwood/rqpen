@@ -1306,6 +1306,48 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 	}
 }
 
+\value{
+  
+}
+\description{
+  Plots how the beta estimates changes with the different values of lambda.  
+}
+\examples{
+  set.seed(1)
+  x <- matrix(rnorm(800),nrow=100)
+  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+  lassoModels <- cv.rq.pen(x,y)
+  b_plot <- beta_plots(lassoModels)
+}
+
+\arguments{
+  \item{model}{"cv.rq.pen" object.}
+  \item{voi}{Index of betas to include. Default is all of the lambdas from "cv.rq.pen" object.}
+  \item{logLambda}{Plot of lambdas is on the log scale.}
+  \item{loi}{Index of lambdas to include. Default is all of the lambdas from "cv.rq.pen" object.}
+  \item{...}{Additional arguments to be sent to plot.}
+}
+
+#' Plots of coefficients by lambda for cv.rq.group.pen and cv.rq.pen
+#'
+#' @param model cv.rq.pen or cv.rq.group.pen object
+#' @param voi Index of betas to include. Default is all of them.
+#' @param logLambda Plot of lambdas is on the log scale.
+#' @param loi Index of lambdas to use, default is all of them. 
+#' @param ... Additional arguments to be sent to plot()
+#' 
+#' @description Warning: this function is deprecated and will not be exported in future versions. 
+#'
+#' @return Plot of how beta estimates change with lambda.
+#' @export
+#'
+#' @examples
+#'   set.seed(1)
+#'   x <- matrix(rnorm(800),nrow=100)
+#'   y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#'   lassoModels <- cv.rq.pen(x,y)
+#'   b_plot <- beta_plots(lassoModels)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
 #logLambda - lambdas plotted on log scale
@@ -1342,10 +1384,37 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
   }  
 }
 
+#' Plot of how coefficients change with tau
+#'
+#' @param x A rq.pen.seq or rq.pen.seq.cv object. 
+#' @param ... Additional arguments see bytau.plot.rq.pen.seq() or bytau.plot.rq.pen.seq.cv() for more information. 
+#'
+#' @return Returns the plot of how coefficients change with tau. 
+#' @export
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot <- function(x,...){
 	UseMethod("bytau.plot")
 } 
 
+#' Plot of how coefficients change with tau. 
+#'
+#' @param x An rq.pen.seq object
+#' @param a The tuning parameter a of interest
+#' @param lambda The lambda value of interest. 
+#' @param lambdaIndex The lambda index of interest. Only specify lambdaIndex or lambda, not both. 
+#' @param ... Additional parameters sent to plot()
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'   set.seed(1)
+#'   x <- matrix(rnorm(800),nrow=100)
+#'   y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#'   lassoModels <- rq.pen(x,y,tau=seq(.1,.9,.1))
+#'   plot(lassoModels,lambda=lassoModels$lambda[5])
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	if(is.null(a) & length(x$a)>1){
 		stop("Need to specify value for a")

@@ -41,6 +41,17 @@ m3 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 plot(m3,septau=FALSE)
 m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 
+x <- matrix(rnorm(100*8,sd=10),ncol=8)
+y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
+m1 <- rq.pen(x,y,tau=c(.1,.5,.7),penalty="SCAD",a=c(3,4))
+plot(m1,a=3,tau=.7)
+plot(m1)
+mlist <- NULL
+for(i in 1:6){
+mlist[i] <- paste("Plot",i)
+}
+plot(m1,main=mlist)
+
 
 
 
