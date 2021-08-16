@@ -1248,7 +1248,7 @@ plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 #' @param lambda Values of lambda of interest. 
 #' @param modelsIndex Specific models of interest.
 #' @param lambdaIndex Specific lambda values of interest. 
-#' @param main Title of the plots. Can be a list of multiple titles if multiple plots are created. 
+#' @param main Title of the plots. Can be a vector of multiple titles if multiple plots are created. 
 #' @param ... Additional arguments sent to plot
 #'
 #' @return Returns plot(s) of coefficients as they change with lambda.  
@@ -1284,7 +1284,7 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 		} else if(length(main)==1){
 			mainText <- main
 		} else{
-			main <- main[i]
+		  mainText <- main[i]
 		}
 		if(logLambda){
 			lambdas <- log(x$lambda)
