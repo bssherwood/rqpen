@@ -1306,28 +1306,6 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 	}
 }
 
-\value{
-  
-}
-\description{
-  Plots how the beta estimates changes with the different values of lambda.  
-}
-\examples{
-  set.seed(1)
-  x <- matrix(rnorm(800),nrow=100)
-  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-  lassoModels <- cv.rq.pen(x,y)
-  b_plot <- beta_plots(lassoModels)
-}
-
-\arguments{
-  \item{model}{"cv.rq.pen" object.}
-  \item{voi}{Index of betas to include. Default is all of the lambdas from "cv.rq.pen" object.}
-  \item{logLambda}{Plot of lambdas is on the log scale.}
-  \item{loi}{Index of lambdas to include. Default is all of the lambdas from "cv.rq.pen" object.}
-  \item{...}{Additional arguments to be sent to plot.}
-}
-
 #' Plots of coefficients by lambda for cv.rq.group.pen and cv.rq.pen
 #'
 #' @param model cv.rq.pen or cv.rq.group.pen object
@@ -1352,6 +1330,7 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
+  .Deprecated("print.rq.pen.seq")
   if( "cv.rq.group.pen" %in% class(model)){
 	betas <- t( model$beta)
 	if(model$intercept){
@@ -1444,8 +1423,26 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	par(ask=FALSE)
 }
 
+#' Plot of coefficients varying by quantiles for rq.pen.seq.cv object
+#'
+#' @param x An rq.pen.seq.cv object
+#' @param septau Whether optimal tuning parameters are estimated separately for each quantile.
+#' @param cvmin Whether the minimum cv error should be used or the one standard error rule. 
+#' @param ... Additional parameters sent to plot() 
+#' 
+#' @description Produces plots of how coefficient estimates vary by quantile for models selected by using cross validation.
+#'
+#' @return Returns plots of coefficient estimates varying by quantile. 
+#' @export
+#'
+#' @examples
+#'  set.seed(1)
+#'  x <- runif(rnorm(800),nrow=100)
+#'  y <- 1 + x[,1] - 3*x[,5] + (1+x[,4])*rnorm(100)
+#'  lmcv <- cv.rq.pen(x,y,tau=seq(.1,.9,.1))
+#'  bytau.plot(lmcv)
 bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
-	coefs <- do.call(rbind,coefficients(x,septau,cvmin,useDefaults,tau=x$fit$tau,...))
+	coefs <- do.call(rbind,coefficients(x,septau,cvmin,TRUE,tau=x$fit$tau))
 	if(nrow(coefs) != length(x$fit$tau)){
 		stop("Too many coefficients returned, function only works with one lambda value")
 	}
@@ -1460,12 +1457,31 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 	
 }
 
+#' Returns coefficients from a rq.pen.seq.cv object. 
+#'
+#' @param x An rq.pen.seq.cv object.
+#' @param septau Whether tuning parameter should be optimized separately for each quantile. 
+#' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
+#' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
+#' @param tau Quantiles of interest. 
+#' @param ... Additional parameters sent to coef.rq.pen.seq()
+#'
+#' @return Returns coefficients
+#' @export
+#'
+#' @examples
+#'  set.seed(1)
+#'  x <- matrix(rnorm(800),nrow=100)
+#'  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#'  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
+#'  coefficients(lassoModels,septau=FALSE)
+#'  coefficients(lassoModels,cvmin=FALSE)
 coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
 		coefficients(x$models,tau=tau,...)
 	} else{
 		if(is.null(tau)){
-			tau <- m1$fit$tau
+			tau <- x$fit$tau
 		}
 		if(septau){
 			keepers <- which(closeEnough(tau,x$btr$tau))
