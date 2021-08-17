@@ -1510,6 +1510,17 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 	}
 }
 
+#' Plots of cross validation results as a function of lambda. 
+#'
+#' @param model 
+#' @param logLambda 
+#' @param loi 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
