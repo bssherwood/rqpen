@@ -1897,6 +1897,7 @@ predict.rq.pen <- function(object, newx,...){
 }
 
 predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
+  .Deprecated("predict.rq.pen.seq.cv")
   if(lambda == "lambda.min"){
      target_pos <- which(object$cv$lambda == object$lambda.min)
   } else{
@@ -1907,6 +1908,7 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 
 
 coef.cv.rq.group.pen <- function(object, lambda='min',...){
+  .Deprecated("coef.rq.pen.seq.cv")
   if(lambda=='min'){
      lambda <- object$lambda.min
   }
@@ -1915,28 +1917,28 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 }
 
 
-#' Title
+#' Fits quantile regression models using a group penalized objective function.
 #'
-#' @param x 
-#' @param y 
-#' @param tau 
-#' @param groups 
-#' @param penalty 
-#' @param lambda 
-#' @param nlambda 
-#' @param eps 
-#' @param alg 
-#' @param a 
-#' @param norm 
-#' @param group.pen.factor 
-#' @param tau.penalty.factor 
-#' @param scalex 
-#' @param coef.cutoff 
-#' @param max.iter 
-#' @param converge.eps 
-#' @param gamma 
-#' @param lambda.discard 
-#' @param ... 
+#' @param x Matrix of predictors. 
+#' @param y Vector of responses.
+#' @param tau Vector of quantiles. 
+#' @param groups Vector of group assignments for predictors. 
+#' @param penalty Penalty used, choices are group lasso ("gLASSO"), group adaptive lasso ("gAdLASSO"), group SCAD ("gSCAD") and group MCP ("gMCP")
+#' @param lambda Vector of lambda tuning parameters. Will be autmoatically generated if it is not set. 
+#' @param nlambda The number of lambda tuning parameters.
+#' @param eps The value to be multiplied by the largest lambda value to determine the smallest lambda value. 
+#' @param alg Algorithm used. Choices are Huber approximation ("huber"), linear programming ("lp") or quantile iterative coordinate descent ("qicd").
+#' @param a The additional tuning parameter for adaptive lasso, SCAD and MCP. 
+#' @param norm Whether a L1 or L2 norm is used for the grouped coefficients. 
+#' @param group.pen.factor Penalty factor for each group.
+#' @param tau.penalty.factor Penalty factor for each quantile.
+#' @param scalex Whether X should be centered and scaled so that the columns have mean zero and standard deviation of one. If set to TRUE, the coefficients will be returned to the original scale of the data.
+#' @param coef.cutoff Coefficient cutoff where any value below this number is set to zero. Useful for the lp algorithm, which are prone to finding almost, but not quite, sparse solutions. 
+#' @param max.iter The maximum number of iterations for the algorithm. 
+#' @param converge.eps The convergence criteria for the algorithms. 
+#' @param gamma The tuning parameter for the Huber loss. 
+#' @param lambda.discard Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions. 
+#' @param ... Additional parameters 
 #'
 #' @return
 #' @export
@@ -2037,32 +2039,37 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	return_val
 }
 
-#' Title
+#' Prints a cv.rq.pen object
 #'
-#' @param x 
-#' @param ... 
 #'
-#' @return
+#' @param x A cv.rq.pen object
+#' @param ... Additional arguments
+#' 
+#' @description Warning: this function is deprecated and will not be exported in future releases. 
+#'
+#' @return Prints coefficients and cross validation results. 
 #' @export
 #'
 #' @examples
 print.cv.rq.pen <- function(x,...){
+   .Deprecated("print.rq.pen.seq.cv")
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
    print(x$cv)
 }
 
-#' Title
+#' Prints a rq.pen object
 #'
-#' @param x 
-#' @param ... 
+#' @param x A rq.pen object
+#' @param ... Additional arguments
 #'
 #' @return
 #' @export
 #'
 #' @examples
 print.rq.pen <- function(x,...){
+  .Deprecated("print.rq.pen.seq")
     cat("\nCoefficients:\n")
 	print(coefficients(x,...))
 }
