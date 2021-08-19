@@ -307,11 +307,13 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="LASSO"
 
 # Finds lambda max for a group penalty. 
 getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE){
+# code improvement: Hacky approach to the group.pen.factor issue. 
 	returnVal <- 0
 	n <- length(y)
 	if(scalex){
 		x <- scale(x)
 	}
+	validSpots <- which(group.pen.factor!=0)
 	for(tau_val in tau){
 		r <- y - quantile(y,tau_val)
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
@@ -319,7 +321,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
 		grad_k.norm<- tapply(grad_k, group.index, hrqglas:::l2norm)
   
-		lambda.max<- max(c(returnVal,grad_k.norm/group.pen.factor))
+		lambda.max<- max(c(returnVal,grad_k.norm[validSpots]/group.pen.factor[validSpots]))
 	}
 	lambda.max
 }
