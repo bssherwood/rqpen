@@ -2115,7 +2115,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' #Linear programming approach with group SCAD penalty and L1-norm
 #' m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,4))
 #' # No penalty for the first group
-#' m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(0,4)))
+#' m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,4)))
 #' # No penalty for the median
 #' m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,0,1))
 #' 
@@ -2168,8 +2168,11 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
 	}
-	if(sum(group.pen.factor<0)>0){
-		stop("penalty factors must be positive")
+	if(any(tau.penalty.factor < 0) | any(group.pen.factor < 0)){
+	  stop("penalty factors must be positive")
+	}
+	if(sum(tau.penalty.factor)==0 | sum(group.pen.factor)==0){
+	  stop("Some penalty factors must be non-zero")
 	}
 	
 	if(lpf!=g){
