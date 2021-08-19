@@ -2174,11 +2174,9 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(sum(tau.penalty.factor)==0 | sum(group.pen.factor)==0){
 	  stop("Some penalty factors must be non-zero")
 	}
-	
 	if(lpf!=g){
 		stop("group penalty factor must be of length g")
 	}	
-	
 	if(is.null(lambda)){
 		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
