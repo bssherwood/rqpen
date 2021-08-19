@@ -5,6 +5,7 @@ import(hqreg)
 import(plyr)
 import(hrqglas)
 import(data.table)
+import(lifecycle)
 importFrom(splines, bs)
 importFrom("graphics", "lines", "plot")
 importFrom("stats", "coefficients", "predict", "quantile", "residuals",

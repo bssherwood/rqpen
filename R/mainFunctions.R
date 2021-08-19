@@ -280,7 +280,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' tvals <- c(.1,.2,.3,.4,.5)
 #' Similiar to penalty proposed by Belloni and Chernouzhukov. To be exact you would divide the tau.penalty.factor by n. 
 #' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
@@ -1441,6 +1441,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 #'  y <- 1 + x[,1] - 3*x[,5] + (1+x[,4])*rnorm(100)
 #'  lmcv <- cv.rq.pen(x,y,tau=seq(.1,.9,.1))
 #'  bytau.plot(lmcv)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
 	coefs <- do.call(rbind,coefficients(x,septau,cvmin,TRUE,tau=x$fit$tau))
 	if(nrow(coefs) != length(x$fit$tau)){
@@ -1476,6 +1477,7 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 #'  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
 #'  coefficients(lassoModels,septau=FALSE)
 #'  coefficients(lassoModels,cvmin=FALSE)
+#'  @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
 	if(!useDefaults){
 		coefficients(x$models,tau=tau,...)
@@ -1517,13 +1519,14 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 #' @param loi 
 #' @param ... 
 #'
-#' @return
+#' @return returns a cross validation plot
 #' @export
 #'
-#' @examples
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
+  .deprecate_soft("3.0","cv_plots()", "plot.rq.pen.seq.cv()")
   cv_data <- model$cv
   if(logLambda){
      cv_data$lambda <- log(cv_data$lambda)
@@ -1706,9 +1709,50 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
   return_val
 }
 
+#' Estimates a quantile regression model with a group penalized objective function.
+#'
+#' @param x Matrix of predictors.
+#' @param y Vector of responses.
+#' @param groups Vector of group assignments.
+#' @param tau Single quantile to be modeled.
+#' @param lambda Single value or seperate value for each group.
+#' @param intercept Whether intercept should be included in the model or not.
+#' @param penalty Type of penalty used: SCAD, MCP or LASSO. 
+#' @param alg Type of algorithm used: QICD or LP. 
+#' @param a Additional tuning parameter for SCAD and MCP. 
+#' @param penGroups Vector of TRUE and FALSE entries for each group determing if they should be penalized. Default is TRUE for all groups.
+#' @param ... Additional arguments sent to rq.group.lin.prog()
+#'
+#' @return Returns the following:      
+#' \itemize{    
+#' \item{coefficients}{Coefficients of the model.}
+#' \item{residuals}{ Residuals from the fitted model.}
+#' \item{rho}{Unpenalized portion of the objective function.}
+#' \item{tau}{ Quantile being modeled.}
+#' \item{n}{Sample size.}
+#' \item{intercept}{Whether intercept was included in model.}
+#' }
+#' 
+#' @description Warning: function is deprecated and will not be exported in future R packages. Recommend using rq.group.pen() instead. 
+#' Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
+#' As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
+#' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
+#' needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
+#' @export
+#'
+#' @examples
+#' 
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
+#' 
+#' @references 
+#' \itemize{
+#' \item Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables. \emph{J. R. Statist. Soc. B}, \bold{68}, 49-67.
+#' \item Peng, B. and Wang, L. (2015). An Iterative Coordinate Descent Algorithm for High-Dimensional Nonconvex Penalized Quantile Regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694.
+#' }
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                 penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
+  deprecate_soft("3.0","rq.group.fit","rq.group.pen")
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
   n <- nrow(x)
@@ -1804,11 +1848,61 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
     return_val
 }
 
-plot.cv.rq.group.pen <- function (x,y=NULL,...) 
+#' Cross validation plot for cv.rq.group.pen object
+#'
+#' @param x A cv.rq.group.pen object
+#' @param ... 
+#'
+#' @return A cross validation plot. 
+#' @export
+#'
+#' @examples
+plot.cv.rq.group.pen <- function (x,...) 
 {
-    plot(x$cv[, 1], x$cv[, 2])
+    deprecate_soft("3.0","plot.cv.rq.group.pen()","plot.rq.group.pen.seq()")
+    plot(x$cv[, 1], x$cv[, 2],...)
 }
 
+#' Estimates a quantile regression model with a lasso penalized quanitle loss function. 
+#'
+#' @param x Matrix of predictors. 
+#' @param y Vector of responses.
+#' @param tau Quantile of interest. 
+#' @param lambda Tuning parameter. 
+#' @param weights Weights for the objective function.
+#' @param intercept Whether model should include an intercept. Constant does not need to be included in "x".
+#' @param coef.cutoff Coefficients below this value will be set to zero.
+#' @param method Use method "br" or "fn" as outlined in quantreg package. We have found "br" to be more stable for penalized regression problems.
+#' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
+#' @param scalex If set to true the predictors will be scaled to have mean zero and standard deviation of one before fitting the model. The output returned will be on the original scale of the data.
+#' @param ... Additional items to be sent to rq. Note this will have to be done carefully as rq is run on the augmented data to account for penalization and could provide strange results if this is not taken into account.
+#'
+#' @return
+#' Returns the following:
+#' \itemize{
+#' \item{coefficients}{ Coefficients from the penalized model.} 
+#' \item{PenRho}{ Penalized objective function value.}
+#' \item{residuals}{ Residuals from the model.}
+#' \item{rho}{ Objective function evaluation without the penalty.}
+#' \item{tau}{ Conditional quantile being modeled.}
+#' \item{n}{ Sample size.}  
+#' }
+#' 
+#' @description Fits a quantile regression model with the LASSO penalty. Uses the augmented data approach similar to the proposal in Sherwood and Wang (2016).   
+#' 
+#' @export
+#'
+#' @examples
+#' x <- matrix(rnorm(800),nrow=100)
+#' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#' lassoModel <- rq.lasso.fit(x,y,lambda=.1)
+#' 
+#' @references 
+#' \itemize{
+#' \item Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. \emph{Journal of the Royal Statistical Society. Series B}, \bold{58}, 267--288.
+#' \item Wu, Y. and Liu, Y. (2009). Variable selection in quantile regression. \emph{Statistica Sinica}, \bold{19}, 801--817.  
+#' \item Sherwood, B. and Wang, L. (2016) Partially linear additive quantile regression in ultra-high dimension. \emph{Annals of Statistics} \bold{44}, 288--317. 
+#' }
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE,lambda.discard=TRUE, ...){
 # x is a n x p matrix without the intercept term
@@ -1819,7 +1913,8 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 ### According to quantreg manual and my experience, "fn" is much faster for big n
 ### The "n" can grow rapidly using lin. prog. approach  
 # penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
-   if(is.null(dim(x))){
+  deprecate_soft("3.0","rq.lasso.fit()","rq.pen()")
+  if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
    }
    p <- dim(x)[2]
@@ -1915,7 +2010,21 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
    return_val
 }
 
+#' Prediction for a rq.pen object
+#'
+#' @param object An rq.pen object. 
+#' @param newx Matrix of new data to make predictions with. 
+#' @param ... Additional parameters that are currenlty ignored
+#'
+#' @return A vector of predictions. 
+#' 
+#' @description This function is deprecated and will not be exported in future versions. 
+#' 
+#' @export
+#'
+#' @examples
 predict.rq.pen <- function(object, newx,...){
+  deprecate_soft("3.0","predict.rq.pen()","predict.rq.pen.seq()")
   coefs <- object$coefficients
   if(object$intercept){
      newx <- cbind(1,newx)
@@ -1923,8 +2032,22 @@ predict.rq.pen <- function(object, newx,...){
   newx %*% coefs
 }
 
+#' Prediction for a cv.rq.pen object
+#'
+#' @param object A cv.rq.pen object. 
+#' @param newx Matrix of new data to make predictions with. 
+#' @param lambda Lambda value used, default is the value associated with the minimum cross validation result. 
+#' @param ... Additional parameters that are currenlty ignored
+#'
+#' @return A vector of predictions. 
+#' 
+#' @description This function is deprecated and will not be exported in future versions. 
+#' 
+#' @export
+#'
+#' @examples
 predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
-  .Deprecated("predict.rq.pen.seq.cv")
+  deprecate_soft("3.0","predict.cv.rq.pen()","predict.rq.pen.seq.cv()")
   if(lambda == "lambda.min"){
      target_pos <- which(object$cv$lambda == object$lambda.min)
   } else{
@@ -1934,6 +2057,16 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 }
 
 
+#' Coefficients from a cv.rq.group.pen object
+#'
+#' @param object A cv.rq.group.pen object.
+#' @param lambda The lambda value, default is to use the one associated with the minimum cv error. 
+#' @param ... Additional parameters. 
+#'
+#' @return Vector of coefficients. 
+#' @export
+#'
+#' @examples
 coef.cv.rq.group.pen <- function(object, lambda='min',...){
   .Deprecated("coef.rq.pen.seq.cv")
   if(lambda=='min'){
@@ -1971,6 +2104,22 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @export
 #'
 #' @examples
+#'  
+#' set.seed(1)
+#' x <- matrix(rnorm(25*30,sd=10),ncol=30)
+#' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(25,3)
+#' g <- rep(seq(1:5),6)
+#' tvals <- c(.25,.75)
+#' r1 <- rq.group.pen(x,y,groups=g)
+#' r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
+#' #Linear programming approach with group SCAD penalty and L1-norm
+#' m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,4))
+#' # No penalty for the first group
+#' m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(0,4)))
+#' # No penalty for the median
+#' m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,0,1))
+#' 
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}, Shaobo Li \email{shaobo.li@ku.edu} and Adam Maidman
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
 						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), 
 						a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.penalty.factor=rep(1,length(tau)),
