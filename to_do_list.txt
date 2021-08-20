@@ -24,6 +24,7 @@
 22. Investigate a smart way to do initial estimates for beta, maybe by tau and tuning parameter. hrq_glasso does have a beta0 for initialization, so that might be a good place to start. 
 23. Allow users to specify lp algorithm of interest for group penalties. 
 24. Maybe add something where if non-convex estimators do not change with lambda that the lambda sequence should stop. Would need a check that the lambda value is "large"
+25. Group penalty provides a totally sparse solution even if one of the group penalty factors is set to zero. 
 
 hrqglasso
 

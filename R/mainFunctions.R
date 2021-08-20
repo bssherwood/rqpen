@@ -227,7 +227,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param gamma tuning parameter for Huber loss, not applicable for non-huber algorithms. 
 #' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights. 
 #'
-#' @details 
+#' @description  
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
 #' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 #' Where \eqref{w_q} and \eqref{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
@@ -590,6 +590,7 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 #' @examples
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.cv.rq.pen <- function(x,...){
+   deprecate_soft("3.0","print.cv.rq.pen()","print.cv.rq.pen.seq()")
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
@@ -655,7 +656,7 @@ print.rq.pen <- function(x,...){
 #' m3 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 #' m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 #' }
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Shaobo Li \email{shaobo.li@ku.edu}
 rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
 	if(is.null(foldid)){
@@ -1330,7 +1331,7 @@ beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
-  .Deprecated("print.rq.pen.seq")
+  deprecate_soft("3.0","beta_plots()","print.rq.pen.seq()")
   if( "cv.rq.group.pen" %in% class(model)){
 	betas <- t( model$beta)
 	if(model$intercept){
@@ -1526,7 +1527,7 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #logLambda - lambdas plotted on log scale
 #loi - index of target lambdas
-  .deprecate_soft("3.0","cv_plots()", "plot.rq.pen.seq.cv()")
+  deprecate_soft("3.0","cv_plots()", "plot.rq.pen.seq.cv()")
   cv_data <- model$cv
   if(logLambda){
      cv_data$lambda <- log(cv_data$lambda)
@@ -2068,7 +2069,7 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 #'
 #' @examples
 coef.cv.rq.group.pen <- function(object, lambda='min',...){
-  .Deprecated("coef.rq.pen.seq.cv")
+  deprecate_soft("3.0","coef.cv.rq.group.pen()","coef.rq.pen.seq.cv()")
   if(lambda=='min'){
      lambda <- object$lambda.min
   }
@@ -2099,6 +2100,49 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param gamma The tuning parameter for the Huber loss. 
 #' @param lambda.discard Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions. 
 #' @param ... Additional parameters 
+#' 
+#' @description  
+#' Let the predictors be divided into G groups with G corresponding vectors of coefficients, \eqn{\beta_1,\ldots,\beta_G}. 
+#' Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models for Q quantiles by minimizing the penalized objective function of
+#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^T\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
+#' Where \eqref{w_q} and \eqref{v_j} are designated by penalty.factor and tau.penalty.factor respectively. The value of \eqn{k} is choosen by \code{norm}.
+#' Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
+#' \itemize{
+#' \item{Group LASSO (gLASSO)}{\eqref{P(||\beta||_k,\lambda,a)=\lambda||\beta||_k}}
+#' \item{Group SCAD}{\eqref{P(||\beta||_k,\lambda,a)=SCAD(||\beta||_k,\lambda,a)}}
+#' \item{Group MCP}{\eqref{P(||\beta||_k,\lambda,a)=MCP(||\beta||_k,\lambda,a)}}
+#' \item{Group Adaptive LASSO}{\eqref{P(||\beta||_k,\lambda,a)}=\frac{\lambda ||\beta||_k}{|\beta_0|^a}}
+#' }
+#' Note if \eqn{k=1} and the group lasso penalty is used then this is identical to the regular lasso and thus function will stop and
+#' suggest that you use rq.pen() instead. For Adaptive LASSO the values of \eqref{\beta_0} come from a Ridge solution with the same value of \eqref{\lambda}.
+#'  If the Huber algorithm is used than \eqref{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqref{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
+#' \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
+#' Where if \eqref{\tau=.5}, we get the usual Huber loss function. 
+#' 
+#' @return An rq.pen.seq object. 
+#' \itemize{
+#' \item{models}{A list of each model fit for each tau and a combination.}
+#' \item{n}{Sample size.}
+#' \item{p}{Number of predictors.}
+#' \item{alg}{Algorithm used.}
+#' \item{tau}{Quantiles modeled.}
+#' \item{penalty}{Penalty used.}
+#' \item{a}{Tuning parameters a used.}
+#' \item{lambda}{Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+#' \item{modelsInfo}{Information about the quantile and a value for each model.}
+#' \item{call}{Original call.}
+#' }
+#' Each model in the models list has the following values. 
+#' \itemize{
+#' \item{coefficients}{Coefficients for each value of lambda.}
+#' \item{rho}{The unpenalized objective function for each value of lambda.}
+#' \item{PenRho}{The penalized objective function for each value of lambda.}
+#' \item{nzero}{The number of nonzero coefficients for each value of lambda.}
+#' \item{tau}{Quantile of the model.}
+#' \item{a}{Value of a for the penalized loss function.}
+#' }
+#' 
+
 #'
 #' @return
 #' @export
@@ -2229,7 +2273,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 #'
 #' @examples
 print.cv.rq.pen <- function(x,...){
-   .Deprecated("print.rq.pen.seq.cv")
+   deprecate_soft("3.0","print.cv.rq.pen()","print.rq.pen.seq.cv()")
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
@@ -2246,8 +2290,8 @@ print.cv.rq.pen <- function(x,...){
 #'
 #' @examples
 print.rq.pen <- function(x,...){
-  .Deprecated("print.rq.pen.seq")
-    cat("\nCoefficients:\n")
+  deprecate_soft("3.0","print.rq.pen()","print.rq.pen.seq()")
+  cat("\nCoefficients:\n")
 	print(coefficients(x,...))
 }
 

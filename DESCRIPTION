@@ -11,6 +11,7 @@ Suggests: splines
 Maintainer: Ben Sherwood <ben.sherwood@ku.edu>
 Description: Performs penalized quantile regression with LASSO, elastic net, SCAD and MCP penalty functions including group penalties. Provides a function that automatically generates lambdas and evaluates different models with cross validation or BIC, including a large p version of BIC. 
 ByteCompile: TRUE
+Encoding: UTF-8
 License: MIT + file LICENSE
 Config/testthat/edition: 3
 RoxygenNote: 7.1.1
