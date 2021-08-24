@@ -6,9 +6,10 @@
 #' @import data.table
 #' @import lifecycle
 #' @importFrom splines bs
-#' @importFrom graphics lines plot
-#' @importFrom stats coefficients predict quantile residuals sd xtabs fitted weighted.mean
+#' @importFrom graphics lines plot par segments points legend
+#' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR
 #' @importFrom Rdpack reprompt
+#' @importFrom methods is
 #' @useDynLib rqPen, .registration=TRUE
 NULL 
 
@@ -110,6 +111,7 @@ qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
 		lambdaIndex <- apply(qic_vals,2,which.min)
 		modelsInfo <- cbind(obj$modelsInfo,minQIC,lambdaIndex)
 		modelsInfo <- data.table(modelsInfo)
+		tau <- modelsInfo$tau
 		modelsInfo <- modelsInfo[, .SD[which.min(minQIC)],by=tau]
 		
 		coefs <- vector(mode="list", length=nt)
@@ -126,6 +128,7 @@ qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
 		}
 		minIndex <- which(gic==min(gic),arr.ind=TRUE)
 		returnA <- obj$a[minIndex[1]]
+		a <- obj$a
 		modelsInfo <- subset(obj$modelsInfo, a==returnA)
 		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
 		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)
@@ -154,7 +157,7 @@ print.qic.select <- function(x,...){
 
 #' Predictions from a qic.select object
 #'
-#' @param x qic.select object
+#' @param object qic.select object
 #' @param newdata Data matrix to make predictions from. 
 #' @param ... optional arguments
 #'
@@ -169,8 +172,8 @@ print.qic.select <- function(x,...){
 #' newx <- matrix(runif(80),ncol)
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.qic.select <- function(x, newdata, ...){
-	coefs <- do.call(cbind(coefficients(x)))
+predict.qic.select <- function(object, newdata, ...){
+	coefs <- do.call(cbind(coefficients(object)))
 	cbind(1,newdata) %*% coefs
 }
 
@@ -234,12 +237,13 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param alg Algorithm used.
 #' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the original scale. 
 #' @param tau.penalty.factor A penalty factor for each quantile.
-#' @param coef.cuttoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
+#' @param coef.cutoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
 #' @param max.iter Maximum number of iterations of non-linear programming algorithms.
 #' @param converge.eps Convergence threshold for non-linear programming algorithms. 
 #' @param gamma tuning parameter for Huber loss, not applicable for non-huber algorithms. 
 #' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights. 
-#'
+#' @param ... Extra parameters. 
+#' 
 #' @description  
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
 #' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
@@ -287,11 +291,15 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' x <- matrix(runif(n*p),ncol=p)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' r1 <- rq.pen(x,y) #Lasso fit for median
-#' r2 <- rq.pen(x,y,tau=c(.25,.5,.75)) # Lasso for multiple quantiles
-#' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1)) # Elastic net fit for multiple quantiles
-#' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7))) # First variable is not penalized
+#' # Lasso for multiple quantiles
+#' r2 <- rq.pen(x,y,tau=c(.25,.5,.75))
+#' # Elastic net fit for multiple quantiles
+#' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1))
+#' # First variable is not penalized
+#' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 #' tvals <- c(.1,.2,.3,.4,.5)
-#' Similiar to penalty proposed by Belloni and Chernouzhukov. To be exact you would divide the tau.penalty.factor by n. 
+#' #Similiar to penalty proposed by Belloni and Chernouzhukov. 
+#' #To be exact you would divide the tau.penalty.factor by n. 
 #' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
@@ -344,12 +352,13 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 
 #' Returns coefficients of a rq.pen.seq object
 #'
-#' @param x rq.pen.seq object
+#' @param object rq.pen.seq object
 #' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
 #' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
 #' @param lambda Tuning parameter of \eqn{\lambda}. Default is NULL, which returns coefficients for all values of \eqn{\lambda}.
 #' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
+#' @param ... Additional parameters. 
 #'
 #' @return A list of a matrix of coefficients for each tau and a combination
 #' @export
@@ -363,21 +372,22 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 #' idxApproach <- coef(m1,modelsIndex=2)
 #' bothIdxApproach <- coef(m1,modelsIndex=2,lambdaIndex=1)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
-  models <- getModels(x,tau,a,lambda,modelsIndex,lambdaIndex)
+coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
+  models <- getModels(object,tau,a,lambda,modelsIndex,lambdaIndex)
   lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
 }
 
 
 #' Predictions from rq.pen.seq object
 #'
-#' @param x rq.pen.seq object
+#' @param object rq.pen.seq object
 #' @param newx Matrix of predictors 
 #' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
 #' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
 #' @param lambda Tuning parameter of \eqn{\lambda}. Default is NULL, which returns coefficients for all values of \eqn{\lambda}.
 #' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
+#' @param ... Additional parameters. 
 #'
 #' @return A list of a matrix of predictions for each tau and a combination
 #' @export
@@ -392,7 +402,7 @@ coef.rq.pen.seq <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambd
 #' idxApproach <- predict(m1,newx,modelsIndex=2)
 #' bothIdxApproach <- predict(m1,newx,modelsIndex=2,lambdaIndex=1)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL){
+predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
 	lapply(object$models, quick.predict,newx=newx)
 }
@@ -541,53 +551,97 @@ print.rq.pen.seq.cv <- function(x,...){
 	}
 }
 
-#' List of coefficients from a rq.pen.seq.cv object
+
+#' Returns coefficients from a rq.pen.seq.cv object. 
 #'
-#' @param x The rq.pen.seq.cv object. 
-#' @param septau Whether the tuning parameters are optimized separately for each quantile, default is TRUE.
-#' @param cvmin If minimum of cross-validation should be used, set to false if you want to use one standard error rule.  
-#' @param useDefaults Set to FALSE if you want to specify the coefficients by lambda and model index. See coef.rq.pen.seq() for more details. 
+#' @param x An rq.pen.seq.cv object.
+#' @param septau Whether tuning parameter should be optimized separately for each quantile. 
+#' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
+#' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
 #' @param tau Quantiles of interest. 
-#' @param ... Additional parameters passed to coef.rq.pen.seq(), only applicable if useDefaults is set to FALSE. 
+#' @param ... Additional parameters sent to coef.rq.pen.seq()
 #'
-#' @return A list of the coefficients for each quantile. 
+#' @return Returns coefficients
 #' @export
 #'
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-
+#' @examples
+#'  set.seed(1)
+#'  x <- matrix(rnorm(800),nrow=100)
+#'  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
+#'  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
+#'  coefficients(lassoModels,septau=FALSE)
+#'  coefficients(lassoModels,cvmin=FALSE)
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
-	if(!useDefaults){
-		coefficients(x$models,tau=tau,...)
-	} else{
-		if(is.null(tau)){
-			tau <- m1$fit$tau
-		}
-		if(septau){
-			keepers <- which(closeEnough(tau,x$btr$tau))
-			btr <- x$btr[keepers,]
-			models <- x$fit$models[btr$modelsIndex]
-			if(cvmin){
-				lambdaIndex <- btr$lambdaIndex
-			} else{
-				lambdaIndex <- btr$lambda1seIndex
-			}
-			returnVal <- vector(mode="list", length=length(models))
-			names(returnVal) <- names(models)
-			for(i in 1:length(returnVal)){
-				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
-			}
-			returnVal
-		} else{
-			if(!cvmin){
-				stop("One standard error approach not implemented for group choice of tuning parameter")
-			} else{
-				keepers <- which(closeEnough(tau,x$gtr$tau))
-				gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
-				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
-			}
-		}
-	}
+  if(!useDefaults){
+    coefficients(x$models,tau=tau,...)
+  } else{
+    if(is.null(tau)){
+      tau <- x$fit$tau
+    }
+    if(septau){
+      keepers <- which(closeEnough(tau,x$btr$tau))
+      btr <- x$btr[keepers,]
+      models <- x$fit$models[btr$modelsIndex]
+      if(cvmin){
+        lambdaIndex <- btr$lambdaIndex
+      } else{
+        lambdaIndex <- btr$lambda1seIndex
+      }
+      returnVal <- vector(mode="list", length=length(models))
+      names(returnVal) <- names(models)
+      for(i in 1:length(returnVal)){
+        returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
+      }
+      returnVal
+    } else{
+      if(!cvmin){
+        stop("One standard error approach not implemented for group choice of tuning parameter")
+      } else{
+        keepers <- which(closeEnough(tau,x$gtr$tau))
+        gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
+        coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
+      }
+    }
+  }
 }
+
+# 
+# 
+# coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+# 	if(!useDefaults){
+# 		coefficients(x$models,tau=tau,...)
+# 	} else{
+# 		if(is.null(tau)){
+# 			tau <- m1$fit$tau
+# 		}
+# 		if(septau){
+# 			keepers <- which(closeEnough(tau,x$btr$tau))
+# 			btr <- x$btr[keepers,]
+# 			models <- x$fit$models[btr$modelsIndex]
+# 			if(cvmin){
+# 				lambdaIndex <- btr$lambdaIndex
+# 			} else{
+# 				lambdaIndex <- btr$lambda1seIndex
+# 			}
+# 			returnVal <- vector(mode="list", length=length(models))
+# 			names(returnVal) <- names(models)
+# 			for(i in 1:length(returnVal)){
+# 				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
+# 			}
+# 			returnVal
+# 		} else{
+# 			if(!cvmin){
+# 				stop("One standard error approach not implemented for group choice of tuning parameter")
+# 			} else{
+# 				keepers <- which(closeEnough(tau,x$gtr$tau))
+# 				gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
+# 				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
+# 			}
+# 		}
+# 	}
+# }
 
 #' Prints a cv.rq.pen object.  
 #'
@@ -1395,7 +1449,7 @@ bytau.plot <- function(x,...){
 #' @param lambdaIndex The lambda index of interest. Only specify lambdaIndex or lambda, not both. 
 #' @param ... Additional parameters sent to plot()
 #'
-#' @return
+#' @return A plot of coefficient values by tau. 
 #' @export
 #'
 #' @examples
@@ -1439,6 +1493,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 #' @param x An rq.pen.seq.cv object
 #' @param septau Whether optimal tuning parameters are estimated separately for each quantile.
 #' @param cvmin Whether the minimum cv error should be used or the one standard error rule. 
+#' @param useDefaults Set to FALSE if you want to use something besides minimum cv or 1se. 
 #' @param ... Additional parameters sent to plot() 
 #' 
 #' @description Produces plots of how coefficient estimates vary by quantile for models selected by using cross validation.
@@ -1469,66 +1524,13 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 	
 }
 
-#' Returns coefficients from a rq.pen.seq.cv object. 
-#'
-#' @param x An rq.pen.seq.cv object.
-#' @param septau Whether tuning parameter should be optimized separately for each quantile. 
-#' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
-#' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
-#' @param tau Quantiles of interest. 
-#' @param ... Additional parameters sent to coef.rq.pen.seq()
-#'
-#' @return Returns coefficients
-#' @export
-#'
-#' @examples
-#'  set.seed(1)
-#'  x <- matrix(rnorm(800),nrow=100)
-#'  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-#'  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
-#'  coefficients(lassoModels,septau=FALSE)
-#'  coefficients(lassoModels,cvmin=FALSE)
-#'  @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
-	if(!useDefaults){
-		coefficients(x$models,tau=tau,...)
-	} else{
-		if(is.null(tau)){
-			tau <- x$fit$tau
-		}
-		if(septau){
-			keepers <- which(closeEnough(tau,x$btr$tau))
-			btr <- x$btr[keepers,]
-			models <- x$fit$models[btr$modelsIndex]
-			if(cvmin){
-				lambdaIndex <- btr$lambdaIndex
-			} else{
-				lambdaIndex <- btr$lambda1seIndex
-			}
-			returnVal <- vector(mode="list", length=length(models))
-			names(returnVal) <- names(models)
-			for(i in 1:length(returnVal)){
-				returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
-			}
-			returnVal
-		} else{
-			if(!cvmin){
-				stop("One standard error approach not implemented for group choice of tuning parameter")
-			} else{
-				keepers <- which(closeEnough(tau,x$gtr$tau))
-				gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
-				coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
-			}
-		}
-	}
-}
 
 #' Plots of cross validation results as a function of lambda. 
 #'
-#' @param model 
-#' @param logLambda 
-#' @param loi 
-#' @param ... 
+#' @param model A cv.rq.pen() object.
+#' @param logLambda Whether lambda values should be logged or not. 
+#' @param loi Lambda indexes of interest, if null all lambda values will be used. 
+#' @param ... Additional parameters sent to plot function.
 #'
 #' @return returns a cross validation plot
 #' @export
@@ -1622,7 +1624,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
        stop("QICD algorithm wtih non-convex penalties setup only to use BIC or PBIC as the criteria")
     }
     #start with lasso fit
-    lasso_fit <- cv.rq.group.pen.old(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
+    lasso_fit <- cv.rq.group.pen(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
                                    nlambda, eps, init.lambda,alg="LP",penGroups,...)
     #then iterate through lasso models to get new models
     model_coefs <- NULL
@@ -1801,8 +1803,6 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
 #' needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
 #' @export
-#'
-#' @examples
 #' 
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 #' 
@@ -1913,7 +1913,7 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 #' Cross validation plot for cv.rq.group.pen object
 #'
 #' @param x A cv.rq.group.pen object
-#' @param ... 
+#' @param ... Additional parameters for plot function.
 #'
 #' @return A cross validation plot. 
 #' @export
@@ -1936,6 +1936,7 @@ plot.cv.rq.group.pen <- function (x,...)
 #' @param method Use method "br" or "fn" as outlined in quantreg package. We have found "br" to be more stable for penalized regression problems.
 #' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
 #' @param scalex If set to true the predictors will be scaled to have mean zero and standard deviation of one before fitting the model. The output returned will be on the original scale of the data.
+#' @param lambda.discard If TRUE lambda sequence will stop early if for small values of lambda the estimates do not change much. 
 #' @param ... Additional items to be sent to rq. Note this will have to be done carefully as rq is run on the augmented data to account for penalization and could provide strange results if this is not taken into account.
 #'
 #' @return

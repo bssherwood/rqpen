@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A cv.rq.group.pen object}
 
-\item{...}{}
+\item{...}{Additional parameters for plot function.}
 }
 \value{
 A cross validation plot.

@@ -5,16 +5,17 @@
 \title{Returns coefficients of a rq.pen.seq object}
 \usage{
 \method{coef}{rq.pen.seq}(
-  x,
+  object,
   tau = NULL,
   a = NULL,
   lambda = NULL,
   modelsIndex = NULL,
-  lambdaIndex = NULL
+  lambdaIndex = NULL,
+  ...
 )
 }
 \arguments{
-\item{x}{rq.pen.seq object}
+\item{object}{rq.pen.seq object}
 
 \item{tau}{Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.}
 
@@ -25,6 +26,8 @@
 \item{modelsIndex}{Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified.}
 
 \item{lambdaIndex}{Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified.}
+
+\item{...}{Additional parameters.}
 }
 \value{
 A list of a matrix of coefficients for each tau and a combination

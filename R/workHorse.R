@@ -3,7 +3,7 @@ lambdanum <- function(model){
 }
 
 updateCoefs <- function(obj,mu_x,sigma_x){
-  transform_coefs(return_val$coefficients,mu_x,sigma_x,intercept)
+  transform_coefs(obj$coefficients,mu_x,sigma_x,TRUE)
 }
 
 quick.predict <- function(coefs,newx){
@@ -271,11 +271,11 @@ rq.huber.deriv<- function(r, tau, gamma){
 } 
 
 neg.gradient <- function(r,weights,tau,gamma,x,apprx){
-  if(apprx=="huber"){
-    wt_deriv <- as.vector(weights*rq.huber.deriv(r, tau, gamma))
-  }else{
-    wt_deriv <- as.vector(weights*rq.tanh.deriv(r, tau, gamma))
-  }
+  #if(apprx=="huber"){
+  wt_deriv <- as.vector(weights*rq.huber.deriv(r, tau, gamma))
+  #}else{
+  #  wt_deriv <- as.vector(weights*rq.tanh.deriv(r, tau, gamma))
+  #}
   
   if(is.null(dim(x))){
     mean(x*wt_deriv)
@@ -1160,6 +1160,8 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 	index <- 1:mn
 	
 	btr <- data.table(tau=tauvals,minCv=overallMin,lambdaIndex=overallSpot,a=avals,modelsIndex=index)
+	minCv <- btr$minCv
+	tau <- btr$tau
 	btr <- btr[, .SD[which.min(minCv)],by=tau]
 	
 	cvse <- lambda1se <- lambda1seIndex <- lambdaVals <- nz <- nzse <- NULL

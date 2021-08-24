@@ -59,9 +59,6 @@ As a result of this the group lasso penalty is the same as the typical lasso pen
 Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
 needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015).
 }
-\examples{
-
-}
 \references{
 \itemize{
 \item Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables. \emph{J. R. Statist. Soc. B}, \bold{68}, 49-67.

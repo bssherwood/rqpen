@@ -7,13 +7,13 @@
 cv_plots(model, logLambda = TRUE, loi = NULL, ...)
 }
 \arguments{
-\item{model}{}
+\item{model}{A cv.rq.pen() object.}
 
-\item{logLambda}{}
+\item{logLambda}{Whether lambda values should be logged or not.}
 
-\item{loi}{}
+\item{loi}{Lambda indexes of interest, if null all lambda values will be used.}
 
-\item{...}{}
+\item{...}{Additional parameters sent to plot function.}
 }
 \value{
 returns a cross validation plot

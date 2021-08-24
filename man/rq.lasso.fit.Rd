@@ -40,6 +40,8 @@ rq.lasso.fit(
 
 \item{scalex}{If set to true the predictors will be scaled to have mean zero and standard deviation of one before fitting the model. The output returned will be on the original scale of the data.}
 
+\item{lambda.discard}{If TRUE lambda sequence will stop early if for small values of lambda the estimates do not change much.}
+
 \item{...}{Additional items to be sent to rq. Note this will have to be done carefully as rq is run on the augmented data to account for penalization and could provide strange results if this is not taken into account.}
 }
 \value{

@@ -13,6 +13,8 @@
 
 \item{cvmin}{Whether the minimum cv error should be used or the one standard error rule.}
 
+\item{useDefaults}{Set to FALSE if you want to use something besides minimum cv or 1se.}
+
 \item{...}{Additional parameters sent to plot()}
 }
 \value{

@@ -50,6 +50,8 @@ rq.pen(
 
 \item{tau.penalty.factor}{A penalty factor for each quantile.}
 
+\item{coef.cutoff}{Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used.}
+
 \item{max.iter}{Maximum number of iterations of non-linear programming algorithms.}
 
 \item{converge.eps}{Convergence threshold for non-linear programming algorithms.}
@@ -58,7 +60,7 @@ rq.pen(
 
 \item{lambda.discard}{Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights.}
 
-\item{coef.cuttoff}{Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used.}
+\item{...}{Extra parameters.}
 }
 \value{
 An rq.pen.seq object. 
@@ -108,11 +110,15 @@ p <- 8
 x <- matrix(runif(n*p),ncol=p)
 y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 r1 <- rq.pen(x,y) #Lasso fit for median
-r2 <- rq.pen(x,y,tau=c(.25,.5,.75)) # Lasso for multiple quantiles
-r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1)) # Elastic net fit for multiple quantiles
-r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7))) # First variable is not penalized
+# Lasso for multiple quantiles
+r2 <- rq.pen(x,y,tau=c(.25,.5,.75))
+# Elastic net fit for multiple quantiles
+r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1))
+# First variable is not penalized
+r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 tvals <- c(.1,.2,.3,.4,.5)
-Similiar to penalty proposed by Belloni and Chernouzhukov. To be exact you would divide the tau.penalty.factor by n. 
+#Similiar to penalty proposed by Belloni and Chernouzhukov. 
+#To be exact you would divide the tau.penalty.factor by n. 
 r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
 }
 \author{

@@ -1,5 +1,14 @@
-rqPen 3.0 (Release date: TBD)
+rqPen 3.0 (Release date: 2021-08-24)
 Changes:
+* Package now has elastic net penalty, adaptive lasso, group adaptive lasso and group lasso.  
+* New function rq.pen() which should be used for any non-group penalty. 
+* New function rq.group.pen() should should be used for any group penalty. Group penalties now have L2 and L1 composite norms. In other words, using L2 norm with group lasso provides the typial group lasso. Previously only had L1 norm implemented and so group lasso was the same as regular lasso. See help(rq.group.pen) for more details. 
+* New functions rq.pen.cv() and rq.group.pen.cv() which provide cross validation for rq.pen() and rq.group.pen() objects, respectively. 
+* Function qic.select() uses information criterion to select best tuning parameters.
+* All functions allow for multiple values of tau and multiple values of "a", the second tuning parameter.
+* New algorithms implement Huber-type approximations to quantile loss, greatly improving computational efficiency.
+* Stopped exporting many functions that were unnecesarily exported. 
+* Started deprecating many functions that were the old way to fit models. Examples include cv.rq.pen() and cv.rq.group.pen(). 
 * Updated code for get_coef_pen() to a fix a bug where it was returning multiple values. Thank you to Jingyi Kenneth Tay for noticing this issue. 
 
 rqPen 2.2.2 (Release date: 2020-04-08)

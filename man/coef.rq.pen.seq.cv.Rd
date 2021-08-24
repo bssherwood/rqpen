@@ -2,10 +2,8 @@
 % Please edit documentation in R/mainFunctions.R
 \name{coef.rq.pen.seq.cv}
 \alias{coef.rq.pen.seq.cv}
-\title{List of coefficients from a rq.pen.seq.cv object}
+\title{Returns coefficients from a rq.pen.seq.cv object.}
 \usage{
-\method{coef}{rq.pen.seq.cv}(x, septau = TRUE, cvmin = TRUE, useDefaults = TRUE, tau = NULL, ...)
-
 \method{coef}{rq.pen.seq.cv}(x, septau = TRUE, cvmin = TRUE, useDefaults = TRUE, tau = NULL, ...)
 }
 \arguments{
@@ -22,13 +20,9 @@
 \item{...}{Additional parameters sent to coef.rq.pen.seq()}
 }
 \value{
-A list of the coefficients for each quantile.
-
 Returns coefficients
 }
 \description{
-List of coefficients from a rq.pen.seq.cv object
-
 Returns coefficients from a rq.pen.seq.cv object.
 }
 \examples{
@@ -38,7 +32,7 @@ Returns coefficients from a rq.pen.seq.cv object.
  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
  coefficients(lassoModels,septau=FALSE)
  coefficients(lassoModels,cvmin=FALSE)
- @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
+
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}

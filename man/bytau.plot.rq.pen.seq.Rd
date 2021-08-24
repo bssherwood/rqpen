@@ -18,7 +18,7 @@
 \item{...}{Additional parameters sent to plot()}
 }
 \value{
-
+A plot of coefficient values by tau.
 }
 \description{
 Plot of how coefficients change with tau.
