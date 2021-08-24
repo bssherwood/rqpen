@@ -2,22 +2,54 @@
 % Please edit documentation in R/mainFunctions.R
 \name{qic.select}
 \alias{qic.select}
-\title{Title}
+\title{Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+as
+\deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
+be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
+\deqn{\sum_{q=1}^Q w_q \sum_{i=1}^n [ \rho_\tau(y_i-x_i^\top\hat{\beta}^q) + d_q*b_q/(2n)],}
+where \eqn{w_q} is the weight assigned for the qth quantile model.}
 \usage{
-qic.select(obj, method = "BIC", septau = FALSE, weights = NULL)
+qic.select(obj, method = "BIC", septau = TRUE, weights = NULL)
 }
 \arguments{
 \item{obj}{A rq.pen.seq or rq.pen.seq.cv object.}
 
 \item{method}{Choice of BIC, AIC or PBIC, a large p BIC.}
 
-\item{septau}{If optimal}
+\item{septau}{If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE.}
 
-\item{weights}{}
+\item{weights}{Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.}
 }
 \value{
-
+\itemize{
+\item{coefficients}{Coefficients of the selected models.}
+\item{ic}{Information criterion values for all considered models.}
+\item{modelsInfo}{Model info for the selected models related to the original object obj.}
+\item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
+}
 }
 \description{
-Title
+Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+as
+\deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
+be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
+\deqn{\sum_{q=1}^Q w_q \sum_{i=1}^n [ \rho_\tau(y_i-x_i^\top\hat{\beta}^q) + d_q*b_q/(2n)],}
+where \eqn{w_q} is the weight assigned for the qth quantile model.
+}
+\examples{
+set.seed(1)
+x <- matrix(runif(800),ncol=8)
+y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75))
+qic.select(m1)
+}
+\references{
+\insertRef{qrbic}{rqPen}
+}
+\author{
+Ben Sherwood, \email{ben.sherwood@ku.edu}
 }

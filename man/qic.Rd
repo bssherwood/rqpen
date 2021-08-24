@@ -24,12 +24,15 @@ Calculate information criterion for penalized quantile regression models
 }
 \examples{
 set.seed(1)
-x <- matrix(runif(800),ncol=1)
-y <- 1 + x[,1] + x[,8] + (1+x[,3])*rnorm(n)
+x <- matrix(runif(800),ncol=8)
+y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 m1 <- rq.pen(x,y,tau=c(.25,.75))
 qic(m1$models[[1]]) # returns the IC values for \tau=.25
 qic(m1$models[[2]]) # returns the IC values for \tau=.75
 }
 \references{
 \insertRef{qrbic}{rqPen}
+}
+\author{
+Ben Sherwood, \email{ben.sherwood@ku.edu}
 }

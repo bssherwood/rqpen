@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{rq.pen}
 \alias{rq.pen}
-\title{Title}
+\title{Fit a quantile regression model using a penalized quantile loss function.}
 \usage{
 rq.pen(
   x,
@@ -36,7 +36,7 @@ rq.pen(
 
 \item{penalty}{choice of penalty}
 
-\item{a}{additional tuning parameter, not used for lasso or ridge penalties}
+\item{a}{Additional tuning parameter, not used for lasso or ridge penalties. However, will be set to the elastic net values of 1 and 0 respectively. Defaults are ENet(0), aLASSO(1), SCAD(3.7) and MCP(3).}
 
 \item{nlambda}{number of lambda, ignored if lambda is set}
 
@@ -44,9 +44,9 @@ rq.pen(
 
 \item{penalty.factor}{penalty factor for the predictors}
 
-\item{alg}{algorithm used}
+\item{alg}{Algorithm used.}
 
-\item{scalex}{Whether x should be scaled before fitting the model. Coefficients are returned on the orginal scale.}
+\item{scalex}{Whether x should be scaled before fitting the model. Coefficients are returned on the original scale.}
 
 \item{tau.penalty.factor}{A penalty factor for each quantile.}
 
@@ -56,11 +56,65 @@ rq.pen(
 
 \item{gamma}{tuning parameter for Huber loss, not applicable for non-huber algorithms.}
 
+\item{lambda.discard}{Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights.}
+
 \item{coef.cuttoff}{Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used.}
 }
 \value{
+An rq.pen.seq object. 
+\itemize{
+\item{models}{A list of each model fit for each tau and a combination.}
+\item{n}{Sample size.}
+\item{p}{Number of predictors.}
+\item{alg}{Algorithm used.}
+\item{tau}{Quantiles modeled.}
+\item{a}{Tuning parameters a used.}
+\item{modelsInfo}{Information about the quantile and a value for each model.}
+\item{lambda}{Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+\item{penalty}{Penalty used.}
+\item{call}{Original call.}
+}
+Each model in the models list has the following values. 
+\itemize{
+\item{coefficients}{Coefficients for each value of lambda.}
+\item{rho}{The unpenalized objective function for each value of lambda.}
+\item{PenRho}{The penalized objective function for each value of lambda.}
+\item{nzero}{The number of nonzero coefficients for each value of lambda.}
+\item{tau}{Quantile of the model.}
+\item{a}{Value of a for the penalized loss function.}
+}
 
+If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
+\deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
+Where if \eqn{\tau=.5}, we get the usual Huber loss function.
 }
 \description{
-Title
+Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
+\deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
+\itemize{
+\item{LASSO}{\eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
+\item{SCAD}{\eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
+\item{MCP}{\eqn{P(\beta,\lambda,a)=MCP(\beta,\lambda,a)}}
+\item{Ridge}{\eqn{P(\beta,\lambda,a)=\lambda\beta^2}}
+\item{Elastic Net}{\eqn{P(\beta,\lambda,a)=a*\lambda|\beta|+(1-a)*\lambda*\beta^2}}
+\item{Adaptive LASSO}{\eqn{P(\beta,\lambda,a)=\frac{\lambda |\beta|}{|\beta_0|^a}}}
+}
+For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}.
+}
+\examples{
+n <- 100
+p <- 8
+x <- matrix(runif(n*p),ncol=p)
+y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+r1 <- rq.pen(x,y) #Lasso fit for median
+r2 <- rq.pen(x,y,tau=c(.25,.5,.75)) # Lasso for multiple quantiles
+r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1)) # Elastic net fit for multiple quantiles
+r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7))) # First variable is not penalized
+tvals <- c(.1,.2,.3,.4,.5)
+Similiar to penalty proposed by Belloni and Chernouzhukov. To be exact you would divide the tau.penalty.factor by n. 
+r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
+}
+\author{
+Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 }
