@@ -28,7 +28,7 @@ Plot of how coefficients change with tau.
   x <- matrix(rnorm(800),nrow=100)
   y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
   lassoModels <- rq.pen(x,y,tau=seq(.1,.9,.1))
-  plot(lassoModels,lambda=lassoModels$lambda[5])
+  bytau.plot(lassoModels,lambda=lassoModels$lambda[5])
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
