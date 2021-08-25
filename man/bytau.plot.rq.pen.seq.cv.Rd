@@ -25,9 +25,9 @@ Produces plots of how coefficient estimates vary by quantile for models selected
 }
 \examples{
  set.seed(1)
- x <- runif(rnorm(800),nrow=100)
+ x <- matrix(runif(800),nrow=100)
  y <- 1 + x[,1] - 3*x[,5] + (1+x[,4])*rnorm(100)
- lmcv <- cv.rq.pen(x,y,tau=seq(.1,.9,.1))
+ lmcv <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
  bytau.plot(lmcv)
 }
 \author{

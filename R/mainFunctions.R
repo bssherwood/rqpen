@@ -204,17 +204,18 @@ print.rq.pen.seq <- function(x,...){
 
 #' Returns Coefficients of a cv.rq.pen object
 #' 
-#' Warning: this function will be depracated and not exported in future versions of rqPen, due to the switch from cv.rq.pen() to rq.pen.cv().
+#' Warning: this function will be deprecated and not exported in future versions of rqPen, due to the switch from cv.rq.pen() to rq.pen.cv().
 #'
 #' @param object cv.rq.pen object 
 #' @param lambda Value of lambda, default is to use the minimum value. 
 #' @param ... Additional parameters.
 #'
-#' @return
+#' @return Coefficients for a given lambda, or the lambda associated with the minimum cv value. 
 #' @export
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.cv.rq.pen <- function(object, lambda='min',...){
+  deprecate_soft("3.0","coef.cv.rq.pen()","coef.rq.pen.seq.cv()")
   if(lambda=='min'){
      lambda <- object$lambda.min
   }
@@ -557,7 +558,7 @@ print.rq.pen.seq.cv <- function(x,...){
 
 #' Returns coefficients from a rq.pen.seq.cv object. 
 #'
-#' @param x An rq.pen.seq.cv object.
+#' @param object An rq.pen.seq.cv object.
 #' @param septau Whether tuning parameter should be optimized separately for each quantile. 
 #' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
 #' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
@@ -576,17 +577,17 @@ print.rq.pen.seq.cv <- function(x,...){
 #'  coefficients(lassoModels,cvmin=FALSE)
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
   if(!useDefaults){
-    coefficients(x$models,tau=tau,...)
+    coefficients(object$models,tau=tau,...)
   } else{
     if(is.null(tau)){
-      tau <- x$fit$tau
+      tau <- object$fit$tau
     }
     if(septau){
-      keepers <- which(closeEnough(tau,x$btr$tau))
-      btr <- x$btr[keepers,]
-      models <- x$fit$models[btr$modelsIndex]
+      keepers <- which(closeEnough(tau,object$btr$tau))
+      btr <- object$btr[keepers,]
+      models <- object$fit$models[btr$modelsIndex]
       if(cvmin){
         lambdaIndex <- btr$lambdaIndex
       } else{
@@ -595,16 +596,16 @@ coef.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NUL
       returnVal <- vector(mode="list", length=length(models))
       names(returnVal) <- names(models)
       for(i in 1:length(returnVal)){
-        returnVal[[i]] <- coef(x$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
+        returnVal[[i]] <- coef(object$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
       }
       returnVal
     } else{
       if(!cvmin){
         stop("One standard error approach not implemented for group choice of tuning parameter")
       } else{
-        keepers <- which(closeEnough(tau,x$gtr$tau))
-        gtr <- x$gtr[keepers,]#subset(x$gtr, closeEnough(tau,x$gtr$tau))
-        coef(x$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
+        keepers <- which(closeEnough(tau,object$gtr$tau))
+        gtr <- object$gtr[keepers,]
+        coef(object$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
       }
     }
   }
@@ -843,11 +844,13 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
-  if(!internal){
-	warning("Recommend using rq.pen.cv instead. This is an older function that is kept for reproducibality reasons, but tends to be much slower. It will not be exported to the namespace in future versions")
+  deprecate_soft("3.0","cv.rq.pen()","rq.pen.cv()")
+  if(length(tau)>1){
+      stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
   }
+  
   m.c <- match.call() # This stores all the arguments in the function call as a list
-
+  
   p <- dim(x)[2]
   if(is.null(penVars)){
     penVars <- 1:p
@@ -1506,14 +1509,14 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 #'
 #' @examples
 #'  set.seed(1)
-#'  x <- runif(800,nrow=100)
+#'  x <- matrix(runif(800),nrow=100)
 #'  y <- 1 + x[,1] - 3*x[,5] + (1+x[,4])*rnorm(100)
-#'  lmcv <- cv.rq.pen(x,y,tau=seq(.1,.9,.1))
+#'  lmcv <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
 #'  bytau.plot(lmcv)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
 	coefs <- do.call(rbind,coefficients(x,septau,cvmin,TRUE,tau=x$fit$tau))
-	if(nrow(coefs) != length(x$fit$tau)){
+	if(ncol(coefs) != length(x$fit$tau)){
 		stop("Too many coefficients returned, function only works with one lambda value")
 	}
 	par(ask=TRUE)

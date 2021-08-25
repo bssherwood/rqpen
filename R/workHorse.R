@@ -187,7 +187,6 @@ randomly_assign <- function(n,k){
    sample(group_assign)
 }
 
-#Old function that is no longer exported. Kept for reproducible reasons. 
 rq.lasso.fit.mult <- function(x,y,tau_seq=c(.1,.3,.5,.7,.9),lambda=NULL,weights=NULL,intercept=TRUE,coef.cutoff=.00000001,...){
    warning("rq.lasso() fits for multiple tau and provides a sequence of lambda and faster algorithms")
    model_list <- list()

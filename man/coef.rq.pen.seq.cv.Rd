@@ -4,10 +4,10 @@
 \alias{coef.rq.pen.seq.cv}
 \title{Returns coefficients from a rq.pen.seq.cv object.}
 \usage{
-\method{coef}{rq.pen.seq.cv}(x, septau = TRUE, cvmin = TRUE, useDefaults = TRUE, tau = NULL, ...)
+\method{coef}{rq.pen.seq.cv}(object, septau = TRUE, cvmin = TRUE, useDefaults = TRUE, tau = NULL, ...)
 }
 \arguments{
-\item{x}{An rq.pen.seq.cv object.}
+\item{object}{An rq.pen.seq.cv object.}
 
 \item{septau}{Whether tuning parameter should be optimized separately for each quantile.}
 

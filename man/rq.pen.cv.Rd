@@ -85,11 +85,14 @@ ME AN IDEA ON HOW TO DO STANDARD ERROR FOR THIS SETTTING.
 x <- matrix(runif(800),ncol=8)
 y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 r1 <- rq.pen.cv(x,y) #lasso fit for median
-r2 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75)) # Elastic net fit for multiple values of a and tau
+# Elastic net fit for multiple values of a and tau
+r2 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75)) 
 #same as above but more weight given to median when calculating group cross validation error. 
 r3 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75),tauWeights=c(.25,.5,.25))
-r4 <- rq.pen.cv(x,y,cvFunc=median) # uses median cross-validation error instead of mean. 
-r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(0,7))) #Cross-validation with no penalty on the first variable.
+# uses median cross-validation error instead of mean.
+r4 <- rq.pen.cv(x,y,cvFunc=median)  
+#Cross-validation with no penalty on the first variable.
+r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(0,7)))
 
 }
 \author{
