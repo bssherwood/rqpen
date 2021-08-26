@@ -65,25 +65,25 @@ rq.pen(
 \value{
 An rq.pen.seq object. 
 \itemize{
-\item{models}{A list of each model fit for each tau and a combination.}
-\item{n}{Sample size.}
-\item{p}{Number of predictors.}
-\item{alg}{Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
-\item{tau}{Quantiles modeled.}
-\item{a}{Tuning parameters a used.}
-\item{modelsInfo}{Information about the quantile and a value for each model.}
-\item{lambda}{Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
-\item{penalty}{Penalty used.}
-\item{call}{Original call.}
+\item{models}{ A list of each model fit for each tau and a combination.}
+\item{n}{ Sample size.}
+\item{p}{ Number of predictors.}
+\item{alg}{ Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
+\item{tau}{ Quantiles modeled.}
+\item{a}{ Tuning parameters a used.}
+\item{modelsInfo}{ Information about the quantile and a value for each model.}
+\item{lambda}{ Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+\item{penalty}{ Penalty used.}
+\item{call}{ Original call.}
 }
 Each model in the models list has the following values. 
 \itemize{
-\item{coefficients}{Coefficients for each value of lambda.}
-\item{rho}{The unpenalized objective function for each value of lambda.}
-\item{PenRho}{The penalized objective function for each value of lambda.}
-\item{nzero}{The number of nonzero coefficients for each value of lambda.}
-\item{tau}{Quantile of the model 3.}
-\item{a}{Value of a for the penalized loss function.}
+\item{coefficients}{ Coefficients for each value of lambda.}
+\item{rho}{ The unpenalized objective function for each value of lambda.}
+\item{PenRho}{ The penalized objective function for each value of lambda.}
+\item{nzero}{ The number of nonzero coefficients for each value of lambda.}
+\item{tau}{ Quantile of the model.}
+\item{a}{ Value of a for the penalized loss function.}
 }
 
 If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
