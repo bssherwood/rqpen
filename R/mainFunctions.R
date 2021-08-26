@@ -173,7 +173,7 @@ print.qic.select <- function(x,...){
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){
-	coefs <- do.call(cbind(coefficients(object)))
+	coefs <- do.call(cbind,coefficients(object))
 	cbind(1,newdata) %*% coefs
 }
 
@@ -397,7 +397,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' x <- matrix(runif(800),ncol=8)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75),lambda=c(.1,.05,.01))
-#' newx <- runif(80,ncol=8)
+#' newx <- matrix(runif(80),ncol=8)
 #' allCoefs <- predict(m1,newx)
 #' targetCoefs <- predict(m1,newx,tau=.25,a=.5,lambda=.1)
 #' idxApproach <- predict(m1,newx,modelsIndex=2)
@@ -405,7 +405,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
-	lapply(object$models, quick.predict,newx=newx)
+	lapply(coefs, quick.predict,newx=newx)
 }
 
 #' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqn{\lambda} and a.
