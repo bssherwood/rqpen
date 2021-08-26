@@ -42,7 +42,7 @@ Predictions from rq.pen.seq object
 x <- matrix(runif(800),ncol=8)
 y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75),lambda=c(.1,.05,.01))
-newx <- runif(80,ncol=8)
+newx <- matrix(runif(80),ncol=8)
 allCoefs <- predict(m1,newx)
 targetCoefs <- predict(m1,newx,tau=.25,a=.5,lambda=.1)
 idxApproach <- predict(m1,newx,modelsIndex=2)

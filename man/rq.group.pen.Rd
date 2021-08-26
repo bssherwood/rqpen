@@ -129,6 +129,9 @@ m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,4)))
 m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,0,1))
 
 }
+\references{
+\insertRef{qr_cd}{rqPen}
+}
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}, Shaobo Li \email{shaobo.li@ku.edu} and Adam Maidman
 }

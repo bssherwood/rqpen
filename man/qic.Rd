@@ -27,8 +27,10 @@ set.seed(1)
 x <- matrix(runif(800),ncol=8)
 y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 m1 <- rq.pen(x,y,tau=c(.25,.75))
-qic(m1$models[[1]]) # returns the IC values for \tau=.25
-qic(m1$models[[2]]) # returns the IC values for \tau=.75
+# returns the IC values for tau=.25
+qic(m1$models[[1]],m1$n) 
+# returns the IC values for tau=.75
+qic(m1$models[[2]],m1$n) 
 }
 \references{
 \insertRef{qrbic}{rqPen}

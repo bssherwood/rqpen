@@ -19,7 +19,8 @@ NULL
 #' @param n Sample size
 #' @param method Choice of BIC, AIC or PBIC, a large p BIC. 
 #'
-#' @return Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
+#' @return 
+#' Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
 #' \deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
 #' for every value of \eqn{\lambda}. 
@@ -30,8 +31,10 @@ NULL
 #' x <- matrix(runif(800),ncol=8)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' m1 <- rq.pen(x,y,tau=c(.25,.75))
-#' qic(m1$models[[1]]) # returns the IC values for \tau=.25
-#' qic(m1$models[[2]]) # returns the IC values for \tau=.75
+#' # returns the IC values for tau=.25
+#' qic(m1$models[[1]],m1$n) 
+#' # returns the IC values for tau=.75
+#' qic(m1$models[[2]],m1$n) 
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #'@author Ben Sherwood, \email{ben.sherwood@ku.edu}
@@ -263,7 +266,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{models}{A list of each model fit for each tau and a combination.}
 #' \item{n}{Sample size.}
 #' \item{p}{Number of predictors.}
-#' \item{alg}{Algorithm used.}
+#' \item{alg}{Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
 #' \item{tau}{Quantiles modeled.}
 #' \item{a}{Tuning parameters a used.}
 #' \item{modelsInfo}{Information about the quantile and a value for each model.}
@@ -283,7 +286,9 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' 
 #' If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
 #' \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
-#' Where if \eqn{\tau=.5}, we get the usual Huber loss function. 
+#' Where if \eqn{\tau=.5}, we get the usual Huber loss function. The Huber implementation calls the package hqreg which implements the methods of Yi and Huang (2017) 
+#' for Huber loss with elastic net penalties. For non-elastic net penalties the LLA algorithm of Zou and Li (2008) is used to approximate those loss functions
+#' with a lasso penalty with different weights for each predictor. 
 #' @export
 #'
 #' @examples
@@ -302,6 +307,14 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' #Similiar to penalty proposed by Belloni and Chernouzhukov. 
 #' #To be exact you would divide the tau.penalty.factor by n. 
 #' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
+#' @references 
+#' \insertRef{lla}{rqPen}
+#' 
+#' \insertRef{huber_cd}{rqPen}
+#' 
+#' \insertRef{qr_lasso}{rqPen}
+#' 
+#' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
@@ -453,6 +466,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' x <- matrix(runif(800),ncol=8)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' r1 <- rq.pen.cv(x,y) #lasso fit for median
@@ -461,10 +475,10 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' #same as above but more weight given to median when calculating group cross validation error. 
 #' r3 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75),tauWeights=c(.25,.5,.25))
 #' # uses median cross-validation error instead of mean.
-#' r4 <- rq.pen.cv(x,y,cvFunc=median)  
+#' r4 <- rq.pen.cv(x,y,cvSummary=median)  
 #'#Cross-validation with no penalty on the first variable.
-#' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(0,7)))
-#' 
+#' r5 <- rq.pen.cv(x,y,penalty.factor=c(1,rep(0,7)))
+#' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
 	n <- length(y)
@@ -718,8 +732,8 @@ print.rq.pen <- function(x,...){
 #' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
 #' g <- c(1,1,1,1,2,2,3,3)
 #' tvals <- c(.25,.75)
-#' m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
 #' \dontrun{
+#' m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
 #' m2 <- rq.group.pen.cv(x,y,penalty="gAdLASSO",tau=c(.1,.3,.7),groups=g)
 #' m3 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 #' m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
@@ -1391,11 +1405,13 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=N
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #'   set.seed(1)
 #'   x <- matrix(rnorm(800),nrow=100)
 #'   y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 #'   lassoModels <- cv.rq.pen(x,y)
 #'   b_plot <- beta_plots(lassoModels)
+#' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
 #voi - index variables of interest
@@ -1599,7 +1615,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \dontrun{
 #' x <- matrix(rnorm(800),nrow=100)
 #' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-#' cv_model <- cv.rq.group.pen(x,y,groups=c(rep(1,4),rep(2,4)))
+#' cv_model <- cv.rq.group.pen(x,y,groups=c(rep(1,4),rep(2,4)),criteria="BIC")
 #' }
 #' @references 
 #' \itemize{
@@ -1613,7 +1629,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
     ...) 
 {
-  warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality. It will not be exported to the namespace in future versions.")
+  deprecate_soft("3.0","cv.rq.group.pen()","rq.group.pen.cv()")
+  #warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality. It will not be exported to the namespace in future versions.")
   if(penalty=="LASSO"){
 	warning("The Lasso group penalties use the L1 norm and thus the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
@@ -1820,7 +1837,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                 penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
-  deprecate_soft("3.0","rq.group.fit","rq.group.pen")
+  deprecate_soft("3.0","rq.group.fit()","rq.group.pen()")
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
   n <- nrow(x)
@@ -2228,6 +2245,8 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,0,1))
 #' 
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}, Shaobo Li \email{shaobo.li@ku.edu} and Adam Maidman
+#' @references 
+#' \insertRef{qr_cd}{rqPen}
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
 						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), 
 						a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.penalty.factor=rep(1,length(tau)),

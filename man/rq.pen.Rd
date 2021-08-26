@@ -68,7 +68,7 @@ An rq.pen.seq object.
 \item{models}{A list of each model fit for each tau and a combination.}
 \item{n}{Sample size.}
 \item{p}{Number of predictors.}
-\item{alg}{Algorithm used.}
+\item{alg}{Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
 \item{tau}{Quantiles modeled.}
 \item{a}{Tuning parameters a used.}
 \item{modelsInfo}{Information about the quantile and a value for each model.}
@@ -82,13 +82,15 @@ Each model in the models list has the following values.
 \item{rho}{The unpenalized objective function for each value of lambda.}
 \item{PenRho}{The penalized objective function for each value of lambda.}
 \item{nzero}{The number of nonzero coefficients for each value of lambda.}
-\item{tau}{Quantile of the model.}
+\item{tau}{Quantile of the model 3.}
 \item{a}{Value of a for the penalized loss function.}
 }
 
 If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
 \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
-Where if \eqn{\tau=.5}, we get the usual Huber loss function.
+Where if \eqn{\tau=.5}, we get the usual Huber loss function. The Huber implementation calls the package hqreg which implements the methods of Yi and Huang (2017) 
+for Huber loss with elastic net penalties. For non-elastic net penalties the LLA algorithm of Zou and Li (2008) is used to approximate those loss functions
+with a lasso penalty with different weights for each predictor.
 }
 \description{
 Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
@@ -120,6 +122,15 @@ tvals <- c(.1,.2,.3,.4,.5)
 #Similiar to penalty proposed by Belloni and Chernouzhukov. 
 #To be exact you would divide the tau.penalty.factor by n. 
 r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
+}
+\references{
+\insertRef{lla}{rqPen}
+
+\insertRef{huber_cd}{rqPen}
+
+\insertRef{qr_lasso}{rqPen}
+
+\insertRef{qr_cd}{rqPen}
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman

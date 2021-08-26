@@ -24,11 +24,13 @@ Plot of how beta estimates change with lambda.
 Warning: this function is deprecated and will not be exported in future versions.
 }
 \examples{
+\dontrun{
   set.seed(1)
   x <- matrix(rnorm(800),nrow=100)
   y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
   lassoModels <- cv.rq.pen(x,y)
   b_plot <- beta_plots(lassoModels)
+}
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
