@@ -169,7 +169,7 @@ print.qic.select <- function(x,...){
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 #' m1 <- rq.pen(x,y,tau=c(.25,.75))
 #' q1 <- qic.select(m1)
-#' newx <- matrix(runif(80),ncol)
+#' newx <- matrix(runif(80),ncol=8)
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){

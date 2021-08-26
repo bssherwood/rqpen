@@ -1175,7 +1175,7 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 		subLambda1se <- lambda[subLambda1sePos]
 		lambda1se <- c(lambda1se,subLambda1se)
 		nz <- c(nz, models[[btr[[5]][i]]]$nz[btr[[3]][i]])
-		nzse <- c(nzse, models[[btr[[5]][i]]]$nz[lambda1seIndex])
+		nzse <- c(nzse, models[[btr[[5]][i]]]$nz[subLambda1sePos])
 	}
 	
 	btr <- cbind(btr, lambda=lambdaVals, cvse = cvse, lambda1se=lambda1se, lambda1seIndex=lambda1seIndex, nonzero=nz, nzse=nzse)
