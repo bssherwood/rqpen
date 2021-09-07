@@ -1,18 +1,3 @@
-#' @import quantreg
-#' @import regpro
-#' @import hqreg
-#' @import plyr
-#' @import hrqglas
-#' @import data.table
-#' @import lifecycle
-#' @importFrom splines bs
-#' @importFrom graphics lines plot par segments points legend
-#' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR
-#' @importFrom Rdpack reprompt
-#' @importFrom methods is
-#' @useDynLib rqPen, .registration=TRUE
-NULL 
-
 #' Calculate information criterion for penalized quantile regression models
 #'
 #' @param model model from a rq.pen.seq() object
@@ -21,7 +6,7 @@ NULL
 #'
 #' @return 
 #' Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
-#' \deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
 #' for every value of \eqn{\lambda}. 
 #' @export
@@ -57,11 +42,11 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
-#' \deqn{\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta}) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
 #' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
 #' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
-#' \deqn{\sum_{q=1}^Q w_q \sum_{i=1}^n [ \rho_\tau(y_i-x_i^\top\hat{\beta}^q) + d_q*b_q/(2n)],}
+#' \deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n  \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
 #' where \eqn{w_q} is the weight assigned for the qth quantile model. 
 #'
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
@@ -86,9 +71,10 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
-# code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with differnt values of lambda
-	if(class(obj) == "rq.pen.seq.cv"){
+qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
+# code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
+	method <- match.arg(method)
+  if(class(obj) == "rq.pen.seq.cv"){
 		obj <- obj$fit
 	} else if(class(obj) != "rq.pen.seq"){
 		stop("obj must be of class rq.pen.seq or rq.pen.seq.cv")
@@ -112,8 +98,8 @@ qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
 	if(septau){
 		minQIC <- apply(qic_vals,2,min)
 		lambdaIndex <- apply(qic_vals,2,which.min)
-		modelsInfo <- cbind(obj$modelsInfo,minQIC,lambdaIndex)
-		modelsInfo <- data.table(modelsInfo)
+		modelsInfo <- data.table(obj$modelsInfo,minQIC,lambdaIndex,lambda=obj$lambda[lambdaIndex])
+		#modelsInfo <- data.table(modelsInfo)
 		tau <- modelsInfo$tau
 		modelsInfo <- modelsInfo[, .SD[which.min(minQIC)],by=tau]
 		
@@ -133,11 +119,13 @@ qic.select <- function(obj, method="BIC",septau=TRUE,weights=NULL){
 		returnA <- obj$a[minIndex[1]]
 		a <- obj$a
 		modelsInfo <- subset(obj$modelsInfo, a==returnA)
-		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2])
+		modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2],lambda=obj$lambda[minIndex[2]])
 		coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)
 	}
-	coefIndex <- 1:nt
-	modelsInfo <- cbind(modelsInfo, coefIndex)
+	#coefIndex <- 1:nt
+	#modelsInfo <- cbind(modelsInfo, coefIndex)
+	coefs <- do.call(cbind,coefs)
+	colnames(coefs) <- paste0("tau=",obj$tau)
 	
 	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
 	class(return_val) <- "qic.select"
@@ -263,25 +251,25 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. 
 #' @return An rq.pen.seq object. 
 #' \itemize{
-#' \item{models}{ A list of each model fit for each tau and a combination.}
-#' \item{n}{ Sample size.}
-#' \item{p}{ Number of predictors.}
-#' \item{alg}{ Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
-#' \item{tau}{ Quantiles modeled.}
-#' \item{a}{ Tuning parameters a used.}
-#' \item{modelsInfo}{ Information about the quantile and a value for each model.}
-#' \item{lambda}{ Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
-#' \item{penalty}{ Penalty used.}
-#' \item{call}{ Original call.}
+#' \item{models: }{ A list of each model fit for each tau and a combination.}
+#' \item{n:}{ Sample size.}
+#' \item{p:}{ Number of predictors.}
+#' \item{alg:}{ Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
+#' \item{tau:}{ Quantiles modeled.}
+#' \item{a:}{ Tuning parameters a used.}
+#' \item{modelsInfo:}{ Information about the quantile and a value for each model.}
+#' \item{lambda:}{ Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+#' \item{penalty:}{ Penalty used.}
+#' \item{call:}{ Original call.}
 #' }
 #' Each model in the models list has the following values. 
 #' \itemize{
-#' \item{coefficients}{ Coefficients for each value of lambda.}
-#' \item{rho}{ The unpenalized objective function for each value of lambda.}
-#' \item{PenRho}{ The penalized objective function for each value of lambda.}
-#' \item{nzero}{ The number of nonzero coefficients for each value of lambda.}
-#' \item{tau}{ Quantile of the model.}
-#' \item{a}{ Value of a for the penalized loss function.}
+#' \item{coefficients:}{ Coefficients for each value of lambda.}
+#' \item{rho:}{ The unpenalized objective function for each value of lambda.}
+#' \item{PenRho:}{ The penalized objective function for each value of lambda.}
+#' \item{nzero:}{ The number of nonzero coefficients for each value of lambda.}
+#' \item{tau:}{ Quantile of the model.}
+#' \item{a:}{ Value of a for the penalized loss function.}
 #' }
 #' 
 #' If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
@@ -328,6 +316,9 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	}
 	if(scalex){
 		x <- scale(x)
+	}
+	if(alg=="lasso" || alg=="scad"){
+	  stop("Choice of lasso or scad for algorithm is invalid, use ``huber'' or a non-lasso, non-scad method from quantreg::rq()")
 	}
 	if(penalty=="LASSO"){
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
