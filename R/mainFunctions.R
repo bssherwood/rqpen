@@ -2268,6 +2268,9 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(norm != 1 & norm != 2){
 		stop("norm must be 1 or 2")
 	}
+	if(!is.matrix(x)){
+	  stop("x must be a matrix")
+	}
 	if(penalty=="gLASSO" & norm==1){
 		stop("Group Lasso with composite norm of 1 is the same as regular lasso, use norm = 2 if you want group lasso")
 	}
