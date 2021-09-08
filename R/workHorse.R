@@ -316,7 +316,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 	if(scalex){
 		x <- scale(x)
 	}
-	
+	i <- 1
 	for(tau_val in tau){
 	  pen.factor <- group.pen.factor*tau.penalty.factor[i]
 	  validSpots <- which(pen.factor!=0)
@@ -328,6 +328,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 		grad_k.norm<- tapply(grad_k, group.index, l2norm)
   
 		lambda.max<- max(c(returnVal,grad_k.norm[validSpots]/pen.factor[validSpots]))
+		i <- i + 1
 	}
 	lambda.max
 }
