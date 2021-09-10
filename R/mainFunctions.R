@@ -305,7 +305,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
-	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
+	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
@@ -446,13 +446,13 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' 
 #' @return
 #' \itemize{
-#' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
-#' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
-#' \item{fit}{The rq.pen.seq object fit to the full data.}
-#' \item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
-#' \item{gtr}{A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
-#' \item{gcve}{Group, across all quantiles, cross-validation error results for each value of a and lambda.}
-#' \item{call}{Original call to the function.}
+#' \item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
+#' \item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
+#' \item{fit:}{ The rq.pen.seq object fit to the full data.}
+#' \item{btr:}{ A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
+#' \item{gtr:}{ A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
+#' \item{gcve:}{ Group, across all quantiles, cross-validation error results for each value of a and lambda.}
+#' \item{call:}{ Original call to the function.}
 #' }
 #' @export
 #'
@@ -500,26 +500,26 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
 	}
 	foldErrors <- fe2ndMoment <- matrix(rep(0,nt*na*nl),ncol=nl)
     for(i in 1:nfolds){
-		if(printProgress){
-			print(paste("Working on fold",i))
-		}
-		train_x <- x[foldid!=i,]
-		train_y <- y[foldid!=i]
-		test_x <- x[foldid==i,,drop=FALSE]
-		test_y <- y[foldid==i]
-		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
-		if(is.null(cvFunc)){
-			testErrors <- check.errors(trainModel,train_x,train_y)
-		} else{
-			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
-		}
-		if(!groupError){
-			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
-		}
-		#code improve maybe should replace below with sapply, but then we get the transpose which effects downstream code
-		foldMeans <- do.call(rbind, lapply(testErrors,apply,2,cvSummary))
-		foldErrors <- foldErrors + foldMeans
-		fe2ndMoment <- fe2ndMoment + foldMeans^2
+  		if(printProgress){
+  			print(paste("Working on fold",i))
+  		}
+  		train_x <- x[foldid!=i,]
+  		train_y <- y[foldid!=i]
+  		test_x <- x[foldid==i,,drop=FALSE]
+  		test_y <- y[foldid==i]
+  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
+  		if(is.null(cvFunc)){
+  			testErrors <- check.errors(trainModel,train_x,train_y)
+  		} else{
+  			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+  		}
+  		if(!groupError){
+  			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
+  		}
+  		#code improve maybe should replace below with sapply, but then we get the transpose which effects downstream code
+  		foldMeans <- do.call(rbind, lapply(testErrors,apply,2,cvSummary))
+  		foldErrors <- foldErrors + foldMeans
+  		fe2ndMoment <- fe2ndMoment + foldMeans^2
     }
 	fe2ndMoment <- fe2ndMoment/nfolds
 	foldErrors <- foldErrors/nfolds
