@@ -12,9 +12,9 @@ rq.pen(
   penalty = c("LASSO", "Ridge", "ENet", "aLASSO", "SCAD", "MCP"),
   a = NULL,
   nlambda = 100,
-  eps = ifelse(nrow(x) < ncol(x), 0.01, 1e-04),
+  eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
   penalty.factor = rep(1, ncol(x)),
-  alg = ifelse(sum(dim(x)) < 200, "huber", "br"),
+  alg = ifelse(sum(dim(x)) < 200, "br", "huber"),
   scalex = TRUE,
   tau.penalty.factor = rep(1, length(tau)),
   coef.cutoff = 1e-08,
@@ -107,7 +107,7 @@ Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.f
 For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}.
 }
 \examples{
-n <- 100
+n <- 200
 p <- 8
 x <- matrix(runif(n*p),ncol=p)
 y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
@@ -119,7 +119,7 @@ r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1))
 # First variable is not penalized
 r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 tvals <- c(.1,.2,.3,.4,.5)
-#Similiar to penalty proposed by Belloni and Chernouzhukov. 
+#Similar to penalty proposed by Belloni and Chernouzhukov. 
 #To be exact you would divide the tau.penalty.factor by n. 
 r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
 }

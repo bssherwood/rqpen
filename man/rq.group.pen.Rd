@@ -12,7 +12,7 @@ rq.group.pen(
   penalty = c("gLASSO", "gAdLASSO", "gSCAD", "gMCP"),
   lambda = NULL,
   nlambda = 100,
-  eps = ifelse(nrow(x) < ncol(x), 0.01, 1e-04),
+  eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
   alg = c("huber", "lp", "qicd"),
   a = NULL,
   norm = 2,

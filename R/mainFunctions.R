@@ -280,7 +280,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @export
 #'
 #' @examples
-#' n <- 100
+#' n <- 200
 #' p <- 8
 #' x <- matrix(runif(n*p),ncol=p)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
@@ -292,7 +292,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' # First variable is not penalized
 #' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 #' tvals <- c(.1,.2,.3,.4,.5)
-#' #Similiar to penalty proposed by Belloni and Chernouzhukov. 
+#' #Similar to penalty proposed by Belloni and Chernouzhukov. 
 #' #To be exact you would divide the tau.penalty.factor by n. 
 #' r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
 #' @references 
@@ -304,7 +304,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' 
 #' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
-rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), 
+rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
@@ -2239,7 +2239,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @references 
 #' \insertRef{qr_cd}{rqPen}
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
-						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001),alg=c("huber","lp","qicd"), 
+						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01),alg=c("huber","lp","qicd"), 
 						a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.penalty.factor=rep(1,length(tau)),
 						scalex=TRUE,coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10, lambda.discard=TRUE, ...){
 	penalty <- match.arg(penalty)
@@ -2299,7 +2299,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		stop("group penalty factor must be of length g")
 	}	
 	if(is.null(lambda)){
-		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 

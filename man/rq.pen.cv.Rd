@@ -55,13 +55,13 @@ rq.pen.cv(
 }
 \value{
 \itemize{
-\item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
-\item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
-\item{fit}{The rq.pen.seq object fit to the full data.}
-\item{btr}{A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
-\item{gtr}{A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
-\item{gcve}{Group, across all quantiles, cross-validation error results for each value of a and lambda.}
-\item{call}{Original call to the function.}
+\item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
+\item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
+\item{fit:}{ The rq.pen.seq object fit to the full data.}
+\item{btr:}{ A data.table of the values of a and lambda that are best as determined by the minimum cross validation error and the one standard error rule, which fixes a. In btr the values of lambda and a are selected seperately for each quantile.}
+\item{gtr:}{ A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
+\item{gcve:}{ Group, across all quantiles, cross-validation error results for each value of a and lambda.}
+\item{call:}{ Original call to the function.}
 }
 }
 \description{

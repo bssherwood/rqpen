@@ -284,8 +284,9 @@ neg.gradient <- function(r,weights,tau,gamma,x,apprx){
 }
 
 #returns a lambda value that (likely) produces a completely sparse model. 
-#Only likely and not guranteed, because it relies on huber approximation to the quantile loss
-getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="LASSO",scalex=TRUE){
+#Only likely and not guaranteed, because it relies on huber approximation to the quantile loss
+#Code improvement: potential hacky code for selection of gamma
+getLamMax <- function(x,y,tau=.5,penalty="LASSO",scalex=TRUE,a=NULL,tau.penalty.factor=NULL,penalty.factor=NULL){
 	n <- length(y)
 	returnVal <- 0
 	if(scalex){
@@ -293,23 +294,44 @@ getLamMax <- function(x,y,tau=.5,gamma=.2,gamma.max=4,gamma.q=.1,penalty="LASSO"
 	}
 	
 	#to-do: remove for loop
-	for(tau_val in tau){
-		inter <- quantile(y,tau_val)
-		r <- y - inter
-	
-		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
-		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
-		returnVal <- max(c(returnVal,abs(grad_k)))
+	if(penalty!="ENet"){
+	#just use typical lasso except for ENET. May change this later. 
+	    a <- 1
 	}
-	returnVal
+	for(aval in a){
+	  tspot <- 1
+  	for(tau_val in tau){
+  	  pf <- penalty.factor*tau.penalty.factor[tspot]*aval
+  	  validspots <- which(pf!=0)
+  	  pf <- pf[validspots]
+  		inter <- quantile(y,tau_val)
+  		r <- y - inter
+  		if(abs(1-tau_val)<.05){
+  		  gamma.q <- .01
+  		  gamma.max <- .0001
+  		} else{
+  		  gamma.q <- .1
+  		  gamma.max <- .001
+  		}
+  		gamma0<- max(gamma.max, quantile(abs(r), probs = gamma.q))
+  		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")[validspots]
+  		returnVal <- max(c(returnVal,abs(grad_k)/pf))
+  		tspot <- tspot + 1
+  	}
+	}
+	returnVal*1.05
 }
 
 l2norm <- function(x){
   sqrt(sum(x^2))
 }
 
+l1norm <- function(x){
+  sum(abs(x))
+}
+
 # Finds lambda max for a group penalty. 
-getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE,tau.penalty.factor){
+getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE,tau.penalty.factor,norm=2){
 # code improvement: Hacky approach to the group.pen.factor issue. 
 	returnVal <- 0
 	n <- length(y)
@@ -325,12 +347,17 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
 
 		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
-		grad_k.norm<- tapply(grad_k, group.index, l2norm)
+		if(norm==2){
+		  grad_k.norm<- tapply(grad_k, group.index, l2norm)
+		}
+		else{
+		  grad_k.norm <- tapply(grad_k,group.index,l1norm)
+		}
   
 		lambda.max<- max(c(returnVal,grad_k.norm[validSpots]/pen.factor[validSpots]))
 		i <- i + 1
 	}
-	lambda.max
+	lambda.max*1.05
 }
 
 
@@ -362,9 +389,8 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 	if(ltpf !=nt){
 		stop("tau penalty factor must be of length tau")
 	}
-	
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex=scalex)
+		lamMax <- getLamMax(x,y,tau,scalex=scalex,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
@@ -429,7 +455,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	}
 	
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex=scalex)
+		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="Enet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(length(lambda)==1){
@@ -703,7 +729,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		stop("Only algorithm for adaptive lasso is huber.")
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex)
+		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor, penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	a <- getA(a,penalty)
