@@ -115,18 +115,18 @@ Where if \eqn{\tau=.5}, we get the usual Huber loss function.
 \examples{
  
 set.seed(1)
-x <- matrix(rnorm(25*30,sd=10),ncol=30)
-y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(25,3)
-g <- rep(seq(1:5),6)
+x <- matrix(rnorm(200*8,sd=1),ncol=8)
+y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(200,3)
+g <- c(1,1,1,2,2,2,3,3)
 tvals <- c(.25,.75)
 r1 <- rq.group.pen(x,y,groups=g)
 r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
 #Linear programming approach with group SCAD penalty and L1-norm
 m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,4))
 # No penalty for the first group
-m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,4)))
-# No penalty for the median
-m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,0,1))
+m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,2)))
+# Smaller penalty for the median
+m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,.25,1))
 
 }
 \references{

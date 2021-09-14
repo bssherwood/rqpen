@@ -333,7 +333,7 @@ l1norm <- function(x){
 # Finds lambda max for a group penalty. 
 getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE,tau.penalty.factor,norm=2){
 # code improvement: Hacky approach to the group.pen.factor issue. 
-	returnVal <- 0
+  lambda.max <- 0
 	n <- length(y)
 	if(scalex){
 		x <- scale(x)
@@ -354,7 +354,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 		  grad_k.norm <- tapply(grad_k,group.index,l1norm)
 		}
   
-		lambda.max<- max(c(returnVal,grad_k.norm[validSpots]/pen.factor[validSpots]))
+		lambda.max<- max(c(lambda.max,grad_k.norm[validSpots]/pen.factor[validSpots]))
 		i <- i + 1
 	}
 	lambda.max*1.05
@@ -659,10 +659,15 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 
 updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.factor){
 #code improvement: double for loop 
-	
+  min_n_coefs <- min(sapply(lapply(obj$models,coefficients),ncol))
+	obj$lambda <- obj$lambda[1:min_n_coefs]
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a
 		taupos <- which(obj$tau == obj$models[[j]]$tau)
+		obj$models[[j]]$rho <- obj$models[[j]]$rho[1:min_n_coefs]
+		obj$models[[j]]$PenRho <- obj$models[[j]]$PenRho[1:min_n_coefs]
+		obj$models[[j]]$nzero <- obj$models[[j]]$nzero[1:min_n_coefs]
+		obj$models[[j]]$coefficients <- obj$models[[j]]$coefficients[,1:min_n_coefs]
 		if(length(obj$models[[j]]$rho)==1){
 			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
 		} 
@@ -815,11 +820,13 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	nt <- length(tau)
 	
 	models <- vector(mode="list",length=nt)
+	#min_n_coefs <- length(lambda)
 	for(i in 1:nt){
 		subtau <- tau[i]
 		penf <- group.pen.factor*tau.penalty.factor[i]
 		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,lambda.discard=lambda.discard,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
+		#min_n_coefs <- min(min_n_coefs)
 	}
 	attributes(models)$names <- paste0("tau",tau,"a",1)
 		
