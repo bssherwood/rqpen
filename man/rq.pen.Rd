@@ -20,7 +20,6 @@ rq.pen(
   coef.cutoff = 1e-08,
   max.iter = 10000,
   converge.eps = 1e-07,
-  gamma = IQR(y)/10,
   lambda.discard = TRUE,
   ...
 )
@@ -55,8 +54,6 @@ rq.pen(
 \item{max.iter}{Maximum number of iterations of non-linear programming algorithms.}
 
 \item{converge.eps}{Convergence threshold for non-linear programming algorithms.}
-
-\item{gamma}{tuning parameter for Huber loss, not applicable for non-huber algorithms.}
 
 \item{lambda.discard}{Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights.}
 
@@ -114,8 +111,8 @@ y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
 r1 <- rq.pen(x,y) #Lasso fit for median
 # Lasso for multiple quantiles
 r2 <- rq.pen(x,y,tau=c(.25,.5,.75))
-# Elastic net fit for multiple quantiles
-r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1))
+# Elastic net fit for multiple quantiles, which must use Huber algorithm
+r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),alg="huber")
 # First variable is not penalized
 r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 tvals <- c(.1,.2,.3,.4,.5)

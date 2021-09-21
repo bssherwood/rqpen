@@ -164,8 +164,8 @@ print.qic.select <- function(x,...){
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){
-	coefs <- do.call(cbind,coefficients(object))
-	cbind(1,newdata) %*% coefs
+	#coefs <- do.call(cbind,coefficients(object))
+	cbind(1,newdata) %*% coefficients(object)
 }
 
 
@@ -232,7 +232,6 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param coef.cutoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
 #' @param max.iter Maximum number of iterations of non-linear programming algorithms.
 #' @param converge.eps Convergence threshold for non-linear programming algorithms. 
-#' @param gamma tuning parameter for Huber loss, not applicable for non-huber algorithms. 
 #' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights. 
 #' @param ... Extra parameters. 
 #' 
@@ -287,8 +286,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' r1 <- rq.pen(x,y) #Lasso fit for median
 #' # Lasso for multiple quantiles
 #' r2 <- rq.pen(x,y,tau=c(.25,.5,.75))
-#' # Elastic net fit for multiple quantiles
-#' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1))
+#' # Elastic net fit for multiple quantiles, which must use Huber algorithm
+#' r3 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),alg="huber")
 #' # First variable is not penalized
 #' r4 <- rq.pen(x,y,penalty.factor=c(0,rep(1,7)))
 #' tvals <- c(.1,.2,.3,.4,.5)
@@ -306,7 +305,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
 	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,gamma=IQR(y)/10,lambda.discard=TRUE,...){
+	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
 		stop("Penalty factors must be non-negative.")
@@ -321,12 +320,12 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	  stop("Choice of lasso or scad for algorithm is invalid, use ``huber'' or a non-lasso, non-scad method from quantreg::rq()")
 	}
 	if(penalty=="LASSO"){
-		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
 			stop("huber alg is only option for Ridge penalty")
 		}
-		fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a=0,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
+		fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a=0,max.iter,converge.eps,lambda.discard=lambda.discard,...)
 	} else if(penalty == "ENet"){
 		if(alg != "huber"){
 			stop("huber alg is only option for ENet penalty")
@@ -383,9 +382,34 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 }
 
 
-#' Predictions from rq.pen.seq object
+#' Predictions from rq.pen.seq.cv object
 #'
-#' @param object rq.pen.seq object
+#' @param object rq.pen.seq.cv object
+#' @param newx Matrix of predictors 
+#' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
+#' @param septau Whether tuning parameter should be optimized separately for each quantile. 
+#' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
+#' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
+#' @param ... Additional parameters sent to coef.rq.pen.seq.cv(). 
+#'
+#' @return A list of a matrix of predictions for each tau and a combination
+#' @export
+#'
+#' @examples
+#' x <- matrix(runif(1600),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(200)
+#' m1 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75),lambda=c(.1,.05,.01))
+#' newx <- matrix(runif(80),ncol=8)
+#' cvpreds <- predict(m1,newx)
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
+  coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
+	lapply(coefs, quick.predict,newx=newx)
+}
+
+#' Predictions from rq.pen.seq.cv object
+#'
+#' @param object rq.pen.seq.cv object
 #' @param newx Matrix of predictors 
 #' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
 #' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
@@ -409,7 +433,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
-	lapply(coefs, quick.predict,newx=newx)
+  lapply(coefs, quick.predict,newx=newx)
 }
 
 #' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqn{\lambda} and a.
@@ -507,7 +531,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
   		train_y <- y[foldid!=i]
   		test_x <- x[foldid==i,,drop=FALSE]
   		test_y <- y[foldid==i]
-  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
+  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,alg=fit$alg,...)
   		if(is.null(cvFunc)){
   			testErrors <- check.errors(trainModel,train_x,train_y)
   		} else{
@@ -762,7 +786,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
 		test_y <- y[foldid==i]
-		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,...)
+		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,alg=fit$alg,...)
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,train_x,train_y)
 		} else{

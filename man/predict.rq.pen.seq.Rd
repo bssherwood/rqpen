@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{predict.rq.pen.seq}
 \alias{predict.rq.pen.seq}
-\title{Predictions from rq.pen.seq object}
+\title{Predictions from rq.pen.seq.cv object}
 \usage{
 \method{predict}{rq.pen.seq}(
   object,
@@ -16,7 +16,7 @@
 )
 }
 \arguments{
-\item{object}{rq.pen.seq object}
+\item{object}{rq.pen.seq.cv object}
 
 \item{newx}{Matrix of predictors}
 
@@ -36,7 +36,7 @@
 A list of a matrix of predictions for each tau and a combination
 }
 \description{
-Predictions from rq.pen.seq object
+Predictions from rq.pen.seq.cv object
 }
 \examples{
 x <- matrix(runif(800),ncol=8)
