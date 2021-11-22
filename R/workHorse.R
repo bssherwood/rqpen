@@ -300,6 +300,9 @@ getLamMax <- function(x,y,tau=.5,penalty="LASSO",scalex=TRUE,a=NULL,tau.penalty.
 	}
 	for(aval in a){
 	  tspot <- 1
+	  if(aval == 0){
+	    aval <- min(1/1000,a[which(a!=0)])
+	  }
   	for(tau_val in tau){
   	  pf <- penalty.factor*tau.penalty.factor[tspot]*aval
   	  validspots <- which(pf!=0)
