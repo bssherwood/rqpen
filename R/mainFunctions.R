@@ -331,7 +331,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 			stop("huber alg is only option for ENet penalty")
 		}
 		if(is.null(a)){
-			stop("Specify a value for a for Enet penalty")
+			stop("Specify a value for a for ENet penalty")
 		}
 		fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){

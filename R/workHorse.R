@@ -471,7 +471,7 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	}
 	
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="Enet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(length(lambda)==1){
