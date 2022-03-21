@@ -223,6 +223,7 @@ get_coef_pen <- function(coefs,lambda,intercept,penVars,penalty="LASSO",a=NULL){
 	}
 	if(is.null(penVars)==FALSE){
 		coefs <- coefs[penVars]
+		lambda <- lambda[penVars]
 	}
 	if( penalty == "LASSO" ){ ### PenRho for LASSO
       sum( abs( coefs )*lambda )
