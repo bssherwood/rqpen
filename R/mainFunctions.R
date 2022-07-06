@@ -304,7 +304,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
-	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200,"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
+	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200 & penalty %in% c("LASSO","aLASSO","SCAD","MCP"),"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
