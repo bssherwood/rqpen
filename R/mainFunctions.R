@@ -226,7 +226,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param nlambda number of lambda, ignored if lambda is set
 #' @param eps If not pre-specified the lambda vector will be from lambda_max to lambda_max times eps
 #' @param penalty.factor penalty factor for the predictors
-#' @param alg Algorithm used.
+#' @param alg Algorithm used. 
 #' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the original scale. 
 #' @param tau.penalty.factor A penalty factor for each quantile.
 #' @param coef.cutoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
@@ -247,7 +247,13 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{Elastic Net:}{ \eqn{P(\beta,\lambda,a)=a*\lambda|\beta|+(1-a)*\lambda*\beta^2}}
 #' \item{Adaptive LASSO:}{ \eqn{P(\beta,\lambda,a)=\frac{\lambda |\beta|}{|\beta_0|^a}}}
 #' }
-#' For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. 
+#' For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. Three different algorithms are implemented
+#' \itemize{
+#' \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
+#' \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm. 
+#' \item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }
+#' }
+#' The huber algorithm offers substantial speed advantages without much, if any, loss in performance. However, it should be noted that it solves an approximation of the quantile loss function.
 #' @return An rq.pen.seq object. 
 #' \itemize{
 #' \item{models: }{ A list of each model fit for each tau and a combination.}
@@ -304,7 +310,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
-	penalty.factor = rep(1, ncol(x)),alg=ifelse(sum(dim(x))<200 & penalty %in% c("LASSO","SCAD","MCP"),"br","huber"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
+	penalty.factor = rep(1, ncol(x)),alg=c("huber","br","QICD","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
@@ -316,10 +322,10 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(scalex){
 		x <- scale(x)
 	}
-	if(alg=="lasso" || alg=="scad"){
-	  stop("Choice of lasso or scad for algorithm is invalid, use ``huber'' or a non-lasso, non-scad method from quantreg::rq()")
-	}
 	if(penalty=="LASSO"){
+	  if(alg=="QICD"){
+	    stop("QICD not implemented for LASSO")
+	  }
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
