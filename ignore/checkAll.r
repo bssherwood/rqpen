@@ -29,9 +29,11 @@ m2$models
 m1 <- rq.pen(x,y,penalty="SCAD")
 m2 <- rq.pen(x,y,penalty="SCAD",alg="br")
 m3 <- rq.pen(x,y,penalty="SCAD",alg="QICD")
+m4 <- rq.pen(x,y,penalty="SCAD",alg="huber")
 m1$models
 m2$models
 m3$models
+m4$models
 
 m1 <- rq.pen(x,y,penalty="aLASSO")
 m1$models
@@ -39,36 +41,46 @@ m1$models
 m1 <- rq.pen(x,y,penalty="MCP")
 m2 <- rq.pen(x,y,alg="br", penalty="MCP")
 m3 <- rq.pen(x,y,alg="QICD",penalty="MCP")
+m4 <- rq.pen(x,y,alg="huber",penalty="MCP")
+m1$models
+m2$models
+m3$models
+m4$models
+
+m1 <- rq.pen(x,y,tau=tvals)
+m2 <- rq.pen(x,y,alg="br",tau=tvals)
+m3 <- rq.pen(x,y,alg="huber",tau=tvals)
 m1$models
 m2$models
 m3$models
 
-m1 <- rq.lasso(x,y,tau=tvals)
-m2 <- rq.lasso(x,y,alg="br",tau=tvals)
+m1 <- rq.pen(x,y,tau=tvals, penalty="ENet")
+m2 <- rq.pen(x,y,a=.5,tau=tvals, penalty="ENet")
 m1$models
 m2$models
 
-m1 <- rq.enet(x,y,tau=tvals)
-m2 <- rq.enet(x,y,a=.5,tau=tvals)
-m1$models
-m2$models
+m1 <- rq.pen(x,y,tau=tvals, penalty="SCAD")
+m2 <- rq.pen(x,y,alg="br",tau=tvals, penalty="SCAD")
+m3 <- rq.pen(x,y,alg="QICD",tau=tvals, penalty="SCAD")
+m4 <- rq.pen(x,y,alg="huber",tau=tvals, penalty="SCAD")
 
-m1 <- rq.nc(x,y,tau=tvals)
-m2 <- rq.nc(x,y,alg="br",tau=tvals)
-m3 <- rq.nc(x,y,alg="QICD",tau=tvals)
 m1$models
 m2$models
 m3$models
+m4$models
 
-m1 <- rq.nc(x,y,tau=tvals,penalty="aLASSO")
+m1 <- rq.pen(x,y,tau=tvals,penalty="aLASSO")
 m1$models
 
-m1 <- rq.nc(x,y,tau=tvals,penalty="MCP")
-m2 <- rq.nc(x,y,alg="br", penalty="MCP",tau=tvals)
-m3 <- rq.nc(x,y,alg="QICD",penalty="MCP",tau=tvals)
+
+m1 <- rq.pen(x,y,tau=tvals, penalty="MCP")
+m2 <- rq.pen(x,y,alg="br",tau=tvals, penalty="SCAD")
+m3 <- rq.pen(x,y,alg="QICD",tau=tvals, penalty="SCAD")
+m4 <- rq.pen(x,y,alg="huber",tau=tvals, penalty="SCAD")
 m1$models
 m2$models
 m3$models
+m4$models
 
 m1 <- rq.enet(x,y,a=c(.2,.5,.7))
 m1$models
