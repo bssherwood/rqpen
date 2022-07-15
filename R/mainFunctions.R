@@ -313,6 +313,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	penalty.factor = rep(1, ncol(x)),alg=c("huber","br","QICD","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
+	alg <- match.arg(alg)
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
 		stop("Penalty factors must be non-negative.")
 	}
