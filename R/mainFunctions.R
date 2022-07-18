@@ -389,6 +389,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
   modelNames <- outer(names(modelsCombined),colnames(modelsCombined[[1]]),paste)
   coefReturn <- do.call(cbind,modelsCombined)
   colnames(coefReturn) <- modelNames
+  coefReturn
 }
 
 
