@@ -21,10 +21,10 @@ m1 <- rq.pen.cv(x,y,tau=c(.3,.7))
 
 coefficients(m1$fit)
 coefficients(m1$fit,lambdaIndex=c(3,5,7))
-coefficients(m1$fit,tau=.5)
+coefficients(m1$fit,tau=.3)
 coefficients(m1$fit,a=1)
-coefficients(m1$fit,a=1,tau=.5)
-coefficients(m1$fit,tau=.5,lambdaIndex=c(3,5,7))
+coefficients(m1$fit,a=1,tau=.3)
+coefficients(m1$fit,tau=.3,lambdaIndex=c(3,5,7))
 coefficients(m1$fit,lambda=m1$fit$lambda[c(3,5,23)])
 
 coefficients(m1)
