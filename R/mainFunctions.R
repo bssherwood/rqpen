@@ -538,7 +538,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
   		train_y <- y[foldid!=i]
   		test_x <- x[foldid==i,,drop=FALSE]
   		test_y <- y[foldid==i]
-  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,alg=fit$alg,...)
+  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
   		if(is.null(cvFunc)){
   			testErrors <- check.errors(trainModel,train_x,train_y)
   		} else{
