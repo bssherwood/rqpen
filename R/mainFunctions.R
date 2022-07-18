@@ -793,7 +793,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		train_y <- y[foldid!=i]
 		test_x <- x[foldid==i,,drop=FALSE]
 		test_y <- y[foldid==i]
-		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,alg=fit$alg,...)
+		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,alg=fit$alg,lambda.discard=FALSE,...)
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,train_x,train_y)
 		} else{
