@@ -385,7 +385,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   models <- getModels(object,tau,a,lambda,modelsIndex,lambdaIndex)
-  lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
+  do.call(cbind,lapply(models$targetModels,getModelCoefs,models$lambdaIndex))
 }
 
 

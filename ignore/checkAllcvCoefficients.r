@@ -35,6 +35,25 @@ m5 <- rq.pen.cv(x,y,penalty="aLASSO")
 m6 <- rq.pen.cv(x,y,penalty="SCAD")
 m7 <- rq.pen.cv(x,y,penalty="MCP")
 
+coefficients(m1)
+coefficients(m2)
+coefficients(m3)
+coefficients(m4)
+coefficients(m5)
+coefficients(m6)
+coefficients(m7)
+
+coefficients(m1, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m2, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m3, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m4, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m5, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m6, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m7, useDefaults=FALSE, lambdaIndex=3)
+
+
+
+
 m1 <- rq.pen.cv(x,y,tau=c(.1,.3,.7))
 coefficients(m1$fit)
 coefficients(m1$fit,lambdaIndex=c(3,5,7))
@@ -51,6 +70,33 @@ m4 <- rq.pen.cv(x,y,penalty="ENet",a=.5,tau=c(.1,.3,.7))
 m5 <- rq.pen.cv(x,y,penalty="aLASSO",tau=c(.1,.3,.7))
 m6 <- rq.pen.cv(x,y,penalty="SCAD",tau=c(.1,.3,.7))
 m7 <- rq.pen.cv(x,y,penalty="MCP",tau=c(.1,.3,.7),a=c(3,4,5))
+
+coefficients(m1)
+coefficients(m2)
+coefficients(m3)
+coefficients(m4)
+coefficients(m5)
+coefficients(m6)
+coefficients(m7)
+
+coefficients(m1, septau=FALSE)
+coefficients(m2, septau=FALSE)
+coefficients(m3, septau=FALSE)
+coefficients(m4, septau=FALSE)
+coefficients(m5, septau=FALSE)
+coefficients(m6, septau=FALSE)
+coefficients(m7, septau=FALSE)
+
+coefficients(m1, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m2, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m3, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m4, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m5, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m6, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m7, useDefaults=FALSE, lambdaIndex=3)
+coefficients(m7, useDefaults=FALSE, lambdaIndex=3,a=4)
+
+
 
 m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
 m2 <- rq.group.pen.cv(x,y,alg="br",tau=c(.1,.3,.7),groups=g)
