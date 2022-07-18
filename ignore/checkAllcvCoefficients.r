@@ -17,7 +17,7 @@ y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
 g <- c(1,1,1,1,2,2,3,3)
 tvals <- c(.25,.75)
 
-m1 <- rq.pen.cv(x,y)
+m1 <- rq.pen.cv(x,y,tau=c(.3,.7))
 
 coefficients(m1$fit)
 coefficients(m1$fit,lambdaIndex=c(3,5,7))
@@ -25,8 +25,9 @@ coefficients(m1$fit,tau=.5)
 coefficients(m1$fit,a=1)
 coefficients(m1$fit,a=1,tau=.5)
 coefficients(m1$fit,tau=.5,lambdaIndex=c(3,5,7))
-coefficients(m1$fit,lambda=m1$fit$models[[1]]$lambda[c(3,5,23)])
+coefficients(m1$fit,lambda=m1$fit$lambda[c(3,5,23)])
 
+coefficients(m1)
 
 m2 <- rq.pen.cv(x,y,alg="br")
 m3 <- rq.pen.cv(x,y,penalty="Ridge")

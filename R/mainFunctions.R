@@ -385,7 +385,10 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   models <- getModels(object,tau,a,lambda,modelsIndex,lambdaIndex)
-  do.call(cbind,lapply(models$targetModels,getModelCoefs,models$lambdaIndex))
+  modelsCombined <- lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
+  modelNames <- outer(names(modelsCombined),colnames(modelsCombined[[1]]),paste)
+  coefReturn <- do.call(cbind,modelsCombined)
+  colnames(coefReturn) <- modelNames
 }
 
 
@@ -629,10 +632,10 @@ coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,ta
       } else{
         lambdaIndex <- btr$lambda1seIndex
       }
-      returnVal <- vector(mode="list", length=length(models))
+      returnVal <- matrix(0,nrow=nrow(coef(object$fit)),ncol=length(models))  #vector(mode="list", length=length(models))
       names(returnVal) <- names(models)
       for(i in 1:length(returnVal)){
-        returnVal[[i]] <- coef(object$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])[[1]]
+        returnVal[,i] <- coef(object$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])
       }
       returnVal
     } else{
