@@ -386,7 +386,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   models <- getModels(object,tau,a,lambda,modelsIndex,lambdaIndex)
   modelsCombined <- lapply(models$targetModels,getModelCoefs,models$lambdaIndex)
-  modelNames <- outer(names(modelsCombined),colnames(modelsCombined[[1]]),paste)
+  modelNames <- as.vector( t(outer(names(modelsCombined),colnames(modelsCombined[[1]]),paste)))
   coefReturn <- do.call(cbind,modelsCombined)
   colnames(coefReturn) <- modelNames
   coefReturn
