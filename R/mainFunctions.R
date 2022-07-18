@@ -642,7 +642,7 @@ coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,ta
       returnVal
     } else{
       if(!cvmin){
-        stop("One standard error approach not implemented for group choice of tuning parameter")
+        stop("One standard error approach not implemented for different lambda values for different quantiles")
       } else{
         keepers <- which(closeEnough(tau,object$gtr$tau))
         gtr <- object$gtr[keepers,]
