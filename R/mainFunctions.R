@@ -615,7 +615,7 @@ print.rq.pen.seq.cv <- function(x,...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
   if(!useDefaults){
-    coefficients(object$models,tau=tau,...)
+    coefficients(object$fit,tau=tau,...)
   } else{
     if(is.null(tau)){
       tau <- object$fit$tau

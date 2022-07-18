@@ -58,7 +58,7 @@ m5 <- rq.group.pen.cv(x,y,penalty="gAdLASSO",tau=c(.1,.3,.7),a=c(1,2,3),groups=g
 m6 <- rq.group.pen.cv(x,y,penalty="gSCAD",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 m7 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 m8 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g,norm=1)
-m9 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g,norm=1,alg="br")
+m9 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g,norm=1)
 
 
 
