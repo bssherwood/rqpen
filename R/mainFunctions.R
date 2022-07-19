@@ -408,7 +408,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
 #' @param ... Additional parameters sent to coef.rq.pen.seq.cv(). 
 #'
-#' @return A list of a matrix of predictions for each tau and a combination
+#' @return A matrix of predictions for each tau and a combination
 #' @export
 #'
 #' @examples
@@ -420,12 +420,12 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
   coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
-	lapply(coefs, quick.predict,newx=newx)
+  cbind(1,newx) %*% coefs
 }
 
-#' Predictions from rq.pen.seq.cv object
+#' Predictions from rq.pen.seq object
 #'
-#' @param object rq.pen.seq.cv object
+#' @param object rq.pen.seq object
 #' @param newx Matrix of predictors 
 #' @param tau Quantile of interest. Default is NULL, which will return all quantiles. Should not be specified if modelsIndex is used.  
 #' @param a Tuning parameter of a. Default is NULL, which returns coefficients for all values of a. Should not be specified if modelsIndex is used. 
@@ -434,7 +434,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
 #' @param ... Additional parameters. 
 #'
-#' @return A list of a matrix of predictions for each tau and a combination
+#' @return A matrix of predictions for each tau and a combination
 #' @export
 #'
 #' @examples
@@ -449,7 +449,8 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
-  lapply(coefs, quick.predict,newx=newx)
+  #lapply(coefs, quick.predict,newx=newx)
+  cbind(1,newx) %*% coefs
 }
 
 #' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqn{\lambda} and a.

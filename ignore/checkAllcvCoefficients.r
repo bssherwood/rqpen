@@ -111,7 +111,19 @@ m8 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g,nor
 m9 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g,norm=1)
 
 
+coefficients(m1)
+coefficients(m5)
+coefficients(m6)
+coefficients(m7)
+coefficients(m8)
+coefficients(m9)
 
+coefficients(m1, useDefaults = FALSE, lambdaIndex=3)
+coefficients(m5, useDefaults = FALSE, lambdaIndex=3)
+coefficients(m6, useDefaults = FALSE, lambdaIndex=3)
+coefficients(m7, useDefaults = FALSE, lambdaIndex=3)
+coefficients(m8, useDefaults = FALSE, lambdaIndex=3)
+coefficients(m9, useDefaults = FALSE, lambdaIndex=3)
 
 
 
