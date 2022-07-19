@@ -124,7 +124,7 @@ qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NUL
 	}
 	#coefIndex <- 1:nt
 	#modelsInfo <- cbind(modelsInfo, coefIndex)
-	coefs <- do.call(cbind,coefs)
+	#coefs <- do.call(cbind,coefs)
 	colnames(coefs) <- paste0("tau=",obj$tau)
 	
 	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
@@ -432,7 +432,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 #' @param lambda Tuning parameter of \eqn{\lambda}. Default is NULL, which returns coefficients for all values of \eqn{\lambda}.
 #' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
-#' @param ... Additional parameters. 
+#' @param ... Additional parameters passed to coef.rq.pen.seq() 
 #'
 #' @return A matrix of predictions for each tau and a combination
 #' @export
@@ -448,7 +448,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 #' bothIdxApproach <- predict(m1,newx,modelsIndex=2,lambdaIndex=1)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
-  coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex)
+  coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex,...)
   #lapply(coefs, quick.predict,newx=newx)
   cbind(1,newx) %*% coefs
 }

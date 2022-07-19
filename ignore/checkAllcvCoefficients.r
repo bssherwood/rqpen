@@ -12,6 +12,7 @@ library(glmnet)
 set.seed(1)
 
 x <- matrix(rnorm(100*8,sd=10),ncol=8)
+newx <- matrix(rnorm(20*8),ncol=8)
 
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(100,3)
 g <- c(1,1,1,1,2,2,3,3)
@@ -52,9 +53,21 @@ coefficients(m5, useDefaults=FALSE, lambdaIndex=3)
 coefficients(m6, useDefaults=FALSE, lambdaIndex=3)
 coefficients(m7, useDefaults=FALSE, lambdaIndex=3)
 
+predict(m1,newx)
+predict(m2,newx)
+predict(m3,newx)
+predict(m4,newx)
+predict(m5,newx)
+predict(m6,newx)
+predict(m7,newx)
 
-h2 <- rq.pen(x,y,alg="br")
-h3 <- rq.pen(x,y)
+predict(m1, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m2, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m3, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m4, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m5, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m6, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m7, newx, useDefaults=FALSE, lambdaIndex=3)
 
 
 
@@ -66,6 +79,14 @@ coefficients(m1$fit,a=1)
 coefficients(m1$fit,a=1,tau=.3)
 coefficients(m1$fit,tau=.3,lambdaIndex=c(3,5,7))
 coefficients(m1$fit,lambda=m1$fit$models[[1]]$lambda[c(3,5,23)])
+
+predict(m1$fit, newx)
+predict(m1$fit, newx, lambdaIndex=c(3,5,7))
+predict(m1$fit, newx, tau=.3)
+predict(m1$fit, newx, a=1)
+predict(m1$fit, newx, a=1,tau=.3)
+predict(m1$fit, newx, tau=.3,lambdaIndex=c(3,5,7))
+predict(m1$fit, newx, lambda=m1$fit$models[[1]]$lambda[c(3,5,23)])
 
 
 m2 <- rq.pen.cv(x,y,alg="br",tau=c(.1,.3,.7))
@@ -101,6 +122,32 @@ coefficients(m7, useDefaults=FALSE, lambdaIndex=3)
 coefficients(m7, useDefaults=FALSE, lambdaIndex=3,a=4)
 
 
+predict(m1, newx)
+predict(m2, newx)
+predict(m3, newx)
+predict(m4, newx)
+predict(m5, newx)
+predict(m6, newx)
+predict(m7, newx)
+
+predict(m1, newx, septau=FALSE)
+predict(m2, newx, septau=FALSE)
+predict(m3, newx, septau=FALSE)
+predict(m4, newx, septau=FALSE)
+predict(m5, newx, septau=FALSE)
+predict(m6, newx, septau=FALSE)
+predict(m7, newx, septau=FALSE)
+
+predict(m1, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m2, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m3, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m4, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m5, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m6, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m7, newx, useDefaults=FALSE, lambdaIndex=3)
+predict(m7, newx, useDefaults=FALSE, lambdaIndex=3,a=4)
+
+
 
 m1 <- rq.group.pen.cv(x,y,tau=c(.1,.3,.7),groups=g)
 m2 <- rq.group.pen.cv(x,y,alg="br",tau=c(.1,.3,.7),groups=g)
@@ -125,7 +172,18 @@ coefficients(m7, useDefaults = FALSE, lambdaIndex=3)
 coefficients(m8, useDefaults = FALSE, lambdaIndex=3)
 coefficients(m9, useDefaults = FALSE, lambdaIndex=3)
 
+predict(m1,newx)
+predict(m5,newx)
+predict(m6,newx)
+predict(m7,newx)
+predict(m8,newx)
+predict(m9,newx)
+predict(m9,newx,septau=FALSE)
 
-
-
+predict(m1, newx, useDefaults = FALSE, lambdaIndex=3)
+predict(m5, newx, useDefaults = FALSE, lambdaIndex=3)
+predict(m6, newx, useDefaults = FALSE, lambdaIndex=3)
+predict(m7, newx, useDefaults = FALSE, lambdaIndex=3)
+predict(m8, newx, useDefaults = FALSE, lambdaIndex=3)
+predict(m9, newx, useDefaults = FALSE, lambdaIndex=3)
 
