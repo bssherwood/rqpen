@@ -53,6 +53,9 @@ coefficients(m6, useDefaults=FALSE, lambdaIndex=3)
 coefficients(m7, useDefaults=FALSE, lambdaIndex=3)
 
 
+h2 <- rq.pen(x,y,alg="br")
+h3 <- rq.pen(x,y)
+
 
 
 m1 <- rq.pen.cv(x,y,tau=c(.1,.3,.7))
