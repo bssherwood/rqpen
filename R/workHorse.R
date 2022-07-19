@@ -893,6 +893,7 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty
 # for loop that could be removed
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
+	colnames(coefs) <- paste0("L",1:ncol(coefs))
 	return_val$coefficients <- coefs
 	#return_val$penalty.factor <- penalty.factor
 	p <- ncol(x)
