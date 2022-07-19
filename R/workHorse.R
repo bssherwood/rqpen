@@ -436,7 +436,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		names(models) <- modelnames
 		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau, a=1)
 	}
-	colnames(coefs) <- paste0("L",1:ncol(coefs))
+	#colnames(coefs) <- paste0("L",1:ncol(coefs))
 	modelIndex <- 1:length(returnVal$models)
 	avals <- sapply(returnVal$models,modelA)
 	tauvals <- sapply(returnVal$models,modelTau)
