@@ -125,7 +125,9 @@ qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NUL
 	#coefIndex <- 1:nt
 	#modelsInfo <- cbind(modelsInfo, coefIndex)
 	#coefs <- do.call(cbind,coefs)
-	colnames(coefs) <- paste0("tau=",obj$tau)
+	if(!is.null(ncol(coefs))){
+	  colnames(coefs) <- paste0("tau=",obj$tau)
+	}
 	
 	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
 	class(return_val) <- "qic.select"
