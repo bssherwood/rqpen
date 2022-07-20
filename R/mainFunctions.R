@@ -103,9 +103,9 @@ qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NUL
 		tau <- modelsInfo$tau
 		modelsInfo <- modelsInfo[, .SD[which.min(minQIC)],by=tau]
 		
-		coefs <- vector(mode="list", length=nt)
+		coefs <- matrix(nrow=nrow(coef(obj)), ncol=nt)#vector(mode="list", length=nt)
 		for(i in 1:nt){
-			coefs[[i]] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
+			coefs[,i] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
 		}
 		gic <- NULL
 	} else{
