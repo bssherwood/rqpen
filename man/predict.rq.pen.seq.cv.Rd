@@ -30,7 +30,7 @@
 \item{...}{Additional parameters sent to coef.rq.pen.seq.cv().}
 }
 \value{
-A list of a matrix of predictions for each tau and a combination
+A matrix of predictions for each tau and a combination
 }
 \description{
 Predictions from rq.pen.seq.cv object

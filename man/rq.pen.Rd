@@ -14,7 +14,7 @@ rq.pen(
   nlambda = 100,
   eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
   penalty.factor = rep(1, ncol(x)),
-  alg = ifelse(sum(dim(x)) < 200, "br", "huber"),
+  alg = c("huber", "br", "QICD", "fn"),
   scalex = TRUE,
   tau.penalty.factor = rep(1, length(tau)),
   coef.cutoff = 1e-08,
@@ -90,18 +90,7 @@ for Huber loss with elastic net penalties. For non-elastic net penalties the LLA
 with a lasso penalty with different weights for each predictor.
 }
 \description{
-Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
-\deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
-Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
-\itemize{
-\item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
-\item{SCAD:}{ \eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
-\item{MCP:}{ \eqn{P(\beta,\lambda,a)=MCP(\beta,\lambda,a)}}
-\item{Ridge:}{ \eqn{P(\beta,\lambda,a)=\lambda\beta^2}}
-\item{Elastic Net:}{ \eqn{P(\beta,\lambda,a)=a*\lambda|\beta|+(1-a)*\lambda*\beta^2}}
-\item{Adaptive LASSO:}{ \eqn{P(\beta,\lambda,a)=\frac{\lambda |\beta|}{|\beta_0|^a}}}
-}
-For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}.
+
 }
 \examples{
 n <- 200

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{predict.rq.pen.seq}
 \alias{predict.rq.pen.seq}
-\title{Predictions from rq.pen.seq.cv object}
+\title{Predictions from rq.pen.seq object}
 \usage{
 \method{predict}{rq.pen.seq}(
   object,
@@ -16,7 +16,7 @@
 )
 }
 \arguments{
-\item{object}{rq.pen.seq.cv object}
+\item{object}{rq.pen.seq object}
 
 \item{newx}{Matrix of predictors}
 
@@ -30,13 +30,13 @@
 
 \item{lambdaIndex}{Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified.}
 
-\item{...}{Additional parameters.}
+\item{...}{Additional parameters passed to coef.rq.pen.seq()}
 }
 \value{
-A list of a matrix of predictions for each tau and a combination
+A matrix of predictions for each tau and a combination
 }
 \description{
-Predictions from rq.pen.seq.cv object
+Predictions from rq.pen.seq object
 }
 \examples{
 x <- matrix(runif(800),ncol=8)

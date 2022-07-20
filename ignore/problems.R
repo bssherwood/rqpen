@@ -1,0 +1,10 @@
+#I think the following is problematic because there is a kitchen quality with only one value, however should be able to provide a better error message
+
+library(AmesHousing)
+ames <- make_ames()
+x_g <- model.matrix(~ Lot_Shape+Garage_Type+Full_Bath+Fireplaces+Kitchen_Qual - 1,ames)
+y_g <- log(ames$Sale_Price)
+g <-  c(rep(1,4),rep(2,6),3,4,rep(5,4))
+r2 <- rq.group.pen.cv(x_g,y_g,groups=g)
+r3 <- rq.group.pen.cv(x_g,y_g,groups=g,penalty="gSCAD",norm=1)
+r4 <- rq.group.pen.cv(x_g,y_g,groups=g,penalty="gSCAD")

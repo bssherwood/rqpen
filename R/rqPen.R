@@ -1,5 +1,4 @@
 #' @import quantreg
-#' @import regpro
 #' @import hqreg
 #' @import plyr
 #' @import hrqglas

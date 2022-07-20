@@ -7,7 +7,7 @@
 \method{plot}{rq.pen.seq}(
   x,
   vars = NULL,
-  logLambda = FALSE,
+  logLambda = TRUE,
   tau = NULL,
   a = NULL,
   lambda = NULL,

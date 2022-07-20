@@ -13,7 +13,7 @@ rq.group.pen(
   lambda = NULL,
   nlambda = 100,
   eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
-  alg = c("huber", "lp", "qicd"),
+  alg = c("huber", "br", "qicd"),
   a = NULL,
   norm = 2,
   group.pen.factor = rep(1, length(unique(groups))),
