@@ -114,7 +114,7 @@ qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NUL
 		for(i in 1:na){
 			subIC <- subset(tqic_vals, obj$modelsInfo$a==obj$a[i])
 			gic[i,] <- weights %*% subIC
-		}
+		}#
 		minIndex <- which(gic==min(gic),arr.ind=TRUE)
 		returnA <- obj$a[minIndex[1]]
 		a <- obj$a
