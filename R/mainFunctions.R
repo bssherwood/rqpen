@@ -1387,7 +1387,7 @@ plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,
 #' }
 #' plot(m1,main=mlist)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-plot.rq.pen.seq <- function(x,vars=NULL,logLambda=FALSE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
+plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,main=NULL, ...){
 	models <- getModels(x,tau=tau,a=a,lambda=lambda,modelsIndex=modelsIndex,lambdaIndex=lambdaIndex)
 	tm <- models$targetModels
 	li <- models$lambdaIndex
