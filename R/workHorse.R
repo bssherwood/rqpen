@@ -302,7 +302,7 @@ getLamMax <- function(x,y,tau=.5,penalty="LASSO",scalex=TRUE,a=NULL,tau.penalty.
 	for(aval in a){
 	  tspot <- 1
 	  if(aval == 0){
-	    aval <- min(1/100,a[which(a!=0)])
+	    aval <- min(1/1000,a[which(a!=0)])
 	  }
   	for(tau_val in tau){
   	  pf <- penalty.factor*tau.penalty.factor[tspot]*aval
@@ -476,8 +476,14 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	}
 	
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
-		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	  if(length(a)==1){
+  		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+  		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
+	  } else{
+	    lamMax1 <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=max(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+	    lamMax2 <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=min(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+	    lambda <-  exp(seq(log(lamMax2),log(eps*lamMax1),length.out=nlambda))
+	  }
 	}
 	if(length(lambda)==1){
 			stop("The Huber algorithm requires at least 2 values of lambda and elastic net only uses the Huber algorithm")
