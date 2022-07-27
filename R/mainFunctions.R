@@ -919,14 +919,14 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
       xpen <- as.matrix(x[,penVars])
-      QICD_func <- "rqPen:::QICD.nonpen"
+      QICD_func <- rqPen:::QICD.nonpen
       mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
       if( intercept )
         mapback <- c(1, 1+mapback)
     } else { # All penalized coefficients
       z <- NULL
       xpen <- x
-      QICD_func <- "rqPen:::QICD"
+      QICD_func <- rqPen:::QICD
       mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
       if( intercept )
         mapback <- c(1, 1+mapback)
@@ -950,7 +950,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     # Start in middle of lambda vector
     ## Increase lambda until intercept only model (or all penlized coefficients are zero)
     ## Decrease lambda until full model (Sparsity assumption => full model is bad)
-    m.c[[1]] <- as.name(QICD_func)
+    m.c[[1]] <- QICD_func#as.name(QICD_func)
     m.c[["penalty"]] <- penalty
     m.c[["x"]] <- xpen
     m.c$z <- z
