@@ -926,7 +926,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     } else { # All penalized coefficients
       z <- NULL
       xpen <- x
-      QICD_func <- "RQpEN:::QICD"
+      QICD_func <- "rqPen:::QICD"
       mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
       if( intercept )
         mapback <- c(1, 1+mapback)
