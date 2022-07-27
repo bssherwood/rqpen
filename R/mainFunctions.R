@@ -919,14 +919,14 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
       xpen <- as.matrix(x[,penVars])
-      QICD_func <- "QICD.nonpen"
+      QICD_func <- "rqPen:::QICD.nonpen"
       mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
       if( intercept )
         mapback <- c(1, 1+mapback)
     } else { # All penalized coefficients
       z <- NULL
       xpen <- x
-      QICD_func <- "QICD"
+      QICD_func <- "RQpEN:::QICD"
       mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
       if( intercept )
         mapback <- c(1, 1+mapback)
