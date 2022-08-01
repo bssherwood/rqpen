@@ -1,4 +1,89 @@
-@preamble{ " \newcommand{\noop}[1]{} " } % a do-nothing command that serves a purpose
+@article{mestatp,
+  title = {Asymptotic properties of concave L1-norm group penalties},
+  journal={Statistics \& Probability Letters},
+  volume = {157},
+  pages={108631},
+  year={2020},
+  issn = {0167-7152},
+  author = {Ben Sherwood and Aaron J. Molstad and Sumanta Singha}
+}
+
+@article{qrbic,
+ ISSN = {01621459},
+ URL = {http://www.jstor.org/stable/24247149},
+ abstract = {Bayesian information criterion (BIC) is known to identify the true model consistently as long as the predictor dimension is finite. Recently, its moderate modifications have been shown to be consistent in model selection even when the number of variables diverges. Those works have been done mostly in mean regression, but rarely in quantile regression. The best-known results about BIC for quantile regression are for linear models with a fixed number of variables. In this article, we investigate how BIC can be adapted to high-dimensional linear quantile regression and show that a modified BIC is consistent in model selection when the number of variables diverges as the sample size increases. We also discuss how it can be used for choosing the regularization parameters of penalized approaches that are designed to conduct variable selection and shrinkage estimation simultaneously. Moreover, we extend the results to structured nonparametric quantile models with a diverging number of covariates. We illustrate our theoretical results via some simulated examples and a real data analysis on human eye disease. Supplementary materials for this article are available online.},
+ author = {Eun Ryung Lee and Hohsuk Noh and Byeong U. Park},
+ journal = {Journal of the American Statistical Association},
+ number = {505},
+ pages = {216--229},
+ publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
+ title = {Model Selection via Bayesian Information Criterion for Quantile Regression Models},
+ volume = {109},
+ year = {2014}
+}
+
+@Article{penBiLevel,
+	author = {Patrick Breheny and Jian Huang},
+	title = {Penalized methods for bi-level variable selection},
+	journal = {Statistics and its Interface},
+	volume = {2},
+	year = {2009},
+	pages = {369-380}
+}
+
+@article{admm_nan_qr,
+author = {Yu, Liqun and Lin, Nan},
+title = {ADMM for Penalized Quantile Regression in Big Data},
+journal = {International Statistical Review},
+volume = {85},
+number = {3},
+pages = {494-518},
+year = {2017}
+}
+
+@article{barro,
+author = { Roger   Koenker  and  José A. F.   Machado },
+title = {Goodness of Fit and Related Inference Processes for Quantile Regression},
+journal = {Journal of the American Statistical Association},
+volume = {94},
+number = {448},
+pages = {1296-1310},
+year  = {1999},
+publisher = {Taylor & Francis},
+doi = {10.1080/01621459.1999.10473882},
+
+URL = { 
+        https://www.tandfonline.com/doi/abs/10.1080/01621459.1999.10473882
+    
+},
+eprint = { 
+        https://www.tandfonline.com/doi/pdf/10.1080/01621459.1999.10473882
+    
+}
+}
+
+
+@article{lan_admm,
+author = {Liqun Yu and Nan Lin and Lan Wang},
+title = {A Parallel Algorithm for Large-Scale Nonconvex Penalized Quantile Regression},
+journal = {Journal of Computational and Graphical Statistics},
+volume = {26},
+number = {4},
+pages = {935-939},
+year  = {2017},
+publisher = {Taylor & Francis}
+}
+
+@article{scadAlg,
+author = {Patrick Breheny and Jian Huang},
+title = {Coordinate descent algorithms for nonconvex penalized regression, with applications to biological feature selection},
+volume = {5},
+journal = {The Annals of Applied Statistics},
+number = {1},
+publisher = {Institute of Mathematical Statistics},
+pages = {232 -- 253},
+year={2011}
+}
 
 @Article{br,
 	author = {I. Barrodale and F.D.K. Roberts},
@@ -38,13 +123,6 @@
 	note = {R package version 3.3.1}
 }
   url   = {https://cran.r-project.org/web/packages/grpreg/index.html}
-	
-@Manual{hrqglas,
-	author = {Shaobo Li and Ben Sherwood},
-	title = {hrqglas: Group Variable Selection for Quantile and Robust Mean Regression},
-	year = {2021},
-	note = {R package version 1.0}
-}
 
 
 @book{devoreLorentz,
@@ -150,10 +228,14 @@ regression},
 
 @Article{admm_hui,
 	author = {Yuwen Gu and Jun Fan and Lingchen Kong and Shiqian Ma and Hui Zou},
-	year = {\noop{3001}in press},
-	journal = {Technometrics},
-	title = {ADMM for high-dimensional sparse penalized quantile regression}
+	title = {ADMM for High-Dimensional Sparse Penalized Quantile Regression},
+  journal = {Technometrics},
+  volume = {60},  
+  number = {3},
+  pages = {319-331},
+  year  = {2018}
 }
+
 
 @Article{heShao,
 	author = {Xuming He and Qi-Man Shao},
@@ -307,6 +389,9 @@ commenturl = "https://doi.org/10.1214/aos/1176342503",
 	pages = {252-267},
 	journal = {Biostatistics}
 }
+
+
+
 	
 
 @InProceedings{kasap_16,
@@ -633,7 +718,7 @@ author = {Sahand N. Negahban and Pradeep Ravikumar and Martin J. Wainwright and 
 }
 
 @book{banachBook,
-  author = {Michel Ledoux and Michel Talagrand},
+  author = {M. Ledoux and M. Talagrand},
   publisher = {Springer-Verlag},
   title = {Probability in Banach Spaces},
   year = {1991}
@@ -847,20 +932,6 @@ year  = {2017}
 	title = {One-step sparse estimates in nonconcave penalized likelihood models}
 }
 
-@article{qrbic,
- ISSN = {01621459},
- URL = {http://www.jstor.org/stable/24247149},
- abstract = {Bayesian information criterion (BIC) is known to identify the true model consistently as long as the predictor dimension is finite. Recently, its moderate modifications have been shown to be consistent in model selection even when the number of variables diverges. Those works have been done mostly in mean regression, but rarely in quantile regression. The best-known results about BIC for quantile regression are for linear models with a fixed number of variables. In this article, we investigate how BIC can be adapted to high-dimensional linear quantile regression and show that a modified BIC is consistent in model selection when the number of variables diverges as the sample size increases. We also discuss how it can be used for choosing the regularization parameters of penalized approaches that are designed to conduct variable selection and shrinkage estimation simultaneously. Moreover, we extend the results to structured nonparametric quantile models with a diverging number of covariates. We illustrate our theoretical results via some simulated examples and a real data analysis on human eye disease. Supplementary materials for this article are available online.},
- author = {Eun Ryung Lee and Hohsuk Noh and Byeong U. Park},
- journal = {Journal of the American Statistical Association},
- number = {505},
- pages = {216--229},
- publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
- title = {Model Selection via Bayesian Information Criterion for Quantile Regression Models},
- volume = {109},
- year = {2014}
-}
-
 
 @Article{peng10,
 author = {Jie Peng and Ji Zhu and Anna Beramaschi and Wonshik Han and Dong-Young Noh and Jonathan R. Pollac and Pei Wang},
@@ -885,6 +956,14 @@ pages = {i204-i212}
 
 
 
+
+@Unpublished{price17,
+author = {Bradley S. Price and Charles J. Geyer and Adam J. Rothman},
+title = {Automatic Response Category Combination in Multinomial Logistic Regression},
+note = {https://arxiv.org/abs/1705.03594},
+month = {May},
+year = {2017}
+}
 
 
 
@@ -1513,14 +1592,11 @@ author={Tibshirani, Robert and Bien, Jacob and Friedman, Jerome and Hastie, Trev
     url = {https://CRAN.R-project.org/package=AmesHousing},
 
 @article{de2011ames,
-  title={Ames, {I}owa: Alternative to the {B}oston housing data as an end of semester regression project},
+  title={Ames, Iowa: Alternative to the Boston housing data as an end of semester regression project},
   author={De Cock, Dean},
   journal={J. Stat. Educ.},
   volume={19},
   number={3},
   year={2011},
-	pages={1-15},
   publisher={Taylor \& Francis}
 }
-
-

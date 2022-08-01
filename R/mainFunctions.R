@@ -1537,12 +1537,12 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	if(length(lambdaIndex)>1){
 		stop("Function only supports a single value of lambda or lambdaIndex")
 	}
-	coefs <- do.call(rbind,coefficients(x,a=a,lambdaIndex=lambdaIndex))
+	coefs <- coefficients(x,a=a,lambdaIndex=lambdaIndex)
 	par(ask=TRUE)
 	p <- ncol(coefs)
 	tau <- x$tau
 	for(i in 1:p){
-		plot(tau,coefs[,i],xlab=expression(tau),ylab="Coefficient",main=colnames(coefs)[i],pch=16,...)
+		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16,...)
 		lines(tau,coefs[,i])
 	}
 	par(ask=FALSE)
