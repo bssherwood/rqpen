@@ -217,7 +217,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 }
 
 
-#' Fit a quantile regression model using a penalized quantile loss function. 
+#' Fit a quantile regression model using a penalized quantile loss function.
 #'
 #' @param x matrix of predictors
 #' @param y vector of responses
@@ -240,7 +240,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @description  
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
 #' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
-#' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
+#' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
 #' \itemize{
 #' \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
 #' \item{SCAD:}{ \eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
@@ -252,7 +252,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. Three different algorithms are implemented
 #' \itemize{
 #' \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
-#' \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm. 
+#' \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm.} 
 #' \item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }
 #' }
 #' The huber algorithm offers substantial speed advantages without much, if any, loss in performance. However, it should be noted that it solves an approximation of the quantile loss function.

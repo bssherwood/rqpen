@@ -28,7 +28,7 @@ cv.rq.pen(
 \arguments{
 \item{x}{Matrix of predictors.}
 
-\item{y}{Vector of response values.}
+\item{y}{Numeric vector of response values.}
 
 \item{tau}{Conditional quantile being modelled.}
 
