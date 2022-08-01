@@ -122,7 +122,7 @@ tvals <- c(.25,.75)
 r1 <- rq.group.pen(x,y,groups=g)
 r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
 #Linear programming approach with group SCAD penalty and L1-norm
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,4))
+m2 <- rq.group.pen(x,y,groups=g,alg="br",penalty="gSCAD",norm=1,a=seq(3,4))
 # No penalty for the first group
 m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,2)))
 # Smaller penalty for the median

@@ -19,7 +19,7 @@ cv.rq.group.pen(
   nlambda = 100,
   eps = 1e-04,
   init.lambda = 1,
-  alg = "QICD",
+  alg = "huber",
   penGroups = NULL,
   ...
 )
