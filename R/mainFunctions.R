@@ -1543,7 +1543,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 	tau <- x$tau
 	for(i in 1:p){
 		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16,...)
-		lines(tau,coefs[,i])
+		lines(tau,coefs[i,])
 	}
 	par(ask=FALSE)
 }
