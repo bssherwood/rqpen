@@ -897,7 +897,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   if(length(tau)>1){
       stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
   }
-  if(is.matrix(Y)){
+  if(is.matrix(y)){
     stop("y must be a numeric vector not a matrix")
   }
   
@@ -922,14 +922,14 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
     if( !all(penVars==1:p) ){ # Some unpenalized coefficients
       z    <- as.matrix(x[,-penVars])
       xpen <- as.matrix(x[,penVars])
-      QICD_func <- rqPen:::QICD.nonpen
+      QICD_func <- QICD.nonpen
       mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
       if( intercept )
         mapback <- c(1, 1+mapback)
     } else { # All penalized coefficients
       z <- NULL
       xpen <- x
-      QICD_func <- rqPen:::QICD
+      QICD_func <- QICD
       mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
       if( intercept )
         mapback <- c(1, 1+mapback)
@@ -2267,7 +2267,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @export
 #'
 #' @examples
-#'  
+#' \dontrun{ 
 #' set.seed(1)
 #' x <- matrix(rnorm(200*8,sd=1),ncol=8)
 #' y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(200,3)
@@ -2281,7 +2281,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,2)))
 #' # Smaller penalty for the median
 #' m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,.25,1))
-#' 
+#' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}, Shaobo Li \email{shaobo.li@ku.edu} and Adam Maidman
 #' @references 
 #' \insertRef{qr_cd}{rqPen}

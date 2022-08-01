@@ -59,8 +59,22 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 }
 
 
-
-
+#' Implements QICD algorithm
+#' @param y response variable, length n vector
+#' @param x input nxp matrix, of dimension nobs x nvars; each row is an observation vector.
+#' @param tau the quantile value
+#' @param lambda the tuning parameter (numeric value > 0)
+#' @param intercept a logical value,should intercept be fitted (default=TRUE) (intercept should be included when using splines)
+#' @param penalty The name of the penalty function ("SCAD", "MCP", "LASSO")
+#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to rq( y-x%*%beta ~ z ).
+#' @param maxin maximum number of iterations for inside coordinate descent,default value is 100
+#' @param maxout maximum number of iterations for outside MM step, default value is 20
+#' @param eps The convergence threshold for coordinate descent and majorization minimization step
+#' @param coef.cutoff Threshold for determining nonzero coefficients
+#' @param a Scale parameter, the default value is 3.7 (>2 for SCAD, >1 for MCP, not used in LASSO)
+#' @param scalex Whether predictors are centered and scaled
+#' @param ... additional parameters
+#' @export
 QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, scalex=TRUE, ...)
@@ -170,7 +184,25 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 }
 
 
-
+#' Implements QICD algorithm with some variables not being penalized
+#' @param y response variable, length n vector
+#' @param x input nxp matrix, of dimension nobs x nvars; each row is an observation vector.
+#' @param z nxq matrix of bases; the coefficients for these columns will be unpenalized
+#' @param tau the quantile value
+#' @param lambda the tuning parameter (numeric value > 0)
+#' @param intercept a logical value,should intercept be fitted (default=TRUE) (intercept should be included when using splines)
+#' @param maxin maximum number of iterations for inside coordinate descent,default value is 100
+#' @param maxout maximum number of iterations for outside MM step, default value is 20
+#' @param eps The convergence threshold for coordinate descent and majorization minimization step
+#' @param penalty The name of the penalty function ("SCAD", "MCP", "LASSO")
+#' @param a Scale parameter, the default value is 3.7 (>2 for SCAD, >1 for MCP, not used in LASSO)
+#' @param coef.cutoff Threshold for determining nonzero coefficients
+#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to rq( y-x%*%beta ~ z ).
+#' @param method quantile regression initialization method, can be "br" or "fn".
+#' @param scalex Whether predictors are centered and scaled
+#' @param ... additional parameters
+#' 
+#' @export
 QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, method="br", scalex=TRUE, ...)

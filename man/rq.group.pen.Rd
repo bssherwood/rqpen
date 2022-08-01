@@ -113,7 +113,7 @@ suggest that you use rq.pen() instead. For Adaptive LASSO the values of \eqn{\be
 Where if \eqn{\tau=.5}, we get the usual Huber loss function.
 }
 \examples{
- 
+\dontrun{ 
 set.seed(1)
 x <- matrix(rnorm(200*8,sd=1),ncol=8)
 y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(200,3)
@@ -127,7 +127,7 @@ m2 <- rq.group.pen(x,y,groups=g,alg="br",penalty="gSCAD",norm=1,a=seq(3,4))
 m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,2)))
 # Smaller penalty for the median
 m4 <- rq.group.pen(x,y,groups=g,tau=c(.25,.5,.75),tau.penalty.factor=c(1,.25,1))
-
+}
 }
 \references{
 \insertRef{qr_cd}{rqPen}

@@ -6,7 +6,7 @@
 #' @import lifecycle
 #' @importFrom splines bs
 #' @importFrom graphics lines plot par segments points legend
-#' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR
+#' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR resid
 #' @importFrom Rdpack reprompt
 #' @importFrom methods is
 #' @useDynLib rqPen, .registration=TRUE
