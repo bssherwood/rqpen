@@ -844,7 +844,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 #' Cross Validated quantile regression
 #'
 #' @param x Matrix of predictors.
-#' @param y Vector of response values.
+#' @param y Numeric vector of response values.
 #' @param tau  Conditional quantile being modelled.
 #' @param lambda  Vector of lambdas. Default is for lambdas to be automatically generated.
 #' @param weights Weights for the objective function.
@@ -896,6 +896,9 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   deprecate_soft("3.0","cv.rq.pen()","rq.pen.cv()")
   if(length(tau)>1){
       stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
+  }
+  if(!is.numeric(Y)){
+    stop("y must be a numeric vector")
   }
   
   m.c <- match.call() # This stores all the arguments in the function call as a list
