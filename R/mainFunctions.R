@@ -897,8 +897,8 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
   if(length(tau)>1){
       stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
   }
-  if(!is.numeric(Y)){
-    stop("y must be a numeric vector")
+  if(is.matrix(Y)){
+    stop("y must be a numeric vector not a matrix")
   }
   
   m.c <- match.call() # This stores all the arguments in the function call as a list
