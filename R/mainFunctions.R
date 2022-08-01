@@ -1664,7 +1664,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #'
 cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
-    foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="QICD",penGroups=NULL,
+    foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="huber",penGroups=NULL,
     ...) 
 {
   deprecate_soft("3.0","cv.rq.group.pen()","rq.group.pen.cv()")
@@ -2276,7 +2276,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' r1 <- rq.group.pen(x,y,groups=g)
 #' r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
 #' #Linear programming approach with group SCAD penalty and L1-norm
-#' m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,4))
+#' m2 <- rq.group.pen(x,y,groups=g,alg="br",penalty="gSCAD",norm=1,a=seq(3,4))
 #' # No penalty for the first group
 #' m3 <- rq.group.pen(x,y,groups=g,group.pen.factor=c(0,rep(1,2)))
 #' # Smaller penalty for the median
