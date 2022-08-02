@@ -66,7 +66,7 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 #' @param lambda the tuning parameter (numeric value > 0)
 #' @param intercept a logical value,should intercept be fitted (default=TRUE) (intercept should be included when using splines)
 #' @param penalty The name of the penalty function ("SCAD", "MCP", "LASSO")
-#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to rq( y-x%*%beta ~ z ).
+#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. 
 #' @param maxin maximum number of iterations for inside coordinate descent,default value is 100
 #' @param maxout maximum number of iterations for outside MM step, default value is 20
 #' @param eps The convergence threshold for coordinate descent and majorization minimization step
@@ -197,7 +197,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 #' @param penalty The name of the penalty function ("SCAD", "MCP", "LASSO")
 #' @param a Scale parameter, the default value is 3.7 (>2 for SCAD, >1 for MCP, not used in LASSO)
 #' @param coef.cutoff Threshold for determining nonzero coefficients
-#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to rq( y-x%*%beta ~ z ).
+#' @param initial_beta Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to by a rq() fit of residuals from initial beta against the unpenalized predictors, z.
 #' @param method quantile regression initialization method, can be "br" or "fn".
 #' @param scalex Whether predictors are centered and scaled
 #' @param ... additional parameters

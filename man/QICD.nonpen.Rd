@@ -38,7 +38,7 @@ QICD.nonpen(
 
 \item{penalty}{The name of the penalty function ("SCAD", "MCP", "LASSO")}
 
-\item{initial_beta}{Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to rq( y-x%*%beta ~ z ).}
+\item{initial_beta}{Vector containing initial values for intercept (if included) and x coefficients. Should be in the form (intercept, coefficients) intercept should be left out if intercept=FALSE. The intercept should be included to be consistent with other methods, but intercept and z coefficients will be initialized to by a rq() fit of residuals from initial beta against the unpenalized predictors, z.}
 
 \item{maxin}{maximum number of iterations for inside coordinate descent,default value is 100}
 
