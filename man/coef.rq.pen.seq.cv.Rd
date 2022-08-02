@@ -26,13 +26,14 @@ Returns coefficients
 Returns coefficients from a rq.pen.seq.cv object.
 }
 \examples{
+ \dontrun{
  set.seed(1)
  x <- matrix(rnorm(800),nrow=100)
  y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
  lassoModels <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
  coefficients(lassoModels,septau=FALSE)
  coefficients(lassoModels,cvmin=FALSE)
-
+}
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
