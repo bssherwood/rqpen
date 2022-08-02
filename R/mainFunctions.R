@@ -337,7 +337,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' 
 #' @description  
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
-#' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+#' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 #' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
 #' \itemize{
 #' \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
@@ -582,8 +582,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' sparsest solution that is within one standard error of the minimum results. 
 #' 
 #' The other approach is the group tau results, gtr. Consider the case of estimating Q quantiles of \eqn{\tau_1,\ldots,\tau_Q} It returns the values of \code{lambda} and \code{a} that minimizes the average, or again whatever function is used for \code{cvSummary}, of 
-#' \deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. I THINK WRITING THIS WAY GIVES 
-#' ME AN IDEA ON HOW TO DO STANDARD ERROR FOR THIS SETTTING. 
+#' \deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. 
 #' 
 #' @return
 #' \itemize{
@@ -2127,14 +2126,6 @@ plot.cv.rq.group.pen <- function (x,...)
 #' }
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE,lambda.discard=TRUE, ...){
-# x is a n x p matrix without the intercept term
-# y is a n x 1 vector
-# lambda takes values of 1 or p
-# coef.cutoff is a threshold to set to zero. 
-# Choose the method used to estimate the coefficients ("br", "fn" or any other method used by quantreg)
-### According to quantreg manual and my experience, "fn" is much faster for big n
-### The "n" can grow rapidly using lin. prog. approach  
-# penVars - variables to be penalized, doesn't work if lambda has multiple entries (Ben: I think it does though it is a little bit strange to do)
   deprecate_soft("3.0","rq.lasso.fit()","rq.pen()")
   if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
@@ -2322,7 +2313,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @description  
 #' Let the predictors be divided into G groups with G corresponding vectors of coefficients, \eqn{\beta_1,\ldots,\beta_G}. 
 #' Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models for Q quantiles by minimizing the penalized objective function of
-#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^T\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
+#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
 #' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. The value of \eqn{k} is chosen by \code{norm}.
 #' Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
 #' \itemize{

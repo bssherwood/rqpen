@@ -78,8 +78,7 @@ It provides the values of \code{lambda} and \code{a} that minimize the average, 
 sparsest solution that is within one standard error of the minimum results. 
 
 The other approach is the group tau results, gtr. Consider the case of estimating Q quantiles of \eqn{\tau_1,\ldots,\tau_Q} It returns the values of \code{lambda} and \code{a} that minimizes the average, or again whatever function is used for \code{cvSummary}, of 
-\deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. I THINK WRITING THIS WAY GIVES 
-ME AN IDEA ON HOW TO DO STANDARD ERROR FOR THIS SETTTING.
+\deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr.
 }
 \examples{
 \dontrun{

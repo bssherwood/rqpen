@@ -4,12 +4,12 @@
 \alias{qic.select}
 \title{Select model using IC}
 \usage{
-qic.select(x, ...)
+qic.select(obj, ...)
 }
 \arguments{
-\item{x}{A rq.pen.seq or rq.pen.seq.cv object.}
+\item{...}{Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information.}
 
-\item{...}{Additional arguments see bytau.plot.rq.pen.seq() or bytau.plot.rq.pen.seq.cv() for more information.}
+\item{x}{A rq.pen.seq or rq.pen.seq.cv object.}
 }
 \value{
 Returns the plot of how coefficients change with tau.
