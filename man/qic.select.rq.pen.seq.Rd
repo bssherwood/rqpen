@@ -15,8 +15,7 @@ where \eqn{w_q} is the weight assigned for the qth quantile model.}
   obj,
   method = c("BIC", "AIC", "PBIC"),
   septau = TRUE,
-  weights = NULL,
-  ...
+  weights = NULL
 )
 }
 \arguments{
