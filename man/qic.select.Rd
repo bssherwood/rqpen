@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{qic.select}
 \alias{qic.select}
-\title{Select model using IC}
+\title{Select tuning parameters using IC}
 \usage{
 qic.select(obj, ...)
 }
@@ -15,7 +15,7 @@ qic.select(obj, ...)
 Returns the plot of how coefficients change with tau.
 }
 \description{
-Select model using IC
+Select tuning parameters using IC
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}

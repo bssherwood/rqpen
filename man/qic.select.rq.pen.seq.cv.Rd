@@ -2,7 +2,8 @@
 % Please edit documentation in R/mainFunctions.R
 \name{qic.select.rq.pen.seq.cv}
 \alias{qic.select.rq.pen.seq.cv}
-\title{Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+\title{Select tuning parameters using IC
+Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 as
 \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
@@ -36,6 +37,7 @@ where \eqn{w_q} is the weight assigned for the qth quantile model.}
 }
 }
 \description{
+Select tuning parameters using IC
 Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 as
 \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},

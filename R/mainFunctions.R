@@ -39,7 +39,7 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 }
 
 
-#' Select model using IC 
+#' Select tuning parameters using IC 
 #'
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
 #' @param ... Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information. 
@@ -52,7 +52,8 @@ qic.select <- function(obj,...){
   UseMethod("qic.select")
 } 
 
-
+#' Select tuning parameters using IC
+#' 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
 #' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
@@ -141,6 +142,8 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 	class(return_val) <- "qic.select"
 	return_val
 }
+
+#' Select tuning parameters using IC
 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
