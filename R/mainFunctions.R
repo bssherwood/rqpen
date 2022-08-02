@@ -39,6 +39,19 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 }
 
 
+#' Select model using IC 
+#'
+#' @param x A rq.pen.seq or rq.pen.seq.cv object. 
+#' @param ... Additional arguments see bytau.plot.rq.pen.seq() or bytau.plot.rq.pen.seq.cv() for more information. 
+#'
+#' @return Returns the plot of how coefficients change with tau. 
+#' @export
+#'
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
+qic.select <- function(x,...){
+  UseMethod("bytau.plot")
+} 
+
 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
@@ -71,14 +84,9 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
+qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
 	method <- match.arg(method)
-  if(class(obj) == "rq.pen.seq.cv"){
-		obj <- obj$fit
-	} else if(class(obj) != "rq.pen.seq"){
-		stop("obj must be of class rq.pen.seq or rq.pen.seq.cv")
-	}
 	if(is.null(weights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
 	}
@@ -132,6 +140,96 @@ qic.select <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NUL
 	return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
 	class(return_val) <- "qic.select"
 	return_val
+}
+
+#' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+#' as
+#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+#' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
+#' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
+#' \deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n  \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
+#' where \eqn{w_q} is the weight assigned for the qth quantile model. 
+#'
+#' @param obj A rq.pen.seq.cv object. 
+#' @param method Choice of BIC, AIC or PBIC, a large p BIC.
+#' @param septau If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE. 
+#' @param weights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.
+#'
+#' @return 
+#' \itemize{
+#' \item{coefficients}{Coefficients of the selected models.}
+#' \item{ic}{Information criterion values for all considered models.}
+#' \item{modelsInfo}{Model info for the selected models related to the original object obj.}
+#' \item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
+#' }
+#' @export
+#' @examples
+#' set.seed(1)
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75))
+#' qic.select(m1)
+#' @references 
+#' \insertRef{qrbic}{rqPen}
+#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
+qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
+  # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
+  method <- match.arg(method)
+  obj <- obj$fit
+  if(is.null(weights)==FALSE & septau){
+    warning("Weights are only used when septau is set to true.")
+  }
+  if(is.null(weights) & !septau){
+    weights <- rep(1,length(obj$tau))
+  }
+  
+  n <- obj$n
+  if(septau & length(weights)==1){
+    warning("septau set to TRUE, but only one quantile modeled")
+  }
+  nt <- length(obj$tau)
+  na <- length(obj$a)
+  nl <- length(obj$lambda)
+  
+  qic_vals <- sapply(obj$models,qic,n,method)
+  if(septau){
+    minQIC <- apply(qic_vals,2,min)
+    lambdaIndex <- apply(qic_vals,2,which.min)
+    modelsInfo <- data.table(obj$modelsInfo,minQIC,lambdaIndex,lambda=obj$lambda[lambdaIndex])
+    #modelsInfo <- data.table(modelsInfo)
+    tau <- modelsInfo$tau
+    modelsInfo <- modelsInfo[, .SD[which.min(minQIC)],by=tau]
+    
+    coefs <- matrix(nrow=nrow(coef(obj)), ncol=nt)#vector(mode="list", length=nt)
+    for(i in 1:nt){
+      coefs[,i] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
+    }
+    gic <- NULL
+  } else{
+    gic <- matrix(rep(0,na*nl),ncol=nl)
+    tqic_vals <- t(qic_vals)
+    for(i in 1:na){
+      subIC <- subset(tqic_vals, obj$modelsInfo$a==obj$a[i])
+      gic[i,] <- weights %*% subIC
+    }#
+    minIndex <- which(gic==min(gic),arr.ind=TRUE)
+    returnA <- obj$a[minIndex[1]]
+    a <- obj$a
+    modelsInfo <- subset(obj$modelsInfo, a==returnA)
+    modelsInfo <- cbind(modelsInfo,minQIC=tqic_vals[modelsInfo$modelIndex,minIndex[2]],lambdaIndex=minIndex[2],lambda=obj$lambda[minIndex[2]])
+    coefs <- coef(obj, lambdaIndex=minIndex[2], modelsIndex=modelsInfo$modelIndex)
+  }
+  #coefIndex <- 1:nt
+  #modelsInfo <- cbind(modelsInfo, coefIndex)
+  #coefs <- do.call(cbind,coefs)
+  if(!is.null(ncol(coefs))){
+    colnames(coefs) <- paste0("tau=",obj$tau)
+  }
+  
+  return_val <- list(coefficients = coefs, ic=qic_vals,modelsInfo=modelsInfo, gic=gic)
+  class(return_val) <- "qic.select"
+  return_val
 }
 
 
