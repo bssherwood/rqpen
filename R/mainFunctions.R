@@ -1555,9 +1555,6 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
-#voi - index variables of interest
-#logLambda - lambdas plotted on log scale
-#loi - index of target lambdas
   deprecate_soft("3.0","beta_plots()","print.rq.pen.seq()")
   if( "cv.rq.group.pen" %in% class(model)){
 	betas <- t( model$beta)
@@ -1700,8 +1697,6 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
-#logLambda - lambdas plotted on log scale
-#loi - index of target lambdas
   deprecate_soft("3.0","cv_plots()", "plot.rq.pen.seq.cv()")
   cv_data <- model$cv
   if(logLambda){

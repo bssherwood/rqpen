@@ -7,7 +7,6 @@ Changes:
 * Function qic.select() uses information criterion to select best tuning parameters.
 * All functions allow for multiple values of tau and multiple values of "a", the second tuning parameter.
 * New algorithms implement Huber-type approximations to quantile loss, greatly improving computational efficiency.
-* Stopped exporting many functions that were unnecesarily exported. 
 * Started deprecating many functions that were the old way to fit models. Examples include rq.lasso.fit(), rq.nc.fit(), rq.group.fit(), cv.rq.pen() and cv.rq.group.pen. Instead recommend using rq.pen(), rq.group.pen(), rq.pen.cv() and rq.group.pen.cv() 
 * Updated code for get_coef_pen() to a fix a bug where it was returning multiple values. Thank you to Jingyi Kenneth Tay for noticing this issue. 
 * Updated cv.rq.pen() code so that it will check to make sure that the y variable is not in matrix form. Thanks to Haixiang Zhang for providing code where y in matrix form caused problems. 
