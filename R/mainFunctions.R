@@ -49,7 +49,7 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 qic.select <- function(x,...){
-  UseMethod("bytau.plot")
+  UseMethod("qic.select")
 } 
 
 
