@@ -7,9 +7,9 @@
 qic.select(obj, ...)
 }
 \arguments{
-\item{...}{Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information.}
+\item{obj}{A rq.pen.seq or rq.pen.seq.cv object.}
 
-\item{x}{A rq.pen.seq or rq.pen.seq.cv object.}
+\item{...}{Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information.}
 }
 \value{
 Returns the plot of how coefficients change with tau.

@@ -41,7 +41,7 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 
 #' Select model using IC 
 #'
-#' @param x A rq.pen.seq or rq.pen.seq.cv object. 
+#' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
 #' @param ... Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information. 
 #'
 #' @return Returns the plot of how coefficients change with tau. 
