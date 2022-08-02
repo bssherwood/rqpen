@@ -67,6 +67,7 @@ qic.select <- function(obj,...){
 #' @param method Choice of BIC, AIC or PBIC, a large p BIC.
 #' @param septau If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE. 
 #' @param weights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.
+#' @param ... Additional arguments.
 #'
 #' @return 
 #' \itemize{
@@ -85,7 +86,7 @@ qic.select <- function(obj,...){
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
+qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL,...){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
 	method <- match.arg(method)
 	if(is.null(weights)==FALSE & septau){
@@ -158,6 +159,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 #' @param method Choice of BIC, AIC or PBIC, a large p BIC.
 #' @param septau If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE. 
 #' @param weights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.
+#' @param ... Additional arguments. 
 #'
 #' @return 
 #' \itemize{
@@ -176,7 +178,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL){
+qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL,...){
   # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
   method <- match.arg(method)
   obj <- obj$fit

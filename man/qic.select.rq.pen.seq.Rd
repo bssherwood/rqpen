@@ -8,7 +8,8 @@
   obj,
   method = c("BIC", "AIC", "PBIC"),
   septau = TRUE,
-  weights = NULL
+  weights = NULL,
+  ...
 )
 }
 \arguments{
@@ -19,6 +20,8 @@
 \item{septau}{If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE.}
 
 \item{weights}{Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.}
+
+\item{...}{Additional arguments.}
 }
 \value{
 \itemize{
