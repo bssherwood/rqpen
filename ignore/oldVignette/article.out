@@ -1,0 +1,12 @@
+\BOOKMARK [1][-]{Section.0.Introduction.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{Section.1.Penalized estimation of quantile regrssion.1}{Penalized estimation of quantile regrssion}{}% 2
+\BOOKMARK [2][-]{Subsection.2.0.Individual Penalties.2}{Individual Penalties}{Section.1.Penalized estimation of quantile regrssion.1}% 3
+\BOOKMARK [2][-]{Subsection.2.1.Group Penalties.2}{Group Penalties}{Section.1.Penalized estimation of quantile regrssion.1}% 4
+\BOOKMARK [2][-]{Subsection.2.2.Estimation of Multiple Quantiles.2}{Estimation of Multiple Quantiles}{Section.1.Penalized estimation of quantile regrssion.1}% 5
+\BOOKMARK [2][-]{Subsection.2.3.Tuning parameter selection.2}{Tuning parameter selection}{Section.1.Penalized estimation of quantile regrssion.1}% 6
+\BOOKMARK [2][-]{Subsection.2.4.Additional notes on Huber approximation.2}{Additional notes on Huber approximation}{Section.1.Penalized estimation of quantile regrssion.1}% 7
+\BOOKMARK [1][-]{Section.2.Description of functions.1}{Description of functions}{}% 8
+\BOOKMARK [1][-]{Section.3.Applications.1}{Applications}{}% 9
+\BOOKMARK [2][-]{Subsection.4.0.barro.2}{barro}{Section.3.Applications.1}% 10
+\BOOKMARK [2][-]{Subsection.4.1.Group Penalty Example.2}{Group Penalty Example}{Section.3.Applications.1}% 11
+\BOOKMARK [1][-]{Section.4.Conclusion.1}{Conclusion}{}% 12

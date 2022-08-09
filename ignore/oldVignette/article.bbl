@@ -1,0 +1,225 @@
+\begin{thebibliography}{34}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Belloni and Chernozhukov(2011)}]{qr_lasso}
+Belloni A, Chernozhukov V (2011).
+\newblock \enquote{L1-Penalized quantile regression in high-dimensional sparse
+  models.}
+\newblock \emph{Ann. Statist.}, \textbf{39}(1), 82--130.
+
+\bibitem[{Breheny and Huang(2009)}]{penBiLevel}
+Breheny P, Huang J (2009).
+\newblock \enquote{Penalized methods for bi-level variable selection.}
+\newblock \emph{Statistics and its Interface}, \textbf{2}, 369--380.
+
+\bibitem[{Breheny and Huang(2011)}]{scadAlg}
+Breheny P, Huang J (2011).
+\newblock \enquote{Coordinate descent algorithms for nonconvex penalized
+  regression, with applications to biological feature selection.}
+\newblock \emph{The Annals of Applied Statistics}, \textbf{5}(1), 232 -- 253.
+
+\bibitem[{Breheny and Huang(2015)}]{brehenyglasso}
+Breheny P, Huang J (2015).
+\newblock \enquote{Group descent algorithms for nonconvex penalized linear and
+  logistic regression models with grouped predictors.}
+\newblock \emph{Stat. Comput.}, \textbf{25}, 173--187.
+
+\bibitem[{De~Cock(2011)}]{de2011ames}
+De~Cock D (2011).
+\newblock \enquote{Ames, Iowa: Alternative to the Boston housing data as an end
+  of semester regression project.}
+\newblock \emph{J. Stat. Educ.}, \textbf{19}(3).
+
+\bibitem[{Fan and Li(2001)}]{fanLi}
+Fan J, Li R (2001).
+\newblock \enquote{Variable selection via nonconcave penalized likelihood and
+  its oracle properties.}
+\newblock \emph{J. Amer. Statist. Assoc.}, \textbf{96}(456), 1348--1360.
+
+\bibitem[{Friedman \emph{et~al.}(2010)Friedman, Hastie, and
+  Tibshirani}]{friedman2009glmnet}
+Friedman J, Hastie T, Tibshirani R (2010).
+\newblock \enquote{Regularization Paths for Generalized Linear Models via
+  Coordinate Descent.}
+\newblock \emph{J. Stat. Softw.}, \textbf{33}(1), 1--22.
+
+\bibitem[{Gu \emph{et~al.}(2018)Gu, Fan, Kong, Ma, and Zou}]{admm_hui}
+Gu Y, Fan J, Kong L, Ma S, Zou H (2018).
+\newblock \enquote{ADMM for High-Dimensional Sparse Penalized Quantile
+  Regression.}
+\newblock \emph{Technometrics}, \textbf{60}(3), 319--331.
+
+\bibitem[{Huang \emph{et~al.}(2012)Huang, Breheny, and Ma}]{groupReview}
+Huang J, Breheny P, Ma S (2012).
+\newblock \enquote{A selective review of group selection in high-dimensional
+  models.}
+\newblock \emph{Statistical Science}, \textbf{27}(4), 481--499.
+
+\bibitem[{Huber(1964)}]{huber1964}
+Huber PJ (1964).
+\newblock \enquote{Robust Estimation of a Location Parameter.}
+\newblock \emph{Ann. Math. Statist.}, \textbf{35}(1), 73--101.
+
+\bibitem[{Kato(2012)}]{qr_group_lasso}
+Kato K (2012).
+\newblock \enquote{Group Lasso for high dimensional sparse quantile regression
+  models.}
+\newblock Https://arxiv.org/pdf/1103.1458.
+
+\bibitem[{Koenker and Bassett(1978)}]{origQR}
+Koenker R, Bassett G (1978).
+\newblock \enquote{Regression Quantiles.}
+\newblock \emph{Econometrica}, \textbf{46}(1), 33--50.
+
+\bibitem[{Koenker and D'Orey(1994)}]{crq2}
+Koenker R, D'Orey V (1994).
+\newblock \enquote{A Remark on Algorithm AS 229: Computing Dual Regression
+  Quantiles and Regression Rank Score.}
+\newblock \emph{J. R. Stat. Soc. Ser. C. Appl. Stat.}, \textbf{43}(2),
+  410--414.
+
+\bibitem[{Koenker and Machado(1999)}]{barro}
+Koenker R, Machado JAF (1999).
+\newblock \enquote{Goodness of Fit and Related Inference Processes for Quantile
+  Regression.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{94}(448), 1296--1310.
+\newblock \doi{10.1080/01621459.1999.10473882}.
+\newblock
+  \eprint{https://www.tandfonline.com/doi/pdf/10.1080/01621459.1999.10473882},
+  \urlprefix\url{https://www.tandfonline.com/doi/abs/10.1080/01621459.1999.10473882}.
+
+\bibitem[{Koenker and Mizera(2014)}]{JSSv060i05}
+Koenker R, Mizera I (2014).
+\newblock \enquote{Convex Optimization in {R}.}
+\newblock \emph{J. Stat. Softw.}, \textbf{60}(5), 1--23.
+\newblock ISSN 1548-7660.
+
+\bibitem[{Koenker and D'Orey(1987)}]{crq1}
+Koenker RW, D'Orey V (1987).
+\newblock \enquote{Computing Regression Quantiles.}
+\newblock \emph{J. R. Stat. Soc. Ser. C. Appl. Stat.}, \textbf{36}(3),
+  383--393.
+
+\bibitem[{Lee \emph{et~al.}(2014)Lee, Noh, and Park}]{qrbic}
+Lee ER, Noh H, Park BU (2014).
+\newblock \enquote{Model Selection via Bayesian Information Criterion for
+  Quantile Regression Models.}
+\newblock \emph{Journal of the American Statistical Association},
+  \textbf{109}(505), 216--229.
+\newblock ISSN 01621459.
+\newblock \urlprefix\url{http://www.jstor.org/stable/24247149}.
+
+\bibitem[{Newey and Powell(1987)}]{expectile}
+Newey WK, Powell JL (1987).
+\newblock \enquote{Asymmetric Least Squares Estimation and Testing.}
+\newblock \emph{Econometrica}, \textbf{55}(4), 819--847.
+\newblock ISSN 00129682, 14680262.
+
+\bibitem[{Peng and Wang(2015)}]{qr_cd}
+Peng B, Wang L (2015).
+\newblock \enquote{An iterative coordinate descent algorithm for
+  high-dimensional nonconvex penalized quantile regression.}
+\newblock \emph{J. Comput. Graph. Statist.}, \textbf{24}(3), 676--694.
+
+\bibitem[{Portnoy and Koenker(1997)}]{portnoy1997}
+Portnoy S, Koenker R (1997).
+\newblock \enquote{The Gaussian hare and the Laplacian tortoise: computability
+  of squared-error versus absolute-error estimators.}
+\newblock \emph{Statist. Sci.}, \textbf{12}(4), 279--300.
+
+\bibitem[{Sherwood \emph{et~al.}(2020)Sherwood, Molstad, and Singha}]{mestatp}
+Sherwood B, Molstad AJ, Singha S (2020).
+\newblock \enquote{Asymptotic properties of concave L1-norm group penalties.}
+\newblock \emph{Statistics \& Probability Letters}, \textbf{157}, 108631.
+\newblock ISSN 0167-7152.
+
+\bibitem[{Tibshirani(1996)}]{lasso}
+Tibshirani R (1996).
+\newblock \enquote{Regression Shrinkage and Selection via the Lasso.}
+\newblock \emph{J. R. Stat. Soc. Ser. B. Stat. Methodol.}, \textbf{58}(1),
+  267--288.
+
+\bibitem[{Tibshirani \emph{et~al.}(2012)}]{tibshirani2012strong}
+Tibshirani R, \emph{et~al.} (2012).
+\newblock \enquote{Strong rules for discarding predictors in lasso-type
+  problems.}
+\newblock \emph{J. R. Stat. Soc. Ser. B. Stat. Methodol.}, \textbf{74}(2),
+  245--266.
+
+\bibitem[{Wang \emph{et~al.}(2007)Wang, Chen, and Li}]{grSCAD}
+Wang L, Chen G, Li H (2007).
+\newblock \enquote{Group SCAD regression analysis for microarray time course
+  gene expression data.}
+\newblock \emph{Bioinformatics}, \textbf{23}(12), 1486--1494.
+
+\bibitem[{Wang \emph{et~al.}(2012)Wang, Wu, and Li}]{lan_scad}
+Wang L, Wu Y, Li R (2012).
+\newblock \enquote{Quantile regression of analyzing heterogeneity in ultra-high
+  dimension.}
+\newblock \emph{J. Amer. Statist. Assoc.}, \textbf{107}(497), 214--222.
+
+\bibitem[{Yang and Zou(2015)}]{Yang2015}
+Yang Y, Zou H (2015).
+\newblock \enquote{A fast unified algorithm for solving group-lasso penalize
+  learning problems.}
+\newblock \emph{Stat. Comput.}, \textbf{25}(6), 1129--1141.
+\newblock ISSN 1573-1375.
+
+\bibitem[{Yi and Huang(2017)}]{huber_cd}
+Yi C, Huang J (2017).
+\newblock \enquote{Semismooth Newton Coordinate Descent Algorithm for
+  Elastic-Net Penalized Huber Loss Regression and Quantile Regression.}
+\newblock \emph{J. Comput. Graph. Statist.}, \textbf{26}(3), 547--557.
+
+\bibitem[{Yu and Lin(2017)}]{admm_nan_qr}
+Yu L, Lin N (2017).
+\newblock \enquote{ADMM for Penalized Quantile Regression in Big Data.}
+\newblock \emph{International Statistical Review}, \textbf{85}(3), 494--518.
+
+\bibitem[{Yu \emph{et~al.}(2017)Yu, Lin, and Wang}]{lan_admm}
+Yu L, Lin N, Wang L (2017).
+\newblock \enquote{A Parallel Algorithm for Large-Scale Nonconvex Penalized
+  Quantile Regression.}
+\newblock \emph{Journal of Computational and Graphical Statistics},
+  \textbf{26}(4), 935--939.
+
+\bibitem[{Yuan and Lin(2005)}]{yuan2007}
+Yuan M, Lin Y (2005).
+\newblock \enquote{Model selection and estimation in regression with grouped
+  variables.}
+\newblock \emph{J. R. Stat. Soc. Ser. B. Stat. Methodol.}, \textbf{68}(1),
+  49--67.
+
+\bibitem[{Zhang(2010)}]{mcp}
+Zhang CH (2010).
+\newblock \enquote{Nearly unbiased variable selection under minimax concave
+  penalty.}
+\newblock \emph{Ann. Statist.}, \textbf{38}(2), 894--942.
+
+\bibitem[{Zou(2006)}]{adaptiveLasso}
+Zou H (2006).
+\newblock \enquote{The adaptive Lasso and its oracle properties.}
+\newblock \emph{J. Amer. Statist. Assoc.}, \textbf{101}(476), 1418--1429.
+
+\bibitem[{Zou and Hastie(2005)}]{zou05}
+Zou H, Hastie T (2005).
+\newblock \enquote{Regularization and variable selection via the Elastic Net.}
+\newblock \emph{J. R. Stat. Soc. Ser. B. Stat. Methodol.}, \textbf{67},
+  301--320.
+
+\bibitem[{Zou and Li(2008)}]{lla}
+Zou H, Li R (2008).
+\newblock \enquote{One-step sparse estimates in nonconcave penalized likelihood
+  models.}
+\newblock \emph{Ann. Statist.}, \textbf{36}(4), 1509--1533.
+
+\end{thebibliography}
