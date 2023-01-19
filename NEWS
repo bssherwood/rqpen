@@ -1,3 +1,7 @@
+rqPen 3.0.1 (Release date: 2023-01-10
+=============
+* Fixed mistake in help file of rq.pen.cv(). Thanks to Jing Lyu for noticing the typo. 
+
 rqPen 3.0 (Release date: 2022-08-09)
 =============
 Changes:

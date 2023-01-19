@@ -613,7 +613,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' # uses median cross-validation error instead of mean.
 #' r4 <- rq.pen.cv(x,y,cvSummary=median)  
 #'#Cross-validation with no penalty on the first variable.
-#' r5 <- rq.pen.cv(x,y,penalty.factor=c(1,rep(0,7)))
+#' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(1,7)))
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
