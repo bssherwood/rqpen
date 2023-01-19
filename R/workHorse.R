@@ -1011,7 +1011,12 @@ rq.lasso.huber <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=T
 }
 
 getModelCoefs <- function(x,index){
-	coefficients(x)[,index]
+	if(is.null(ncol(coefficients(x)))){
+		coefficients(x)
+	}
+	else{
+		coefficients(x)[,index]
+	}
 }
 
 closeEnough <- function(targets,original){
