@@ -419,6 +419,9 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(is.matrix(y)==TRUE){
+		y <- as.numeric(y)
+	}
 	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
 		stop("Penalty factors must be non-negative.")
 	}
@@ -2399,6 +2402,9 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	}
 	if(g==p){
 		warning("p groups for p predictors, not really using a group penalty")
+	}
+	if(is.matrix(y)==TRUE){
+		y <- as.numeric(y)
 	}
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
