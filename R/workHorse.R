@@ -655,7 +655,11 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 
 updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.factor){
 #code improvement: double for loop 
-  min_n_coefs <- min(sapply(lapply(obj$models,coefficients),ncol))
+	if(length(obj$lambda)==1){
+		min_n_coefs <- 1
+	} else{  
+		min_n_coefs <- min(sapply(lapply(obj$models,coefficients),ncol))
+	}
 	obj$lambda <- obj$lambda[1:min_n_coefs]
 	for(j in 1:length(obj$models)){
 		a <- obj$models[[j]]$a

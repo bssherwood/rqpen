@@ -1,3 +1,6 @@
+rqPen 3.0.2 (Release date: ...)
+* fixed issues where rq.group.pen did not work with a single value of lambda
+
 rqPen 3.0.1 (Release date: 2023-01-31)
 =============
 * Fixed mistake in help file of rq.pen.cv(). Thanks to Jing Lyu for noticing the typo. 
