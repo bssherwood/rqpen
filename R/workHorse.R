@@ -667,7 +667,11 @@ updateGroupPenRho <- function(obj,norm,groups,group.pen.factor,tau.penalty.facto
 		obj$models[[j]]$rho <- obj$models[[j]]$rho[1:min_n_coefs]
 		obj$models[[j]]$PenRho <- obj$models[[j]]$PenRho[1:min_n_coefs]
 		obj$models[[j]]$nzero <- obj$models[[j]]$nzero[1:min_n_coefs]
-		obj$models[[j]]$coefficients <- obj$models[[j]]$coefficients[,1:min_n_coefs]
+		if(min_n_coefs ==1 ){
+			obj$models[[j]]$coefficients <- obj$models[[j]]$coefficients
+		} else{
+			obj$models[[j]]$coefficients <- obj$models[[j]]$coefficients[,1:min_n_coefs]
+		}
 		if(length(obj$models[[j]]$rho)==1){
 			obj$models[[j]]$PenRho <- obj$models[[j]]$rho + sum(getGroupPen(obj$models[[j]]$coefficients[-1],groups,obj$lambda,group.pen.factor*tau.penalty.factor[taupos],obj$penalty,norm,a)) 
 		} 
