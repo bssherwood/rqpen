@@ -2406,8 +2406,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(is.matrix(y)==TRUE){
 		y <- as.numeric(y)
 	}
-	penalty <- match.arg(penalty)
-	alg <- match.arg(alg)
+	#penalty <- match.arg(penalty)
+	#alg <- match.arg(alg)
 	if(norm != 1 & norm != 2){
 		stop("norm must be 1 or 2")
 	}
