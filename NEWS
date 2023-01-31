@@ -1,8 +1,9 @@
-rqPen 3.0.1 (Release date: 2023-01-19)
+rqPen 3.0.1 (Release date: 2023-01-31)
 =============
 * Fixed mistake in help file of rq.pen.cv(). Thanks to Jing Lyu for noticing the typo. 
 * Fixed issue where coefficients() function was not working correctly if there was only one value of lambda used. 
 * Fixed issue where if y had class matrix rq.pen() and rq.group.pen() were not working. Solution is to switch y to a numeric vector if it is passed as a matrix. 
+* Added vignette. 
 
 rqPen 3.0 (Release date: 2022-08-09)
 =============
