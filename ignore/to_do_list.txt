@@ -26,6 +26,7 @@
 23. Allow users to specify lp algorithm of interest for group penalties. 
 24. Maybe add something where if non-convex estimators do not change with lambda that the lambda sequence should stop. Would need a check that the lambda value is "large"
 25. Group penalty provides a totally sparse solution even if one of the group penalty factors is set to zero. 
+26. Allow weights for objective function. I think this would be easy to incorporate for everything that does not depend on hqreg and even then could send those to hrqglas with a naive group penalty where each predictor is its own group.
 
 hrqglasso
 
