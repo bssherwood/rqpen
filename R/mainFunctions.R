@@ -1686,7 +1686,7 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 	p <- ncol(coefs)
 	tau <- x$fit$tau
 	for(i in 1:p){
-		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16,...)
+		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient",i),main=rownames(coefs)[i],pch=16,...)
 		lines(tau,coefs[i,])
 	}
 	par(ask=FALSE)
