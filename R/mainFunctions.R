@@ -1679,11 +1679,11 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
 	coefs <- coefficients(x,septau,cvmin,TRUE,tau=x$fit$tau)
-	if(nrow(coefs) != length(x$fit$tau)){
+	if(ncol(coefs) != length(x$fit$tau)){
 		stop("Too many coefficients returned, function only works with one lambda value")
 	}
 	par(ask=TRUE)
-	p <- nrow(coefs)
+	p <- ncol(coefs)
 	tau <- x$fit$tau
 	for(i in 1:p){
 		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16,...)
