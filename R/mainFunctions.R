@@ -46,7 +46,14 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 #'
 #' @return Returns the plot of how coefficients change with tau. 
 #' @export
-#'
+#' @examples
+#' set.seed(1)
+#' x <- matrix(runif(800),ncol=8)
+#' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+#' m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75))
+#' qic.select(m1)
+#' @references 
+#' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 qic.select <- function(obj,...){
   UseMethod("qic.select")
@@ -300,7 +307,7 @@ print.rq.pen.seq <- function(x,...){
 
 #' Returns Coefficients of a cv.rq.pen object
 #' 
-#' Warning: this function will be deprecated and not exported in future versions of rqPen, due to the switch from cv.rq.pen() to rq.pen.cv().
+#' Warning: this function is no longer exported, due to the switch from cv.rq.pen() to rq.pen.cv().
 #'
 #' @param object cv.rq.pen object 
 #' @param lambda Value of lambda, default is to use the minimum value. 
@@ -311,7 +318,6 @@ print.rq.pen.seq <- function(x,...){
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.cv.rq.pen <- function(object, lambda='min',...){
-  deprecate_soft("3.0","coef.cv.rq.pen()","coef.rq.pen.seq.cv()")
   if(lambda=='min'){
      lambda <- object$lambda.min
   }
@@ -462,8 +468,11 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		}
 	}
 	if(lambda.discard){
-		lmax <- max(sapply(fit$models,lambdanum))
-		fit$lambda <- fit$lambda[1:lmax]
+	#If lambda.discard is used we need to make sure the sequence is the same across all quantiles. 
+	#A to-do thing would be to consider how to allow downstream functions such as coef() to allow for different sequence lengths,
+	# but that seems unnecessarliy complicated right now. 
+		lmin <- min(sapply(fit$models,lambdanum))
+		fit$lambda <- fit$lambda[1:lmin]
 	}
 	fit$call <- match.call()
 	fit
@@ -807,14 +816,13 @@ coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,ta
 #' @param x cv.rq.pen object
 #' @param ... Optional arguments, not used. 
 #' 
-#' @details Warning this function is deprecated and will not be exported in future releases. 
+#' @details Warning this function is no longer exported. 
 #'
 #' @return Prints cross validation or information criterion values by lambda. 
 #' @export
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.cv.rq.pen <- function(x,...){
-   deprecate_soft("3.0","print.cv.rq.pen()","print.cv.rq.pen.seq()")
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
@@ -824,7 +832,7 @@ print.cv.rq.pen <- function(x,...){
 
 #' Prints an rq.pen object
 #' 
-#' @description Warning this function is deprecated and will not be exported in future releases. 
+#' @description Warning this function is no longer exported. 
 #'
 #' @param x The rq.pen object
 #' @param ... Additional parameters sent to function
@@ -999,7 +1007,6 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 # penVar: variables to be penalized, default is all non-intercept terms
 
   # Pre-algorithm setup/ get convenient values
-  deprecate_soft("3.0","cv.rq.pen()","rq.pen.cv()")
   if(length(tau)>1){
       stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
   }
@@ -1274,7 +1281,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' @param ... Additional items to be sent to rq.lasso.fit.
 #' 
 #' @description 
-#' Warning: this function is deprecated and will not be exported in future releases. Produces penalized quantile regression models for a range of lambdas and penalty of choice. If lambda is unselected than an iterative algorithm is used to 
+#' Warning: this function is no longer exported. Produces penalized quantile regression models for a range of lambdas and penalty of choice. If lambda is unselected than an iterative algorithm is used to 
 #' find a maximum lambda such that the penalty is large enough to produce an intercept only model. Then range of lambdas goes from the maximum lambda found to "eps" on the 
 #' log scale. Local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
 #'
@@ -1543,7 +1550,7 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 #' @param loi Index of lambdas to use, default is all of them. 
 #' @param ... Additional arguments to be sent to plot()
 #' 
-#' @description Warning: this function is deprecated and will not be exported in future versions. 
+#' @description Warning: this function is no longer exported.  
 #'
 #' @return Plot of how beta estimates change with lambda.
 #' @export
@@ -1558,7 +1565,6 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 beta_plots <- function(model,voi=NULL,logLambda=TRUE,loi=NULL,...){
-  deprecate_soft("3.0","beta_plots()","print.rq.pen.seq()")
   if( "cv.rq.group.pen" %in% class(model)){
 	betas <- t( model$beta)
 	if(model$intercept){
@@ -1700,7 +1706,6 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,.
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
-  deprecate_soft("3.0","cv_plots()", "plot.rq.pen.seq.cv()")
   cv_data <- model$cv
   if(logLambda){
      cv_data$lambda <- log(cv_data$lambda)
@@ -1735,7 +1740,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' @param ... Additional arguments to be sent to rq.group.fit or groupQICDMultLambda.   
 #' 
 #' @description 
-#' This function is deprecated. Recommend using rq.group.pen.cv() instead. 
+#' This function is no longer exported. Recommend using rq.group.pen.cv() instead. 
 #'
 #' @return
 #' Returns the following: 
@@ -1768,8 +1773,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="huber",penGroups=NULL,
     ...) 
 {
-  deprecate_soft("3.0","cv.rq.group.pen()","rq.group.pen.cv()")
-  #warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality. It will not be exported to the namespace in future versions.")
+  warning("Recommend that you use rq.group.pen.cv() instead. This is an older and slower version that is only kept for reproducibality. It will not be exported to the namespace in future versions.")
   if(penalty=="LASSO"){
 	warning("The Lasso group penalties use the L1 norm and thus the Lasso group penalty is the same as the standard Lasso penalty and therefore does not account for group structure. The group lasso method is only implemented because it is needed for the SCAD and MCP algorithms. Otherwise it should be avoided. ")
   }
@@ -1959,7 +1963,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' \item{intercept}{Whether intercept was included in model.}
 #' }
 #' 
-#' @description Warning: function is deprecated and will not be exported in future R packages. Recommend using rq.group.pen() instead. 
+#' @description Warning: function is no longer exported. Recommend using rq.group.pen() instead. 
 #' Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
 #' As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
 #' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
@@ -1976,7 +1980,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                 penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
-  deprecate_soft("3.0","rq.group.fit()","rq.group.pen()")
+  warning("recommend using rq.group.pen() instead, this is an older function with fewer options and does not include faster algorithms")
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
   n <- nrow(x)
@@ -2082,7 +2086,6 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 #'
 plot.cv.rq.group.pen <- function (x,...) 
 {
-    deprecate_soft("3.0","plot.cv.rq.group.pen()","plot.rq.group.pen.seq()")
     plot(x$cv[, 1], x$cv[, 2],...)
 }
 
@@ -2129,7 +2132,7 @@ plot.cv.rq.group.pen <- function (x,...)
 #' }
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE,lambda.discard=TRUE, ...){
-  deprecate_soft("3.0","rq.lasso.fit()","rq.pen()")
+  warning("Recommend using rq.pen() instead, this is an older functions with fewer options and does not provide access to faster algorithms.")
   if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
    }
@@ -2234,12 +2237,11 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #'
 #' @return A vector of predictions. 
 #' 
-#' @description This function is deprecated and will not be exported in future versions. 
+#' @description This function is no longer exported. 
 #' 
 #' @export
 #'
 predict.rq.pen <- function(object, newx,...){
-  deprecate_soft("3.0","predict.rq.pen()","predict.rq.pen.seq()")
   coefs <- object$coefficients
   if(object$intercept){
      newx <- cbind(1,newx)
@@ -2256,12 +2258,11 @@ predict.rq.pen <- function(object, newx,...){
 #'
 #' @return A vector of predictions. 
 #' 
-#' @description This function is deprecated and will not be exported in future versions. 
+#' @description This function is no longer exported. 
 #' 
 #' @export
 #'
 predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
-  deprecate_soft("3.0","predict.cv.rq.pen()","predict.rq.pen.seq.cv()")
   if(lambda == "lambda.min"){
      target_pos <- which(object$cv$lambda == object$lambda.min)
   } else{
@@ -2281,7 +2282,6 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 #' @export
 #'
 coef.cv.rq.group.pen <- function(object, lambda='min',...){
-  deprecate_soft("3.0","coef.cv.rq.group.pen()","coef.rq.pen.seq.cv()")
   if(lambda=='min'){
      lambda <- object$lambda.min
   }
@@ -2486,13 +2486,12 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 #' @param x A cv.rq.pen object
 #' @param ... Additional arguments
 #' 
-#' @description Warning: this function is deprecated and will not be exported in future releases. 
+#' @description Warning: this function is no longer exported. 
 #'
 #' @return Prints coefficients and cross validation results. 
 #' @export
 #'
 print.cv.rq.pen <- function(x,...){
-   deprecate_soft("3.0","print.cv.rq.pen()","print.rq.pen.seq.cv()")
    cat("\nCoefficients:\n")
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
@@ -2508,7 +2507,6 @@ print.cv.rq.pen <- function(x,...){
 #' @export
 #'
 print.rq.pen <- function(x,...){
-  deprecate_soft("3.0","print.rq.pen()","print.rq.pen.seq()")
   cat("\nCoefficients:\n")
 	print(coefficients(x,...))
 }
