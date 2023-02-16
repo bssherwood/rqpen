@@ -2474,8 +2474,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	return_val$call <- match.call()	
 	return_val$lambda <- lambda
 	if(lambda.discard){
-		lmax <- max(sapply(return_val$models,lambdanum))
-		return_val$lambda <- return_val$lambda[1:lmax]
+		lmin <- min(sapply(return_val$models,lambdanum))
+		return_val$lambda <- return_val$lambda[1:lmin]
 	}
 	return_val
 }
