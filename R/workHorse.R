@@ -1232,17 +1232,21 @@ byTauResults <- function(cvErr,tauvals,avals,models,se,lambda){
 	btr
 }
 
-groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda){
+groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda,stdErr){
 # improve note: maybe code in for loop could be improved upon by checking at each iteration if the better cv value has been found or not
 	nl <- length(lambda)
 	na <- length(a)
 	gcve <- matrix(rep(0,na*nl),ncol=nl)
+	gcse <- matrix(rep(0,na*nl),ncol=nl)
 	for(i in 1:na){
 		subErr <- subset(cvErr, avals==a[i])
+		subSe <- subset(stdErr, avals==a[i])
 		gcve[i,] <- tauWeights %*% subErr
+		gcse[i,] <- sqrt( tauWeights^2 %*% stdErr^2)
 	}
 	rownames(gcve) <- paste0("a",a)
 	minIndex <- which(gcve==min(gcve),arr.ind=TRUE)
+	minSe <- gcse[minIndex]
 	returnA <- a[minIndex[1]]
 	modelIndex <- which(avals==returnA)
 	targetModels <- models[modelIndex]
@@ -1250,6 +1254,9 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda){
 	lambdavals <- lambda[minIndex[1,2]]
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- cvErr[modelIndex,minIndex[1,2]]
+	se1Above <- minCv + minSe
+	which(gcve[minIndex[1],] <= se1Above)
+	
 	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz),gcve=gcve)
 }
 
@@ -1301,6 +1308,16 @@ getModels <- function(x,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex
 	list(targetModels=targetModels,lambdaIndex=lambdaIndex,modelsIndex=modelsIndex)
 }
 
+error.bars <- function (x, upper, lower, width = 0.02, ...) 
+{
+    xlim <- range(x)
+    barw <- diff(xlim) * width
+    segments(x, upper, x, lower, ...)
+    segments(x - barw, upper, x + barw, upper, ...)
+    segments(x - barw, lower, x + barw, lower, ...)
+    range(upper, lower)
+}
+
 
 plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	a <- x$fit$a
@@ -1329,19 +1346,6 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	if(na > 1){
 		legend("topleft",paste("a=",a),col=1:na,pch=1)
 	}
-}
-
-
-
-
-error.bars <- function (x, upper, lower, width = 0.02, ...) 
-{
-    xlim <- range(x)
-    barw <- diff(xlim) * width
-    segments(x, upper, x, lower, ...)
-    segments(x - barw, upper, x + barw, upper, ...)
-    segments(x - barw, lower, x + barw, lower, ...)
-    range(upper, lower)
 }
 
 plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
