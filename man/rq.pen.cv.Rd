@@ -92,7 +92,7 @@ r3 <- rq.pen.cv(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.5,.75),tauWeights=c(.2
 # uses median cross-validation error instead of mean.
 r4 <- rq.pen.cv(x,y,cvSummary=median)  
 #Cross-validation with no penalty on the first variable.
-r5 <- rq.pen.cv(x,y,penalty.factor=c(1,rep(0,7)))
+r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(1,7)))
 }
 }
 \author{

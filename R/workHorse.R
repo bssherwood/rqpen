@@ -1259,7 +1259,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda,stdE
 	se1nz <- sapply(targetModels, modelNz, se1Spot)
 	lambda1se <- lambda[se1Spot]
 	
-	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,lambda1se=lambda1se,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],lambda1seIndex=se1Spot,modelsIndex=modelIndex, nonzero=nz, nzse=se1nz),gcve=gcve)
+	list(returnTable=data.table(tau=tauvals,minCv=minCv,lambda=lambdavals,lambdaIndex=minIndex[1,2],lambda1se=lambda1se,lambda1seIndex=se1Spot,a=returnA,cvse=minSe,modelsIndex=modelIndex, nonzero=nz, nzse=se1nz),gcve=gcve)
 }
 
 re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
