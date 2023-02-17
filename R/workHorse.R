@@ -1242,7 +1242,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda,stdE
 		subErr <- subset(cvErr, avals==a[i])
 		subSe <- subset(stdErr, avals==a[i])
 		gcve[i,] <- tauWeights %*% subErr
-		gcse[i,] <- sqrt( tauWeights^2 %*% stdErr^2)
+		gcse[i,] <- sqrt( tauWeights^2 %*% subSe^2)
 	}
 	rownames(gcve) <- paste0("a",a)
 	minIndex <- which(gcve==min(gcve),arr.ind=TRUE)
