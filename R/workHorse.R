@@ -1255,9 +1255,11 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda,stdE
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
 	minCv <- min(gcve)#cvErr[modelIndex,minIndex[1,2]]
 	se1Above <- minCv + minSe
-	which(gcve[minIndex[1],] <= se1Above)
+	se1Spot <- which(gcve[minIndex[1],] <= se1Above)[1]
+	se1nz <- sapply(targetModels, modelNz, se1Spot)
+	lambda1se <- lambda[se1Spot]
 	
-	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],modelsIndex=modelIndex, nonzero=nz),gcve=gcve)
+	list(returnTable=data.table(tau=tauvals,lambda=lambdavals,lambda1se=lambda1se,a=returnA,minCv=minCv,lambdaIndex=minIndex[1,2],lambda1seIndex=se1Spot,modelsIndex=modelIndex, nonzero=nz, nzse=se1nz),gcve=gcve)
 }
 
 re_order_nonpen_coefs <- function(nonpen_coefs, penVars, intercept=TRUE){
