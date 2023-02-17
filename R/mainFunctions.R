@@ -764,13 +764,14 @@ coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,ta
       }
       returnVal
     } else{
-      if(!cvmin){
-        stop("One standard error approach not implemented for different lambda values for different quantiles")
+	  keepers <- which(closeEnough(tau,object$gtr$tau))
+	  gtr <- object$gtr[keepers,]
+	  if(!cvmin){
+        li <- gtr$lambda1seIndex[1]
       } else{
-        keepers <- which(closeEnough(tau,object$gtr$tau))
-        gtr <- object$gtr[keepers,]
-        coef(object$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=gtr$lambdaIndex[1])
+        li <- gtr$lambdaIndex[1]
       }
+	  coef(object$fit,modelsIndex=gtr$modelsIndex,lambdaIndex=li)
     }
   }
 }
