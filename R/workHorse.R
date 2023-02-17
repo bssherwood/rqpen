@@ -1253,7 +1253,7 @@ groupTauResults <- function(cvErr, tauvals,a,avals,models,tauWeights,lambda,stdE
 	tauvals <- sapply(targetModels,modelTau)
 	lambdavals <- lambda[minIndex[1,2]]
 	nz <- sapply(targetModels, modelNz, minIndex[1,2])
-	minCv <- cvErr[modelIndex,minIndex[1,2]]
+	minCv <- min(gcve)#cvErr[modelIndex,minIndex[1,2]]
 	se1Above <- minCv + minSe
 	which(gcve[minIndex[1],] <= se1Above)
 	
