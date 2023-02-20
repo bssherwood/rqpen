@@ -21,7 +21,7 @@ beta_plots(model, voi = NULL, logLambda = TRUE, loi = NULL, ...)
 Plot of how beta estimates change with lambda.
 }
 \description{
-Warning: this function is deprecated and will not be exported in future versions.
+Warning: this function is no longer exported.
 }
 \examples{
 \dontrun{

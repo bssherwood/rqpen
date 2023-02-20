@@ -53,7 +53,7 @@ Returns the following:
 }
 }
 \description{
-Warning: function is deprecated and will not be exported in future R packages. Recommend using rq.group.pen() instead. 
+Warning: function is no longer exported. Recommend using rq.group.pen() instead. 
 Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
 As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
 Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 

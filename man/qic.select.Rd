@@ -17,6 +17,16 @@ Returns the plot of how coefficients change with tau.
 \description{
 Select tuning parameters using IC
 }
+\examples{
+set.seed(1)
+x <- matrix(runif(800),ncol=8)
+y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+m1 <- rq.pen(x,y,penalty="ENet",a=c(0,.5,1),tau=c(.25,.75))
+qic.select(m1)
+}
+\references{
+\insertRef{qrbic}{rqPen}
+}
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }

@@ -20,8 +20,8 @@ rq.group.pen(
   tau.penalty.factor = rep(1, length(tau)),
   scalex = TRUE,
   coef.cutoff = 1e-08,
-  max.iter = 10000,
-  converge.eps = 1e-07,
+  max.iter = 500,
+  converge.eps = 1e-04,
   gamma = IQR(y)/10,
   lambda.discard = TRUE,
   ...
@@ -91,8 +91,6 @@ Each model in the models list has the following values.
 \item{tau}{Quantile of the model.}
 \item{a}{Value of a for the penalized loss function.}
 }
-
-
 }
 \description{
 Let the predictors be divided into G groups with G corresponding vectors of coefficients, \eqn{\beta_1,\ldots,\beta_G}. 

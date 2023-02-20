@@ -16,10 +16,10 @@
 \value{
 Prints the coefficients of the object.
 
-
+prints coefficients
 }
 \description{
-Warning this function is deprecated and will not be exported in future releases.
+Warning this function is no longer exported.
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}

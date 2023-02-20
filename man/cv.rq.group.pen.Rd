@@ -73,7 +73,7 @@ Returns the following:
 }
 }
 \description{
-This function is deprecated. Recommend using rq.group.pen.cv() instead.
+This function is no longer exported. Recommend using rq.group.pen.cv() instead.
 }
 \examples{
 \dontrun{

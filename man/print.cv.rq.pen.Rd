@@ -19,10 +19,10 @@ Prints cross validation or information criterion values by lambda.
 Prints coefficients and cross validation results.
 }
 \description{
-Warning: this function is deprecated and will not be exported in future releases.
+Warning: this function is no longer exported.
 }
 \details{
-Warning this function is deprecated and will not be exported in future releases.
+Warning this function is no longer exported.
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}

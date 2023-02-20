@@ -19,5 +19,5 @@
 A vector of predictions.
 }
 \description{
-This function is deprecated and will not be exported in future versions.
+This function is no longer exported.
 }

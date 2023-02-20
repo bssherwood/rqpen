@@ -2362,8 +2362,6 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' }
 #' 
 
-#'
-#' @return
 #' @export
 #'
 #' @examples
@@ -2510,7 +2508,7 @@ print.cv.rq.pen <- function(x,...){
 #' @param x A rq.pen object
 #' @param ... Additional arguments
 #'
-#' @return
+#' @return prints coefficients
 #' @export
 #'
 print.rq.pen <- function(x,...){

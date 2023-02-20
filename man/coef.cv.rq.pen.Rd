@@ -17,7 +17,7 @@
 Coefficients for a given lambda, or the lambda associated with the minimum cv value.
 }
 \description{
-Warning: this function will be deprecated and not exported in future versions of rqPen, due to the switch from cv.rq.pen() to rq.pen.cv().
+Warning: this function is no longer exported, due to the switch from cv.rq.pen() to rq.pen.cv().
 }
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
