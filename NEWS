@@ -1,4 +1,4 @@
-rqPen 3.1 (Release date: ...)
+rqPen 3.1 (Release date: 2023-02-20)
 * fixed issues where rq.group.pen did not work with a single value of lambda
 * Older functions that were deprecated in 3.0 are no longer exported. Big changes are rq.pen() should be used instead of rq.lasso.fit() or rq.nc.fit(). Similarly rq.group.pen() should be used instead of rq.group.fit(). Finally rq.pen.cv() and rq.group.pen.cv() should be used instead of cv.rq.pen() and cv.rq.group.pen().
 * Fixed issue where length of lambda sequence could differ by quantile if lambda.discard=TRUE. Now it returns the minimum sequence used across all quantiles. Users not liking possible shortening of interesting lambda sequences should set lambda.discard=FALSE, but that will slow the functions down. 

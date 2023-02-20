@@ -1987,7 +1987,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
                 penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
 {
-  warning("recommend using rq.group.pen() instead, this is an older function with fewer options and does not include faster algorithms")
+  #warning("recommend using rq.group.pen() instead, this is an older function with fewer options and does not include faster algorithms")
   ### Some cleaning/checking before getting to the algorithms
   p <- ncol(x)
   n <- nrow(x)
@@ -2139,7 +2139,7 @@ plot.cv.rq.group.pen <- function (x,...)
 #' }
 rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                          coef.cutoff=1e-08, method="br",penVars=NULL,scalex=TRUE,lambda.discard=TRUE, ...){
-  warning("Recommend using rq.pen() instead, this is an older functions with fewer options and does not provide access to faster algorithms.")
+  #warning("Recommend using rq.pen() instead, this is an older functions with fewer options and does not provide access to faster algorithms.")
   if(is.null(dim(x))){
       stop('x needs to be a matrix with more than 1 column')
    }
