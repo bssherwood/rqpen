@@ -1530,12 +1530,18 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 			lambdas <- x$lambda
 			xtext <- expression(lambda)
 		}
-	  maxli <- ncol(tm[[i]]$coefficients)
-	  subli <- li[which(li<=maxli)]
+	    maxli <- ncol(tm[[i]]$coefficients)
+	    subli <- li[which(li<=maxli)]
 		betas <- tm[[i]]$coefficients[-1,subli]
 		plot(lambdas[subli], betas[1,], type="n",ylim=c(min(betas),max(betas)),ylab="Coefficient Value",xlab=xtext,main=mainText,...)
-		for(i in 1:dim(betas)[1]){
-			lines(lambdas[subli], betas[i,],col=i)
+		if(is.null(vars)){
+			for(i in 1:dim(betas)[1]){
+				lines(lambdas[subli], betas[i,],col=i)
+			}
+		}else{
+			for(i in vars){
+				lines(lambdas[subli], betas[i,],col=i)
+			}
 		}
 	}
 	if(ml > 1){
