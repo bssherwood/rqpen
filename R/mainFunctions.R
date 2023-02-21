@@ -277,6 +277,7 @@ print.qic.select <- function(x,...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){
 	#coefs <- do.call(cbind,coefficients(object))
+  newdata <- as.matrix(newdata)
 	cbind(1,newdata) %*% coefficients(object)
 }
 
