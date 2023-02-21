@@ -277,7 +277,7 @@ print.qic.select <- function(x,...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){
 	if(is.null(dim(newData))){
-	  coefficients(object)[1] + sum(newdata*coefficients(object)[-1]) 
+	  c(1,newdata) %*% coefficients(object)
 	} else{
 	  cbind(1,newdata) %*% coefficients(object)
 	}
@@ -541,7 +541,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
   coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
   if(is.null(dim(newx))){
-    coefs[1] + sum(newx*coefs[-1])  
+    c(1,newx) %*% coefs  
   } else{
     cbind(1,newx) %*% coefs
   }
@@ -575,7 +575,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex,...)
   #lapply(coefs, quick.predict,newx=newx)
   if(is.null(newx)){
-    coefs[1]+sum(coefs[-1]*newx)
+    c(1,newx) %*% coefs
   } else{
     cbind(1,newx) %*% coefs
   }
