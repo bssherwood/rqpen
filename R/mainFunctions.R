@@ -574,7 +574,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex,...)
   #lapply(coefs, quick.predict,newx=newx)
-  if(is.null(dim(newx)){
+  if(is.null(dim(newx))){
     c(1,newx) %*% coefs
   } else{
     cbind(1,newx) %*% coefs
