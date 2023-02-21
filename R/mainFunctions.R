@@ -540,7 +540,11 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
   coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
-  cbind(1,newx) %*% coefs
+  if(is.null(dim(newx))){
+    coefs[1] + sum(newx*coefs[-1])  
+  } else{
+    cbind(1,newx) %*% coefs
+  }
 }
 
 #' Predictions from rq.pen.seq object
@@ -570,7 +574,11 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,u
 predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex,...)
   #lapply(coefs, quick.predict,newx=newx)
-  cbind(1,newx) %*% coefs
+  if(is.null(newx)){
+    coefs[1]+sum(coefs[-1]*newx)
+  } else{
+    cbind(1,newx) %*% coefs
+  }
 }
 
 #' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqn{\lambda} and a.

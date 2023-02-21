@@ -1,6 +1,6 @@
 rqPen 3.1.1 (Release date: )
 =============
-* Fixed issue with prediction with qic.select objects. 
+* Fixed issue where predict was not working for a single observation.  
 
 rqPen 3.1 (Release date: 2023-02-20)
 =============
