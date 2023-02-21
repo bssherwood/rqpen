@@ -1475,7 +1475,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #' plot(m1)
 #' plot(m1,septau=FALSE)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=FALSE,main=NULL,...){
+plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=TRUE,main=NULL,...){
 	if(septau){
 		plotsep.rq.pen.seq.cv(x,tau,logLambda,main,...)
 	} else{
