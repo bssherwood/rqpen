@@ -276,7 +276,7 @@ print.qic.select <- function(x,...){
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 predict.qic.select <- function(object, newdata, ...){
-	if(is.null(dim(newData))){
+	if(is.null(dim(newdata))){
 	  c(1,newdata) %*% coefficients(object)
 	} else{
 	  cbind(1,newdata) %*% coefficients(object)
