@@ -579,11 +579,13 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 			endHit <- FALSE
 			penVals <- NULL
 			for(i in 1:ll){	
-			 # print(paste("j val", j, "k val", k, "i val", i))
+			  print(paste("j val", j, "k val", k, "i val", i))
 				coef_by_group_deriv <- group_derivs(derivf, groups, abs(coefficients(obj$models[[j]])[-1,i]),lampen[,i],a[k],norm=norm)
-				#print(paste("derivs are ", coef_by_group_deriv))
+				print(paste("derivs are ", coef_by_group_deriv))
 				if(sum(coef_by_group_deriv)==0){
 					if(n > p + 1){
+					  saveRDS(x,"tempx.RDS")
+					  saveRDS(y,"tempy.RDS")
 						update_est <- coefficients(rq(y~x,tau=obj$tau[j]))
 						endHit <- TRUE
 					} else{
