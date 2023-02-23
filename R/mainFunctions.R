@@ -1667,7 +1667,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 	}
 	coefs <- coefficients(x,a=a,lambdaIndex=lambdaIndex)
 	if(is.null(vars)){
-	  pindex <- 1:ncol(coefs)
+	  pindex <- 1:nrow(coefs)
 	} else{
 	  pindex <- vars
 	}
@@ -1708,13 +1708,12 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 		stop("Too many coefficients returned, function only works with one lambda value")
 	}
 	if(is.null(vars)){
-	  pindex <- 1:ncol(coefs)
+	  pindex <- 1:nrow(coefs)
 	} else{
 	  pindex <- vars
 	}
 	lp <- length(pindex)
 	if(lp > 1){	par(ask=TRUE) }
-	p <- ncol(coefs)
 	tau <- x$fit$tau
 	for(i in pindex){
 		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient",i),main=rownames(coefs)[i],pch=16,...)
