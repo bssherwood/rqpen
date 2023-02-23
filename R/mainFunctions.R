@@ -769,6 +769,7 @@ coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,ta
       }
       nm <- length(models)
       returnVal <- matrix(0,nrow=nrow(coef(object$fit)),ncol=nm)  #vector(mode="list", length=length(models))
+      rownames(returnVal) <- rownames(coef(object$fit))
       colnames(returnVal) <- names(models)
       for(i in 1:nm){
         returnVal[,i] <- coef(object$fit,modelsIndex=btr$modelsIndex[i],lambdaIndex=lambdaIndex[i])
@@ -1716,7 +1717,7 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 	if(lp > 1){	par(ask=TRUE) }
 	tau <- x$fit$tau
 	for(i in pindex){
-		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient",i),main=rownames(coefs)[i],pch=16,...)
+		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient estimate"),main=rownames(coefs)[i],pch=16,...)
 		lines(tau,coefs[i,])
 	}
 	if(lp > 1){	par(ask=FALSE) }
