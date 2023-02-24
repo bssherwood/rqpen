@@ -4,7 +4,8 @@ rqPen 3.1.1 (Release date: )
 * Set logLambda=TRUE as default for plot.rq.pen.seq.cv()
 * Fixed issue where SCAD and MCP penalties could fail for large values of lambda, even when n>p+1. New solution is to try quantreg:::rq(y~x,tau=tau) and if that fails then rq.group.pen() or rq.pen() stops early. 
 * Updated bytau.plot() code to allow users to specify specific variables they want to plot.
-* Updated rq.pen.cv.coefficients() to include names of variables as rownames. 
+* Updated rq.pen.cv.coefficients() to include names of variables as rownames.
+* Older functions mentioned in 3.1 are now really no longer exported. They were accidentally exported due to misuse of roxygen2.  
 
 
 rqPen 3.1 (Release date: 2023-02-20)

@@ -74,7 +74,6 @@ shortrq.fit.fnb <- function (x, y, tau = 0.5, beta = 0.99995, eps = 1e-06)
 #' @param a Scale parameter, the default value is 3.7 (>2 for SCAD, >1 for MCP, not used in LASSO)
 #' @param scalex Whether predictors are centered and scaled
 #' @param ... additional parameters
-#' @export
 QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, scalex=TRUE, ...)
@@ -202,7 +201,6 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 #' @param scalex Whether predictors are centered and scaled
 #' @param ... additional parameters
 #' 
-#' @export
 QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, method="br", scalex=TRUE, ...)

@@ -1,4 +1,4 @@
-#' Calculate information criterion for penalized quantile regression models
+#' Calculate information criterion for penalized quantile regression models. Currently not exported. 
 #'
 #' @param model model from a rq.pen.seq() object
 #' @param n Sample size
@@ -9,7 +9,6 @@
 #' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
 #' for every value of \eqn{\lambda}. 
-#' @export
 #'
 #' @examples
 #' set.seed(1)
@@ -1002,7 +1001,6 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 #' \item{penalty}{Penalty selected.}
 #' }
 #' 
-#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -1310,7 +1308,6 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' \item{penalty}{ Penalty used, SCAD or MCP.} 
 #' \item{penalty}{Penalty selected.}
 #' }
-#' @export
 #'
 #' @examples
 #' x <- matrix(rnorm(800),nrow=100)
@@ -1572,7 +1569,6 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 #' @description Warning: this function is no longer exported.  
 #'
 #' @return Plot of how beta estimates change with lambda.
-#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -1734,7 +1730,6 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 #' @param ... Additional parameters sent to plot function.
 #'
 #' @return returns a cross validation plot
-#' @export
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
@@ -1798,7 +1793,6 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \item Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables. \emph{J. R. Statist. Soc. B}, \bold{68}, 49-67.
 #' \item Peng, B. and Wang, L. (2015). An Iterative Coordinate Descent Algorithm for High-Dimensional Nonconvex Penalized Quantile Regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694.
 #' }
-#' @export
 #'
 cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
@@ -2000,7 +1994,6 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
 #' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
 #' needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
-#' @export
 #' 
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 #' 
@@ -2114,7 +2107,6 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 #' @param ... Additional parameters for plot function.
 #'
 #' @return A cross validation plot. 
-#' @export
 #'
 plot.cv.rq.group.pen <- function (x,...) 
 {
@@ -2149,7 +2141,6 @@ plot.cv.rq.group.pen <- function (x,...)
 #' 
 #' @description Fits a quantile regression model with the LASSO penalty. Uses the augmented data approach similar to the proposal in Sherwood and Wang (2016).   
 #' 
-#' @export
 #'
 #' @examples
 #' x <- matrix(rnorm(800),nrow=100)
@@ -2271,7 +2262,6 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #' 
 #' @description This function is no longer exported. 
 #' 
-#' @export
 #'
 predict.rq.pen <- function(object, newx,...){
   coefs <- object$coefficients
@@ -2292,7 +2282,6 @@ predict.rq.pen <- function(object, newx,...){
 #' 
 #' @description This function is no longer exported. 
 #' 
-#' @export
 #'
 predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
   if(lambda == "lambda.min"){
@@ -2311,7 +2300,6 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 #' @param ... Additional parameters. 
 #'
 #' @return Vector of coefficients. 
-#' @export
 #'
 coef.cv.rq.group.pen <- function(object, lambda='min',...){
   if(lambda=='min'){
@@ -2386,7 +2374,6 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \item{a}{Value of a for the penalized loss function.}
 #' }
 #' 
-
 #' @export
 #'
 #' @examples
@@ -2519,7 +2506,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 #' @description Warning: this function is no longer exported. 
 #'
 #' @return Prints coefficients and cross validation results. 
-#' @export
 #'
 print.cv.rq.pen <- function(x,...){
    cat("\nCoefficients:\n")
@@ -2534,7 +2520,6 @@ print.cv.rq.pen <- function(x,...){
 #' @param ... Additional arguments
 #'
 #' @return prints coefficients
-#' @export
 #'
 print.rq.pen <- function(x,...){
   cat("\nCoefficients:\n")

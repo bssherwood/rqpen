@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{qic}
 \alias{qic}
-\title{Calculate information criterion for penalized quantile regression models}
+\title{Calculate information criterion for penalized quantile regression models. Currently not exported.}
 \usage{
 qic(model, n, method = c("BIC", "AIC", "PBIC"))
 }
@@ -20,7 +20,7 @@ for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimensi
 for every value of \eqn{\lambda}.
 }
 \description{
-Calculate information criterion for penalized quantile regression models
+Calculate information criterion for penalized quantile regression models. Currently not exported.
 }
 \examples{
 set.seed(1)
