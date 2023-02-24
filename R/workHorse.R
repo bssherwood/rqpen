@@ -1349,7 +1349,7 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	maxerr <- max(x$gcve)
 	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,type="n",main=main,...)
 	for(i in 1:na){
-		points(lambdas,x$gcve[i,],col=i,pch=1)
+		points(lambdas,x$gcve[i,],col=i,pch=20)
 	}
 	bestlamidx <- x$gtr$lambdaIndex[1]
 	se1lamidx <- x$gtr$lambda1seIndex[1]
@@ -1363,7 +1363,7 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	segments(lambdas-.01,besterr-gse,lambdas+.01,besterr-gse)
 	segments(lambdas-.01,besterr+gse,lambdas+.01,besterr+gse)
 	if(na > 1){
-		legend("bottomright",paste("a=",a),col=1:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
+		legend("bottomright",paste("a=",a),col=20:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
 	}
 }
 
@@ -1400,7 +1400,11 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		}
 		subkeepers <- which(closeEnough(tau[i],minfo$tau))
 		subinfo <- minfo[subkeepers,]
-		suberr <- merr[subkeepers,]
+		if(is.null(dim(merr))){
+		  suberr <- merr  
+		} else{
+		  suberr <- merr[subkeepers,]
+		}
 		
 		bestkeep <- which(closeEnough(tau[i],x$btr$tau))
 		subbtr <- x$btr[bestkeep,]
@@ -1412,7 +1416,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		} else{
 			plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
 			for(j in 1:na){
-				points(lambdas,suberr[j,],col=j)
+				points(lambdas,suberr[j,],col=j,pch=20)
 			}
 		}
 		#then get index and plot error bars for this. 
@@ -1421,7 +1425,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		segments(lambdas-.01,besterr-cvsd,lambdas+.01,besterr-cvsd)
 		segments(lambdas-.01,besterr+cvsd,lambdas+.01,besterr+cvsd)
 		if(na>1){
-			legend("bottomright",paste("a=",subinfo$a),col=1:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
+			legend("bottomright",paste("a=",subinfo$a),col=1:na,pch=20,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
 		}
 		lidx <- subbtr$lambdaIndex
 		lidxse <- subbtr$lambda1seIndex
