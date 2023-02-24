@@ -1364,6 +1364,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 	}
 	keepers <- which(closeEnough(tau,x$fit$modelsInfo$tau))
 	minfo <- x$fit$modelsInfo[keepers,]
+	merr <- x$cverr[keepers,]
 	avals <- unique(minfo$a)
 	na <- length(avals)
 	nt <- length(tau)
@@ -1390,7 +1391,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		}
 		subkeepers <- which(closeEnough(tau[i],minfo$tau))
 		subinfo <- minfo[subkeepers,]
-		suberr <- x$cverr[subkeepers,]
+		suberr <- merr[subkeepers,]
 		
 		bestkeep <- which(closeEnough(tau[i],x$btr$tau))
 		subbtr <- x$btr[bestkeep,]
