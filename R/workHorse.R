@@ -1412,7 +1412,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		segments(lambdas-.01,besterr-cvsd,lambdas+.01,besterr-cvsd)
 		segments(lambdas-.01,besterr+cvsd,lambdas+.01,besterr+cvsd)
 		if(na>1){
-			legend("topleft",paste("a=",subinfo$a),col=1:na,pch=1)
+			legend("topleft",paste("a=",subinfo$a),col=1:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
 		}
 		lidx <- subbtr$lambdaIndex
 		lidxse <- subbtr$lambda1seIndex
