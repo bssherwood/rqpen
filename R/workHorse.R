@@ -1352,9 +1352,18 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 		points(lambdas,x$gcve[i,],col=i,pch=1)
 	}
 	bestlamidx <- x$gtr$lambdaIndex[1]
-	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+5),lty=2)
+	se1lamidx <- x$gtr$lambda1seIndex[1]
+	gse <- x$gtr$cvse[1]
+	minrow <- which(x$gcve==min(x$gcve),arr.ind=TRUE)[1]
+	besterr <- x$gcve[minrow,]
+	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+gse+5),lty=2)
+	lines(rep(lambdas[se1lamidx],2),c(-5,maxerr+gse+5),lty=2)
+	
+	segments(lambdas,besterr-gse,lambdas,besterr+gse)
+	segments(lambdas-.01,besterr-gse,lambdas+.01,besterr-gse)
+	segments(lambdas-.01,besterr+gse,lambdas+.01,besterr+gse)
 	if(na > 1){
-		legend("topleft",paste("a=",a),col=1:na,pch=1)
+		legend("bottomright",paste("a=",a),col=1:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
 	}
 }
 
