@@ -475,7 +475,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	# but that seems unnecessarliy complicated right now. 
 		lmin <- min(sapply(fit$models,lambdanum))
 		fit$lambda <- fit$lambda[1:lmin]
-		for(j in 1:length(fit$tau)){
+		for(j in 1:length(fit$models)){
 			fit$models[[j]]$coefficients <- fit$models[[j]]$coefficients[,1:lmin]
 			fit$models[[j]]$rho <- fit$models[[j]]$rho[1:lmin]
 			fit$models[[j]]$PenRho <- fit$models[[j]]$PenRho[1:lmin]
