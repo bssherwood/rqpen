@@ -479,7 +479,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 			fit$models[[j]]$coefficients <- fit$models[[j]]$coefficients[,1:lmin]
 			fit$models[[j]]$rho <- fit$models[[j]]$rho[1:lmin]
 			fit$models[[j]]$PenRho <- fit$models[[j]]$PenRho[1:lmin]
-			fit$models[[j]]$nzero <- fit$models[[j]]$zero[1:lmin]
+			fit$models[[j]]$nzero <- fit$models[[j]]$nzero[1:lmin]
 		}
 	}
 	fit$call <- match.call()
