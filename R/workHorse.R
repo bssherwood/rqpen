@@ -789,7 +789,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 			}
 		}
 		names(models) <- modelNames
-		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=rep(1,p),penalty=penalty,a=a)		
+		returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau,lambda=lambda,penalty.factor=penalty.factor,penalty=penalty,a=a)		
 		returnVal$modelsInfo <- createModelsInfo(models)
 		class(returnVal) <- "rq.pen.seq"
 		returnVal

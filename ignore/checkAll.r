@@ -206,21 +206,76 @@ p4 <- predict(q4,testx)
 
 m1 <- rq.pen(x,y,tau=tvals, penalty="ENet", a=.25)
 m2 <- rq.pen(x,y,a=.5,tau=tvals, penalty="ENet")
-m1$models
-m2$models
 
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+
+pdf("plots1.pdf")
+plot(m1)
+plot(m2)
+dev.off()
+
+q1 <- qic.select(m1)
+q2 <- qic.select(m2,method="AIC")
+
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+
+
+#SCAD with multiple quantiles
 m1 <- rq.pen(x,y,tau=tvals, penalty="SCAD")
 m2 <- rq.pen(x,y,alg="br",tau=tvals, penalty="SCAD")
-#m3 <- rq.pen(x,y,alg="QICD",tau=tvals, penalty="SCAD")
+m3 <- rq.pen(x,y,alg="QICD",tau=tvals, penalty="SCAD")
 m4 <- rq.pen(x,y,alg="huber",tau=tvals, penalty="SCAD")
 m5 <- rq.pen(x,y,alg="fn",tau=tvals, penalty="SCAD")
 
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+c3 <- coefficients(m3)
+c4 <- coefficients(m4)
+c5 <- coefficients(m5)
 
-m1$models
-m2$models
-#m3$models
-m4$models
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+p4 <- predict(m4,testx)
+p5 <- predict(m5,testx)
 
+pdf("plots1.pdf")
+plot(m1, tau=.25)
+plot(m2,tau=.25)
+plot(m3,tau=.75)
+plot(m4,tau=.25)
+plot(m5,tau=.75)
+dev.off()
+
+q1 <- qic.select(m1)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+q4 <- qic.select(m4)
+q5 <- qic.select(m5)
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3)
+c4 <- coefficients(q4)
+c5 <- coefficients(q5)
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+p3 <- predict(q3,testx)
+p4 <- predict(q4,testx)
+p5 <- predict(q5,testx)
+
+#Adaptive Lasso
 m1 <- rq.pen(x,y,tau=tvals,penalty="aLASSO")
 m1$models
 
