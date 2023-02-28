@@ -1,6 +1,7 @@
 #I think the following is problematic because there is a kitchen quality with only one value, however should be able to provide a better error message
 library(rqPen)
 library(AmesHousing)
+set.seed(1)
 ames <- make_ames()
 x_g <- model.matrix(~ Lot_Shape+Garage_Type+Full_Bath+Fireplaces+Kitchen_Qual - 1,ames)
 y_g <- log(ames$Sale_Price)
