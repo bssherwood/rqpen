@@ -134,139 +134,237 @@ p2 <- predict(q2,testx)
 p3 <- predict(q3,testx)
 p4 <- predict(q4,testx)
 
-r1 <- rq.group.pen(x,y,groups=g)
-r2 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO")
-r3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD") #still a problem here with the updates of coefficients, I think. 
-r4 <- rq.group.pen(x,y,groups=g,penalty="gMCP")
-r5 <- rq.group.pen(x,y,groups=g,tau=tvals)
+# lasso mult tau 
+m1 <- rq.group.pen(x,y,groups=g,tau=tvals)
 
-r1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals)
-r2 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals)
-r3 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals)
+c1 <- coefficients(m1)
 
-r1 <- rq.group.pen(x,y,groups=g,norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",norm=1)
+p1 <- predict(m1,testx)
 
-r1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gAdLASSO",norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gAdLASSO",norm=1)
+pdf("plots1.pdf")
+plot(m1,tau=.25)
+dev.off()
 
-r1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gSCAD",norm=1)
-
-r1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gMCP",norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gMCP",norm=1)
-
-r1 <- rq.group.pen(x,y,groups=g,tau=tvals,norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",tau=tvals,norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",tau=tvals,norm=1)
-
-r1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals,norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gAdLASSO",tau=tvals,norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gAdLASSO",tau=tvals,norm=1)
-
-r1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals,norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",tau=tvals,norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gSCAD",tau=tvals,norm=1)
-
-r1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals,norm=1)
-r2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gMCP",tau=tvals,norm=1)
-r3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gMCP",tau=tvals,norm=1)
-
-rm(list=ls(all=TRUE))
-library(devtools)
-devtools::unload("rqPen")
-install_github("bssherwood/rqpen")
-library(rqPen)
-library(hrqglas)
+q1 <- qic.select(m1)
 
 
-library(hqreg)
-library(glmnet)
+c1 <- coefficients(q1)
 
-set.seed(1)
+p1 <- predict(q1,testx)
 
-x <- matrix(rnorm(25*30,sd=10),ncol=30)
+# adaptive lasso mult tau 
+m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals)
+m2 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,tau=tvals)
+m3 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,alg="br",tau=tvals)
 
-y <- 1 + x[,1] + 3*x[,3] - x[,8] + rt(25,3)
-g <- rep(seq(1:5),6)
-tvals <- c(.25,.75)
+c1 <- coefficients(m1)
+c2 <- coefficients(m2,tau=.25)
+c3 <- coefficients(m3)
 
-rq.group.pen(x,y,groups=g,a=seq(3,5))
+p1 <- predict(m1,testx,tau=.75)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",a=seq(3,5))
-#m1$models
+pdf("plots1.pdf")
+plot(m1,tau=.25)
+plot(m2,tau=.25)
+plot(m3,tau=.25)
+dev.off()
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",a=seq(3,5))
-#m1$models
+q1 <- qic.select(m1)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",a=seq(3,5))
-#m1$models
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3,tau=.25)
 
-m1 <- rq.group.pen(x,y,groups=g,tau=tvals,a=seq(3,5))
-#m1$models
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx,tau=.75)
+p3 <- predict(q3,testx)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals,a=seq(3,5))
-#m1$models
+#group SCAD
+m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals)
+m2 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,tau=tvals)
+m3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,alg="br",tau=tvals)
+m4 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,alg="qicd",tau=tvals)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals,a=seq(3,5))
-#m1$models
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+c3 <- coefficients(m3)
+c4 <- coefficients(m4,septau=FALSE)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals,a=seq(3,5))
-#m1$models
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+p4 <- predict(m4,testx,lambda=m4$lambda[5])
 
-m1 <- rq.group.pen(x,y,groups=g,norm=1,a=seq(3,5))
-#m1$models
+pdf("plots1.pdf")
+plot(m1,tau=.25)
+plot(m2,tau=.75)
+plot(m3,tau=.25)
+plot(m4,tau=.25)
+dev.off()
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gAdLASSO",norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gAdLASSO",norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+q1 <- qic.select(m1,septau=FALSE)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+q4 <- qic.select(m4,method="PBIC")
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gSCAD",norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3)
+c4 <- coefficients(q4)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gMCP",norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gMCP",norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+p3 <- predict(q3,testx)
+p4 <- predict(q4,testx)
 
-m1 <- rq.group.pen(x,y,groups=g,tau=tvals,norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",tau=tvals,norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",tau=tvals,norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+#group MCP
+m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals)
+m2 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,tau=tvals)
+m3 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,alg="br",tau=tvals)
+m4 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,alg="qicd",tau=tvals)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals,norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gAdLASSO",tau=tvals,norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gAdLASSO",tau=tvals,norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+c3 <- coefficients(m3)
+c4 <- coefficients(m4,septau=FALSE)
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals,norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gSCAD",tau=tvals,norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gSCAD",tau=tvals,norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+p4 <- predict(m4,testx,lambda=m4$lambda[5])
 
-m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals,norm=1,a=seq(3,5))
-m2 <- rq.group.pen(x,y,groups=g,alg="lp",penalty="gMCP",tau=tvals,norm=1,a=seq(3,5))
-m3 <- rq.group.pen(x,y,groups=g,alg="qicd",penalty="gMCP",tau=tvals,norm=1,a=seq(3,5))
-m1$models
-m2$models
-m3$models
+pdf("plots1.pdf")
+plot(m1,tau=.25)
+plot(m2,tau=.75)
+plot(m3,tau=.25)
+plot(m4,tau=.25)
+dev.off()
+
+q1 <- qic.select(m1,septau=FALSE)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+q4 <- qic.select(m4,method="PBIC")
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3)
+c4 <- coefficients(q4)
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+p3 <- predict(q3,testx)
+p4 <- predict(q4,testx)
+
+
+# adaptive lasso mult tau 
+m1 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",tau=tvals,a=c(3,4,5))
+m2 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,tau=tvals,a=c(3,4,5))
+m3 <- rq.group.pen(x,y,groups=g,penalty="gAdLASSO",norm=1,alg="br",tau=tvals,a=c(3,4,5))
+
+c1 <- coefficients(m1)
+c2 <- coefficients(m2,tau=.25)
+c3 <- coefficients(m3,septau=FALSE)
+
+p1 <- predict(m1,testx,tau=.75)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+
+pdf("plots1.pdf")
+plot(m1,tau=.25,a=3)
+plot(m2,tau=.25,a=4)
+plot(m3,tau=.25,a=5)
+dev.off()
+
+q1 <- qic.select(m1)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3,tau=.25)
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx,tau=.75)
+p3 <- predict(q3,testx)
+
+#group SCAD
+m1 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",tau=tvals,a=c(3,4,5))
+m2 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,tau=tvals,a=c(3,4,5))
+m3 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,alg="br",tau=tvals,a=c(3,4,5))
+m4 <- rq.group.pen(x,y,groups=g,penalty="gSCAD",norm=1,alg="qicd",tau=tvals,a=c(3,4,5))
+
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+c3 <- coefficients(m3)
+c4 <- coefficients(m4,septau=FALSE)
+
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+p4 <- predict(m4,testx,lambda=m4$lambda[5])
+
+pdf("plots1.pdf")
+plot(m1,tau=.25,a=3)
+plot(m2,tau=.75,a=4)
+plot(m3,tau=.25,a=5)
+plot(m4,tau=.25,a=3)
+dev.off()
+
+q1 <- qic.select(m1,septau=FALSE)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+q4 <- qic.select(m4,method="PBIC")
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3)
+c4 <- coefficients(q4)
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+p3 <- predict(q3,testx)
+p4 <- predict(q4,testx)
+
+#group MCP
+m1 <- rq.group.pen(x,y,groups=g,penalty="gMCP",tau=tvals,a=c(3,4,5))
+m2 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,tau=tvals,a=c(3,4,5))
+m3 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,alg="br",tau=tvals,a=c(3,4,5))
+m4 <- rq.group.pen(x,y,groups=g,penalty="gMCP",norm=1,alg="qicd",tau=tvals,a=c(3,4,5))
+
+c1 <- coefficients(m1)
+c2 <- coefficients(m2)
+c3 <- coefficients(m3)
+c4 <- coefficients(m4,septau=FALSE)
+
+p1 <- predict(m1,testx)
+p2 <- predict(m2,testx)
+p3 <- predict(m3,testx,lambda=m3$lambda[5])
+p4 <- predict(m4,testx,lambda=m4$lambda[5])
+
+pdf("plots1.pdf")
+plot(m1,tau=.25,a=3)
+plot(m2,tau=.75,a=4)
+plot(m3,tau=.25,a=5)
+plot(m4,tau=.25,a=3)
+dev.off()
+
+q1 <- qic.select(m1,septau=FALSE)
+q2 <- qic.select(m2,method="AIC")
+q3 <- qic.select(m3,method="PBIC")
+q4 <- qic.select(m4,method="PBIC")
+
+c1 <- coefficients(q1)
+c2 <- coefficients(q2)
+c3 <- coefficients(q3)
+c4 <- coefficients(q4)
+
+p1 <- predict(q1,testx)
+p2 <- predict(q2,testx)
+p3 <- predict(q3,testx)
+p4 <- predict(q4,testx)
+
 
