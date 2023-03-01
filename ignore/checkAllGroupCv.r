@@ -59,10 +59,10 @@ p2 <- predict(q2,testx)
 p3 <- predict(q3,testx)
 
 #group SCAD
-m1 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD")
-m2 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1)
-m3 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1,alg="br")
-m3 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1,alg="qicd")
+m1 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",nfolds=3)
+m2 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1,nfolds=3)
+m3 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1,alg="br",nfolds=3)
+m3 <- rq.group.pen.cv(x,y,groups=g,penalty="gSCAD",norm=1,alg="qicd",nfolds=3)
 
 c1 <- coefficients(m1)
 c2 <- coefficients(m2)
