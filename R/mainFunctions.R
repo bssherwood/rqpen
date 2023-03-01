@@ -1638,7 +1638,7 @@ bytau.plot <- function(x,...){
 #' @param lambda The lambda value of interest. 
 #' @param lambdaIndex The lambda index of interest. Only specify lambdaIndex or lambda, not both.
 #' @param vars Index of the variables to plot with 1 being the intercept, 2 being the first predictor, etc. Default is to include all variables. 
-#' @param ... Additional parameters sent to plot()
+#' @param ... Additional parameters sent to coef()
 #'
 #' @return A plot of coefficient values by tau. 
 #' @export
@@ -1668,7 +1668,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 	if(length(lambdaIndex)>1){
 		stop("Function only supports a single value of lambda or lambdaIndex")
 	}
-	coefs <- coefficients(x,a=a,lambdaIndex=lambdaIndex)
+	coefs <- coefficients(x,a=a,lambdaIndex=lambdaIndex,...)
 	if(is.null(vars)){
 	  pindex <- 1:nrow(coefs)
 	} else{
@@ -1678,7 +1678,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 	if(lp > 1){	par(ask=TRUE) }
 	tau <- x$tau
 	for(i in pindex){
-		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16,...)
+		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16)
 		lines(tau,coefs[i,])
 	}
 	if(lp > 1){	par(ask=FALSE) }
@@ -1691,7 +1691,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 #' @param cvmin Whether the minimum cv error should be used or the one standard error rule. 
 #' @param useDefaults Set to FALSE if you want to use something besides minimum cv or 1se. 
 #' @param vars Index of the variables to plot with 1 being the intercept, 2 being the first predictor, etc. Default is to include all variables. 
-#' @param ... Additional parameters sent to plot() 
+#' @param ... Additional parameters sent to coef() 
 #' 
 #' @description Produces plots of how coefficient estimates vary by quantile for models selected by using cross validation.
 #'
@@ -1706,7 +1706,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 #'  bytau.plot(lmcv)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,vars=NULL,...){
-	coefs <- coefficients(x,septau,cvmin,TRUE,tau=x$fit$tau)
+	coefs <- coefficients(x,septau,cvmin,useDefaults,tau=x$fit$tau,...)
 	if(ncol(coefs) != length(x$fit$tau)){
 		stop("Too many coefficients returned, function only works with one lambda value")
 	}
@@ -1719,7 +1719,7 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 	if(lp > 1){	par(ask=TRUE) }
 	tau <- x$fit$tau
 	for(i in pindex){
-		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient estimate"),main=rownames(coefs)[i],pch=16,...)
+		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient estimate"),main=rownames(coefs)[i],pch=16)
 		lines(tau,coefs[i,])
 	}
 	if(lp > 1){	par(ask=FALSE) }
