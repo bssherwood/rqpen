@@ -123,6 +123,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 		for(i in 1:nt){
 			coefs[,i] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
 		}
+		rownames(coefs) <- names(coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]])
 		gic <- NULL
 	} else{
 		gic <- matrix(rep(0,na*nl),ncol=nl)
@@ -216,6 +217,7 @@ qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=TR
     for(i in 1:nt){
       coefs[,i] <- coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]]
     }
+	rownames(coefs) <- names(coef(obj$models[[modelsInfo$modelIndex[i]]])[,modelsInfo$lambdaIndex[i]])
     gic <- NULL
   } else{
     gic <- matrix(rep(0,na*nl),ncol=nl)
