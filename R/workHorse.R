@@ -1349,16 +1349,19 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	if(is.null(main)){
 		main <- "Cross validation results summarized for all tau"
 	}
+	
 	maxerr <- max(x$gcve)
-	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(0,maxerr),xlab=xtext,type="n",main=main,...)
-	for(i in 1:na){
-		points(lambdas,x$gcve[i,],col=i,pch=20)
-	}
 	bestlamidx <- x$gtr$lambdaIndex[1]
 	se1lamidx <- x$gtr$lambda1seIndex[1]
 	gse <- x$gtr$cvse[1]
 	minrow <- which(x$gcve==min(x$gcve),arr.ind=TRUE)[1]
 	besterr <- x$gcve[minrow,]
+	
+	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(min(c(x$gcve,besterr-gse)),max(c(maxerr,besterr+gse)),xlab=xtext,type="n",main=main,...)
+	for(i in 1:na){
+		points(lambdas,x$gcve[i,],col=i,pch=20)
+	}
+	
 	lines(rep(lambdas[bestlamidx],2),c(-5,maxerr+gse+5),lty=2)
 	lines(rep(lambdas[se1lamidx],2),c(-5,maxerr+gse+5),lty=2)
 	
@@ -1415,9 +1418,9 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		cvsd <- x$cvse[subbtr$modelsIndex,]
 		
 		if(is.null(dim(suberr))){
-			plot(lambdas,suberr,ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,...) 
+			plot(lambdas,suberr,ylim=c(min(min(suberr),min(besterr-cvsd)),max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,...) 
 		} else{
-			plot(lambdas,suberr[1,],ylim=c(0,max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
+			plot(lambdas,suberr[1,],ylim=c(min(min(suberr),min(besterr-cvsd)),max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
 			for(j in 1:na){
 				points(lambdas,suberr[j,],col=j,pch=20)
 			}
