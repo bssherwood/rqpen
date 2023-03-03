@@ -1369,7 +1369,7 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	segments(lambdas-.01,besterr-gse,lambdas+.01,besterr-gse)
 	segments(lambdas-.01,besterr+gse,lambdas+.01,besterr+gse)
 	if(na > 1){
-		legend("bottomright",paste("a=",a),col=20:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
+		legend("bottomright",paste("a=",a),col=1:na,pch=1,inset=c(0,1),xpd=TRUE,horiz=TRUE,bty="n")
 	}
 }
 
