@@ -502,7 +502,7 @@ rq.lla <- function(obj,x,y,penalty,a=ifelse(penalty=="SCAD",3.7,3),penalty.facto
 				if(sum(llapenf)==0){
 					if(!endHit){
 						update_est <- try(coefficients(rq(y~x,tau=obj$tau[j])),silent=TRUE)
-						if(class(update_est)=="try-error"){
+						if(inherits(update_est,"try-error")){
 							warning(paste0("At lambda value ", obj$lambda[i], " method is equivalent to an unpenalized method but quantreg:::rq(y~x) fails at quantile", obj$tau[j], ". Thus method stops at lambda", obj$lambda[i-1]))
 							i <- i -1
 							update_est <- newModels[[pos]]$coefficients[,i] # bad code alert. Hack to get out of this situation where rq doesn't work
@@ -591,7 +591,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				if(sum(coef_by_group_deriv)==0){
 					if(n > p + 1){
 						update_est <- try(coefficients(rq(y~x,tau=obj$tau[j])), silent=TRUE)
-						if(class(update_est)=="try-error"){
+						if(inherits(update_est,"try-error")){
 						  warning(paste0("At lambda value ", obj$lambda[i], " method is equivalent to an unpenalized method but quantreg:::rq(y~x) fails at quantile", obj$tau[j], ". Thus method stops at lambda", obj$lambda[i-1]))
 						  i <- i -1
 						  update_est <- newModels[[pos]]$coefficients[,i] # bad code alert. Hack to get out of this situation where rq doesn't work
