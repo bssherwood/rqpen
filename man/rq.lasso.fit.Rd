@@ -59,10 +59,11 @@ Returns the following:
 Fits a quantile regression model with the LASSO penalty. Uses the augmented data approach similar to the proposal in Sherwood and Wang (2016).
 }
 \examples{
+\dontrun{
 x <- matrix(rnorm(800),nrow=100)
 y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 lassoModel <- rq.lasso.fit(x,y,lambda=.1)
-
+}
 }
 \references{
 \itemize{
@@ -71,3 +72,4 @@ lassoModel <- rq.lasso.fit(x,y,lambda=.1)
 \item Sherwood, B. and Wang, L. (2016) Partially linear additive quantile regression in ultra-high dimension. \emph{Annals of Statistics} \bold{44}, 288--317. 
 }
 }
+\keyword{internal}

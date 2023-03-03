@@ -70,9 +70,11 @@ find a maximum lambda such that the penalty is large enough to produce an interc
 log scale. Local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.
 }
 \examples{
+\dontrun{
 x <- matrix(rnorm(800),nrow=100)
 y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 scadModel <- rq.nc.fit(x,y,lambda=1)
+}
 }
 \references{
 \itemize{
@@ -85,3 +87,4 @@ scadModel <- rq.nc.fit(x,y,lambda=1)
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman.
 }
+\keyword{internal}

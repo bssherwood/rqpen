@@ -201,6 +201,7 @@ QICD <- function(y, x, tau=.5, lambda, intercept=TRUE, penalty="SCAD",
 #' @param scalex Whether predictors are centered and scaled
 #' @param ... additional parameters
 #' 
+#' @keywords internal
 QICD.nonpen <- function(y, x, z, tau=.5, lambda, intercept=TRUE, penalty="SCAD", 
                  initial_beta=NULL, maxin=100, maxout=20, eps = 1e-05, coef.cutoff=1e-08,  
                  a=3.7, method="br", scalex=TRUE, ...)

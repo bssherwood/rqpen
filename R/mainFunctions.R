@@ -9,8 +9,8 @@
 #' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
 #' for every value of \eqn{\lambda}. 
-#'
-#' @examples
+#' @keywords internal
+#' @examples \dontrun{
 #' set.seed(1)
 #' x <- matrix(runif(800),ncol=8)
 #' y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
@@ -18,7 +18,8 @@
 #' # returns the IC values for tau=.25
 #' qic(m1$models[[1]],m1$n) 
 #' # returns the IC values for tau=.75
-#' qic(m1$models[[2]],m1$n) 
+#' qic(m1$models[[2]],m1$n)
+#' } 
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #'@author Ben Sherwood, \email{ben.sherwood@ku.edu}
@@ -1009,6 +1010,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 #' \item{penalty}{Penalty selected.}
 #' }
 #' 
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{
@@ -1316,11 +1318,14 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' \item{penalty}{ Penalty used, SCAD or MCP.} 
 #' \item{penalty}{Penalty selected.}
 #' }
+#' 
+#' @keywords internal
 #'
-#' @examples
+#' @examples \dontrun{
 #' x <- matrix(rnorm(800),nrow=100)
 #' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 #' scadModel <- rq.nc.fit(x,y,lambda=1)
+#' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman. 
 #' @references 
 #' \itemize{
@@ -1577,6 +1582,8 @@ plot.rq.pen.seq <- function(x,vars=NULL,logLambda=TRUE,tau=NULL,a=NULL,lambda=NU
 #' @description Warning: this function is no longer exported.  
 #'
 #' @return Plot of how beta estimates change with lambda.
+#' 
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{
@@ -1789,6 +1796,8 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \item{intercept}{Whether intercept was included in model.}
 #' \item{groups}{Group structure for penalty function.}
 #' }
+#' 
+#' @keywords internal
 #' 
 #' @examples 
 #' \dontrun{
@@ -2149,12 +2158,13 @@ plot.cv.rq.group.pen <- function (x,...)
 #' 
 #' @description Fits a quantile regression model with the LASSO penalty. Uses the augmented data approach similar to the proposal in Sherwood and Wang (2016).   
 #' 
+#' @keywords internal
 #'
-#' @examples
+#' @examples \dontrun{
 #' x <- matrix(rnorm(800),nrow=100)
 #' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
 #' lassoModel <- rq.lasso.fit(x,y,lambda=.1)
-#' 
+#' }
 #' @references 
 #' \itemize{
 #' \item Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. \emph{Journal of the Royal Statistical Society. Series B}, \bold{58}, 267--288.

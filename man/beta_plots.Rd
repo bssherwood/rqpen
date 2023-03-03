@@ -35,3 +35,4 @@ Warning: this function is no longer exported.
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }
+\keyword{internal}

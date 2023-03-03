@@ -59,3 +59,4 @@ QICD.nonpen(
 \description{
 Implements QICD algorithm with some variables not being penalized
 }
+\keyword{internal}

@@ -24,7 +24,7 @@
 
 \item{vars}{Index of the variables to plot with 1 being the intercept, 2 being the first predictor, etc. Default is to include all variables.}
 
-\item{...}{Additional parameters sent to plot()}
+\item{...}{Additional parameters sent to coef()}
 }
 \value{
 Returns plots of coefficient estimates varying by quantile.

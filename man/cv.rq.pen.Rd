@@ -86,3 +86,4 @@ cv_model <- cv.rq.pen(x,y)
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }
+\keyword{internal}
