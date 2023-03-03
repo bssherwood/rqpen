@@ -1357,7 +1357,7 @@ plotgroup.rq.pen.seq.cv <- function(x,logLambda,main,...){
 	minrow <- which(x$gcve==min(x$gcve),arr.ind=TRUE)[1]
 	besterr <- x$gcve[minrow,]
 	
-	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(min(c(x$gcve,besterr-gse)),max(c(maxerr,besterr+gse)),xlab=xtext,type="n",main=main,...)
+	plot(lambdas, x$gcve[1,],ylab="Cross Validation Error",ylim=c(min(c(x$gcve,besterr-gse)),max(c(maxerr,besterr+gse))),xlab=xtext,type="n",main=main,...)
 	for(i in 1:na){
 		points(lambdas,x$gcve[i,],col=i,pch=20)
 	}
