@@ -1,3 +1,7 @@
+rqPen 3.1.2 (Release date: 2023-03-28)
+=============
+* Moved some functions to internal that are only relevant to functions that are no longer exported. 
+
 rqPen 3.1.1 (Release date: 2023-03-03)
 =============
 * Fixed issue where predict was not working for a single observation. 

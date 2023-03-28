@@ -53,3 +53,4 @@ QICD(
 \description{
 Implements QICD algorithm
 }
+\keyword{internal}

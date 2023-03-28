@@ -19,3 +19,4 @@ Vector of coefficients.
 \description{
 Coefficients from a cv.rq.group.pen object
 }
+\keyword{internal}

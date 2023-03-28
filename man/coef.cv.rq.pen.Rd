@@ -22,3 +22,4 @@ Warning: this function is no longer exported, due to the switch from cv.rq.pen()
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }
+\keyword{internal}

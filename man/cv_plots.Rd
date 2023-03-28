@@ -24,3 +24,4 @@ Plots of cross validation results as a function of lambda.
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }
+\keyword{internal}

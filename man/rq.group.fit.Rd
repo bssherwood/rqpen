@@ -68,3 +68,4 @@ needed for the SCAD and MCP algorithm. We use a group penalty extension of the Q
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 }
+\keyword{internal}

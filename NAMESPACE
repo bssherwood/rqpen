@@ -2,7 +2,6 @@
 
 S3method(bytau.plot,rq.pen.seq)
 S3method(bytau.plot,rq.pen.seq.cv)
-S3method(coef,cv.rq.pen)
 S3method(coef,rq.pen.seq)
 S3method(coef,rq.pen.seq.cv)
 S3method(plot,rq.pen.seq)

@@ -19,3 +19,4 @@ A vector of predictions.
 \description{
 This function is no longer exported.
 }
+\keyword{internal}

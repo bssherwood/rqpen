@@ -319,7 +319,8 @@ print.rq.pen.seq <- function(x,...){
 #' @param ... Additional parameters.
 #'
 #' @return Coefficients for a given lambda, or the lambda associated with the minimum cv value. 
-#' @export
+#' 
+#' @keywords internal
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 coef.cv.rq.pen <- function(object, lambda='min',...){
@@ -1746,6 +1747,8 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 #'
 #' @return returns a cross validation plot
 #'
+#' @keywords internal
+#'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
   cv_data <- model$cv
@@ -1760,6 +1763,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 }
 
 #' Old cross validation function for group penalty
+#' 
 #' 
 #' 
 #'
@@ -2012,6 +2016,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
 #' needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
 #' 
+#' @keywords internal
+#' 
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 #' 
 #' @references 
@@ -2123,6 +2129,8 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 #' @param x A cv.rq.group.pen object
 #' @param ... Additional parameters for plot function.
 #'
+#' @keywords internal
+#' 
 #' @return A cross validation plot. 
 #'
 plot.cv.rq.group.pen <- function (x,...) 
@@ -2278,6 +2286,8 @@ rq.lasso.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #'
 #' @return A vector of predictions. 
 #' 
+#' @keywords internal
+#' 
 #' @description This function is no longer exported. 
 #' 
 #'
@@ -2297,6 +2307,8 @@ predict.rq.pen <- function(object, newx,...){
 #' @param ... Additional parameters that are currenlty ignored
 #'
 #' @return A vector of predictions. 
+#'
+#' @keywords internal
 #' 
 #' @description This function is no longer exported. 
 #' 
@@ -2316,6 +2328,9 @@ predict.cv.rq.pen <- function(object, newx, lambda="lambda.min",...){
 #' @param object A cv.rq.group.pen object.
 #' @param lambda The lambda value, default is to use the one associated with the minimum cv error. 
 #' @param ... Additional parameters. 
+#'
+#' @keywords internal
+#'
 #'
 #' @return Vector of coefficients. 
 #'
@@ -2523,6 +2538,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 #' 
 #' @description Warning: this function is no longer exported. 
 #'
+#' @keywords internal
+#'
 #' @return Prints coefficients and cross validation results. 
 #'
 print.cv.rq.pen <- function(x,...){
@@ -2537,6 +2554,8 @@ print.cv.rq.pen <- function(x,...){
 #' @param x A rq.pen object
 #' @param ... Additional arguments
 #'
+#' @keywords internal
+#' 
 #' @return prints coefficients
 #'
 print.rq.pen <- function(x,...){

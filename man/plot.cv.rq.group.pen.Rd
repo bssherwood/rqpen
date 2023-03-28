@@ -17,3 +17,4 @@ A cross validation plot.
 \description{
 Cross validation plot for cv.rq.group.pen object
 }
+\keyword{internal}
