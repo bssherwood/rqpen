@@ -2430,10 +2430,13 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \insertRef{qr_cd}{rqPen}
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
 						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01),alg=c("huber","br","qicd"), 
-						a=NULL, norm=2, group.pen.factor=rep(1,length(unique(groups))),tau.penalty.factor=rep(1,length(tau)),
+						a=NULL, norm=2, group.pen.factor=NULL,tau.penalty.factor=rep(1,length(tau)),
 						scalex=TRUE,coef.cutoff=1e-8,max.iter=500,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE, ...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(is.null(group.pen.factor)){
+		group.pen.factor <- sqrt(xtabs(~groups))
+	}
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
