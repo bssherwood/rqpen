@@ -2356,7 +2356,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param alg Algorithm used. Choices are Huber approximation ("huber"), linear programming ("lp") or quantile iterative coordinate descent ("qicd").
 #' @param a The additional tuning parameter for adaptive lasso, SCAD and MCP. 
 #' @param norm Whether a L1 or L2 norm is used for the grouped coefficients. 
-#' @param group.pen.factor Penalty factor for each group.
+#' @param group.pen.factor Penalty factor for each group. Default is 1 for all groups if norm=1 and square root of group size if norm=2. 
 #' @param tau.penalty.factor Penalty factor for each quantile.
 #' @param scalex Whether X should be centered and scaled so that the columns have mean zero and standard deviation of one. If set to TRUE, the coefficients will be returned to the original scale of the data.
 #' @param coef.cutoff Coefficient cutoff where any value below this number is set to zero. Useful for the lp algorithm, which are prone to finding almost, but not quite, sparse solutions. 
@@ -2434,13 +2434,21 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 						scalex=TRUE,coef.cutoff=1e-8,max.iter=500,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE, ...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(norm != 1 & norm != 2){
+		stop("norm must be 1 or 2")
+	}
+	
+	g <- length(unique(groups))
 	if(is.null(group.pen.factor)){
-		group.pen.factor <- sqrt(xtabs(~groups))
+		if(norm == 2){
+			group.pen.factor <- sqrt(xtabs(~groups))
+		} else{
+			group.pen.factor <- rep(1,g)
+		}
 	}
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
-	g <- length(unique(groups))
 	nt <- length(tau)
 	na <- length(a)
 	lpf <- length(group.pen.factor)
@@ -2461,9 +2469,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	}
 	#penalty <- match.arg(penalty)
 	#alg <- match.arg(alg)
-	if(norm != 1 & norm != 2){
-		stop("norm must be 1 or 2")
-	}
+	
 	if(!is.matrix(x)){
 	  stop("x must be a matrix")
 	}
