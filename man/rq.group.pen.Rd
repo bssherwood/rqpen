@@ -16,7 +16,7 @@ rq.group.pen(
   alg = c("huber", "br", "qicd"),
   a = NULL,
   norm = 2,
-  group.pen.factor = rep(1, length(unique(groups))),
+  group.pen.factor = NULL,
   tau.penalty.factor = rep(1, length(tau)),
   scalex = TRUE,
   coef.cutoff = 1e-08,
@@ -50,7 +50,7 @@ rq.group.pen(
 
 \item{norm}{Whether a L1 or L2 norm is used for the grouped coefficients.}
 
-\item{group.pen.factor}{Penalty factor for each group.}
+\item{group.pen.factor}{Penalty factor for each group. Default is 1 for all groups if norm=1 and square root of group size if norm=2.}
 
 \item{tau.penalty.factor}{Penalty factor for each quantile.}
 
