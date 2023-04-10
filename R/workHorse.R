@@ -46,7 +46,7 @@ model_eval <- function(model, test_x, test_y, test_w=NULL, func="check",...){
 qbic <- function(model, largeP=FALSE){
   tau <- model$tau
   n <- model$n
-  nzero <- sum(model$coefficients !=0)
+  nzero <- apply(model$coefficients !=0,2,sum)
   if(largeP){
     bic <- log(model$rho) + nzero*log(n)*log(length(model$coefficients))/(2*n)
   }else{
