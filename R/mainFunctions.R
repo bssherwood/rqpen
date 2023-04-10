@@ -426,7 +426,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' 
 #' \insertRef{qr_cd}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
-rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP","gQuant"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
+rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
 	penalty.factor = rep(1, ncol(x)),alg=c("huber","br","QICD","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
 	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
 	penalty <- match.arg(penalty)
@@ -463,12 +463,13 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
 		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,lambda.discard=lambda.discard,...)
-	} else if(penalty == "gQuant"){
-		fit <- rq.pen.gq1y(x,y,tau,lambda,nlambda=100,eps,scalex=FALSE,penalty.factor=penalty.factor, 
-							tau.penalty.factor=tau.penalty.factor,
-							max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,
-							gamma=gamma)
-	}
+	} 
+	#else if(penalty == "gQuant"){
+		# fit <- rq.pen.gq1y(x,y,tau,lambda,nlambda=100,eps,scalex=FALSE,penalty.factor=penalty.factor, 
+							# tau.penalty.factor=tau.penalty.factor,
+							# max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,
+							# gamma=gamma)
+	# }
 	if(scalex){
 		for(i in 1:length(fit$models)){
 			if(!is.null(dim(fit$models[[i]]$coefficients))){

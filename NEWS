@@ -1,3 +1,7 @@
+rqPen 3.1.3 (Release date: 2023-04-11)
+=============
+* Fixed bug where qic was not calculating the degree of freedom correctly. 
+
 rqPen 3.1.2 (Release date: 2023-03-28)
 =============
 * Moved some functions to internal that are only relevant to functions that are no longer exported. 
