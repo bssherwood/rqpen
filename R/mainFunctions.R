@@ -263,7 +263,7 @@ print.qic.select <- function(x,...){
 #' Predictions from a qic.select object
 #'
 #' @param object qic.select object
-#' @param newdata Data matrix to make predictions from. 
+#' @param newx Data matrix to make predictions from. 
 #' @param ... optional arguments
 #'
 #' @return A matrix of predicted values.
@@ -277,11 +277,11 @@ print.qic.select <- function(x,...){
 #' newx <- matrix(runif(80),ncol=8)
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.qic.select <- function(object, newdata, ...){
-	if(is.null(dim(newdata))){
-	  c(1,newdata) %*% coefficients(object)
+predict.qic.select <- function(object, newx, ...){
+	if(is.null(dim(newx))){
+	  c(1,newx) %*% coefficients(object)
 	} else{
-	  cbind(1,newdata) %*% coefficients(object)
+	  cbind(1,newx) %*% coefficients(object)
 	}
 }
 
@@ -1681,8 +1681,12 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 	if(is.null(lambdaIndex)){
 		lambdaIndex <- which(x$lambda==lambda)
 	}
-	if(length(lambdaIndex)>1){
+	lli <- length(lambdaIndex)
+	if(lli>1){
 		stop("Function only supports a single value of lambda or lambdaIndex")
+	}
+	if(lli==0){
+		stop("Lambda value must be one used when fitting the models")
 	}
 	coefs <- coefficients(x,a=a,lambdaIndex=lambdaIndex,...)
 	if(is.null(vars)){
@@ -1691,13 +1695,16 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 	  pindex <- vars
 	}
 	lp <- length(pindex)
-	if(lp > 1){	par(ask=TRUE) }
+	if(lp > 1){	
+		opar <- par(ask=TRUE) 
+		on.exit(par(opar))
+	}
 	tau <- x$tau
 	for(i in pindex){
 		plot(tau,coefs[i,],xlab=expression(tau),ylab="Coefficient",main=rownames(coefs)[i],pch=16)
 		lines(tau,coefs[i,])
 	}
-	if(lp > 1){	par(ask=FALSE) }
+	#if(lp > 1){	par(ask=FALSE) }
 }
 
 #' Plot of coefficients varying by quantiles for rq.pen.seq.cv object
@@ -1732,13 +1739,16 @@ bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,v
 	  pindex <- vars
 	}
 	lp <- length(pindex)
-	if(lp > 1){	par(ask=TRUE) }
+	if(lp > 1){	
+		opar <- par(ask=TRUE) 
+		on.exit(par(opar))
+	}
 	tau <- x$fit$tau
 	for(i in pindex){
 		plot(tau,coefs[i,],xlab=expression(tau),ylab=paste("Coefficient estimate"),main=rownames(coefs)[i],pch=16)
 		lines(tau,coefs[i,])
 	}
-	if(lp > 1){	par(ask=FALSE) }
+	#if(lp > 1){	par(ask=FALSE) }
 }
 
 
