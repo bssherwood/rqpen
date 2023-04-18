@@ -300,13 +300,17 @@ print.rq.pen.seq <- function(x,...){
   na <- length(x$a)
   if(nt==1 & na==1){
     print(data.frame(nzero=x$models[[1]]$nzero,lambda=x$lambda))
-  } else if(nt > 1 & na > 1){
-    print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
-  } else if( na > 1){
-    print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
   } else{
-    print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
-  }	
+	cat("\n Number of nonzero coefficients by lambda for all models\n")
+	print(data.frame(lambda=x$lambda,sapply(x$models,getNZero)))
+  }
+  # }else if(nt > 1 & na > 1){
+    # print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
+  # } else if( na > 1){
+    # print(paste(c(paste(c("Quantile regression with ", x$penalty, " penalty for quantile:",x$tau), collapse=" ")," and tuning parameters a:", x$a),collapse=" "))
+  # } else{
+    # print(paste(c("Quantile regression with ", x$penalty, " penalty for quantiles:",x$tau), collapse=" "))
+  # }	
 }
 
 

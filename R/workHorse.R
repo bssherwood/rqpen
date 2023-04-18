@@ -2,6 +2,10 @@ lambdanum <- function(model){
 	length(model$rho)
 }
 
+getNZero <- function(model){
+	model$nzero
+}
+
 updateCoefs <- function(obj,mu_x,sigma_x){
   transform_coefs(obj$coefficients,mu_x,sigma_x,TRUE)
 }
