@@ -314,12 +314,15 @@ l1norm <- function(x){
 }
 
 # Finds lambda max for a group penalty. 
-getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE,tau.penalty.factor,norm=2){
+getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamma.max=4,gamma.q=.1,penalty="gLASSO",scalex=TRUE,tau.penalty.factor,norm=2,weights=NULL){
 # code improvement: Hacky approach to the group.pen.factor issue. 
   lambda.max <- 0
 	n <- length(y)
 	if(scalex){
 		x <- scale(x)
+	}
+	if(is.null(weights)){
+		weights <- rep(1,n)
 	}
 	i <- 1
 	for(tau_val in tau){
@@ -337,7 +340,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 	  }
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
 
-		grad_k<- -neg.gradient(r, rep(1,n), tau_val, gamma=gamma0, x, apprx="huber")
+		grad_k<- -neg.gradient(r, weights, tau_val, gamma=gamma0, x, apprx="huber")
 		if(norm==2){
 		  grad_k.norm<- tapply(grad_k, group.index, l2norm)
 		}
@@ -356,7 +359,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 # lambda.discard not used
 rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.01,.0001), penalty.factor = rep(1, ncol(x)),
 						alg=c("huber","br"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
+						coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,weights=NULL,...){
 	if(alg == "lp"){
 	#use br as the default for linear programming 
 		alg <- "br"
@@ -388,7 +391,12 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		if(length(lambda)==1){
 			stop("The Huber algorithm requires at least 2 values of lambda")
 		}
-		returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,max.iter,converge.eps,lambda.discard=lambda.discard,...)
+		if(is.null(weights)){
+			returnVal <- rq.lasso.huber(x,y,tau,lambda,penalty.factor,scalex,tau.penalty.factor,max.iter,converge.eps,lambda.discard=lambda.discard,...)
+		} else{
+			#this needs to be updated
+			returnVal <- rq.glasso(x,y,tau,1:p, lambda,penalty.factor,scalex,tau.penalty.factor,max.iter,converge.eps,lambda.discard=lambda.discard,weights=weights,gamma=.2,...)
+		}
 	} else{
 		models <- vector(mode="list",length=nt)
 		modelnames <- NULL
@@ -397,7 +405,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 			j <- 1
 			for(lam in lambda){
 				sublam <- lam*penalty.factor*tau.penalty.factor[i]
-				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, coef.cutoff=coef.cutoff,lambda.discard=lambda.discard,...)
+				subm <- rq.lasso.fit(x,y,tau[i],lambda=sublam, method=alg,scalex=scalex, coef.cutoff=coef.cutoff,lambda.discard=lambda.discard,weights=weights,...)
 				coefs <- cbind(coefs,coefficients(subm))
 				j <- j + 1
 			}
@@ -562,7 +570,7 @@ clearModels <- function(model,pos){
 
 
 rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=NULL,norm=2, group.pen.factor,
-						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard,...){
+						tau.penalty.factor,scalex,coef.cutoff,max.iter,converge.eps,gamma,lambda.discard,weights,...){
 	#for loop calculation of penalty factors that could maybe be removed
 	nt <- length(obj$tau)
 	p <- ncol(x)
@@ -594,7 +602,7 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 				#print(paste("derivs are ", coef_by_group_deriv))
 				if(sum(coef_by_group_deriv)==0){
 					if(n > p + 1){
-						update_est <- try(coefficients(rq(y~x,tau=obj$tau[j])), silent=TRUE)
+						update_est <- try(coefficients(rq(y~x,weights=weights,tau=obj$tau[j])), silent=TRUE)
 						if(inherits(update_est,"try-error")){
 						  warning(paste0("At lambda value ", obj$lambda[i], " method is equivalent to an unpenalized method but quantreg:::rq(y~x) fails at quantile", obj$tau[j], ". Thus method stops at lambda", obj$lambda[i-1]))
 						  i <- i -1
@@ -617,14 +625,14 @@ rq.group.lla <- function(obj,x,y,groups,penalty=c("gAdLASSO","gSCAD","gMCP"),a=N
 					if(obj$alg=="huber"){
 						if(norm == 1){
 							penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=FALSE,...)$models[[1]])[,2]
+							update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=c(2,1),penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=FALSE,weights=weights,...)$models[[1]])[,2]
 						} else{
-							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=FALSE,...)$models[[1]])
+							update_est <- coefficients(rq.group.pen(x,y,obj$tau[j],groups,lambda=1,group.pen.factor=coef_by_group_deriv, alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=FALSE,weights=weights,...)$models[[1]])
 						}
 					} else{
 					#norm must be 1 as huber is only valid approach for norm 2
 						penalty.factor <- mapvalues(groups,seq(1,g),coef_by_group_deriv)
-						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=FALSE,...)$models[[1]])
+						update_est <- coefficients(rq.lasso(x,y,obj$tau[j],lambda=1,penalty.factor=penalty.factor,alg=obj$alg,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=FALSE,weights=weights,...)$models[[1]])
 					}
 				}
 				newModels[[pos]]$coefficients[,i] <- update_est
@@ -831,7 +839,7 @@ getDerivF <- function(penalty){
 	derivf
 }
 
-rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,lambda.discard,...){
+rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,lambda.discard,weights,...){
 	dims <- dim(x)
 	n <- dims[1]
 	p <- dims[2]
@@ -843,7 +851,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	for(i in 1:nt){
 		subtau <- tau[i]
 		penf <- group.pen.factor*tau.penalty.factor[i]
-		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,lambda.discard=lambda.discard,...)
+		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,lambda.discard=lambda.discard,weights=weights,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1)
 		#min_n_coefs <- min(min_n_coefs)
 	}

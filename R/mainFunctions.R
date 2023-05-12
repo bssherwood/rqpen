@@ -2384,6 +2384,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param converge.eps The convergence criteria for the algorithms. 
 #' @param gamma The tuning parameter for the Huber loss. 
 #' @param lambda.discard Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions. 
+#' @param weights Weights used in the quanitle loss objective function. 
 #' @param ... Additional parameters 
 #' 
 #' @description  
@@ -2451,7 +2452,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
 						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01),alg=c("huber","br","qicd"), 
 						a=NULL, norm=2, group.pen.factor=NULL,tau.penalty.factor=rep(1,length(tau)),
-						scalex=TRUE,coef.cutoff=1e-8,max.iter=500,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE, ...){
+						scalex=TRUE,coef.cutoff=1e-8,max.iter=500,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE,weights=NULL, ...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
 	if(norm != 1 & norm != 2){
@@ -2471,7 +2472,11 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	p <- dims[2]
 	if(length(groups)!=p){
 	  stop("length of groups is not equal to number of columns in x")
+	}	
+	if(is.null(weights) & penalty=="gAdLASSO"){
+		warning("Initial estimate for group adaptive lasso ignores the weights")
 	}
+	
 	nt <- length(tau)
 	na <- length(a)
 	lpf <- length(group.pen.factor)
@@ -2524,14 +2529,14 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		stop("group penalty factor must be of length g")
 	}	
 	if(is.null(lambda)){
-		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma,weights=weights)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 
 	penalty.factor <- mapvalues(groups,seq(1,g),group.pen.factor)
 	
 	if(penalty == "gLASSO"){
-		return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
+		return_val <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,weights=weights,...)
 	} else{
 		if(penalty == "gAdLASSO"){
 			init.model <- rq.enet(x,y,tau,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,tau.penalty.factor=tau.penalty.factor,
@@ -2545,12 +2550,12 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 				}
 				init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,
 							tau.penalty.factor=tau.penalty.factor,max.iter=max.iter,coef.cutoff=coef.cutoff,converge.eps=converge.eps,
-							gamma=gamma,lambda.discard=lambda.discard,...)
+							gamma=gamma,lambda.discard=lambda.discard,weights,...)
 			} else{
 				init.model <- rq.glasso(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalty.factor,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 			}
 		}
-		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,tau.penalty.factor=tau.penalty.factor,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=lambda.discard,...)
+		return_val <- rq.group.lla(init.model,x,y,groups,penalty=penalty,a=a,norm=norm,group.pen.factor=group.pen.factor,tau.penalty.factor=tau.penalty.factor,scalex=scalex,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=lambda.discard,weights=weights,...)
 	}
 	class(return_val) <- "rq.pen.seq"
 	return_val$call <- match.call()	
