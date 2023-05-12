@@ -893,6 +893,7 @@ print.rq.pen <- function(x,...){
 #' @param cvSummary The 
 #' @param tauWeights Weights for the tau penalty. 
 #' @param printProgress If set to TRUE will print which fold the process is working on. 
+#' @param weights Weights for the quantile loss function. Used in both model fitting and cross-validation. 
 #' @param ... Additional parameters that will be sent to rq.group.pen().
 #'
 #' @return
@@ -920,7 +921,7 @@ print.rq.pen <- function(x,...){
 #' m4 <- rq.group.pen.cv(x,y,penalty="gMCP",tau=c(.1,.3,.7),a=c(3,4,5),groups=g)
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Shaobo Li \email{shaobo.li@ku.edu}
-rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
+rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,weights=NULL,...){
 	n <- length(y)
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
@@ -948,15 +949,25 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		if(printProgress){
 			print(paste("Working on fold",i))
 		}
-		train_x <- x[foldid!=i,]
-		train_y <- y[foldid!=i]
-		test_x <- x[foldid==i,,drop=FALSE]
-		test_y <- y[foldid==i]
-		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,lambda.discard=FALSE,...)
+		trainIdx <- foldid!=i
+		testIdx <- foldid==i
+		
+		train_x <- x[trainIdx,]
+		train_y <- y[trainIdx]
+		train_wts <- weights[trainIdx]
+		
+		test_x <- x[testIdx,,drop=FALSE]
+		test_y <- y[testIdx]
+		test_wts <- weights[testIdx]
+		
+		trainModel <- rq.group.pen(train_x,train_y,tau,groups=groups,lambda=fit$lambda,a=fit$a,lambda.discard=FALSE,weights=train_wts,...)
 		if(is.null(cvFunc)){
-			testErrors <- check.errors(trainModel,train_x,train_y)
+			testErrors <- check.errors(trainModel,test_x,test_y)
 		} else{
 			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+		}
+		if(is.null(weights)==FALSE){
+			testErrors <- lapply(testErrors,"*",test_wts)
 		}
 		if(!groupError){
 			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
