@@ -6,8 +6,8 @@
 #'
 #' @return 
 #' Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
-#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
-#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
+#' \deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. The values of w_i default to one and are set using weights when fitting the models. Returns this value for each coefficient vector in the model, so one
 #' for every value of \eqn{\lambda}. 
 #' @keywords internal
 #' @examples \dontrun{
@@ -40,11 +40,13 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 
 
 #' Select tuning parameters using IC 
+#' 
+#' Selects tuning parameters using IC. If weights were used for the loss function then same weights will be used in calculating IC. 
 #'
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
 #' @param ... Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information. 
 #'
-#' @return Returns the plot of how coefficients change with tau. 
+#' @return Returns a qic.select object. 
 #' @export
 #' @examples
 #' set.seed(1)
@@ -63,7 +65,7 @@ qic.select <- function(obj,...){
 #' 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
-#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' \deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
 #' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
 #' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
@@ -73,7 +75,7 @@ qic.select <- function(obj,...){
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
 #' @param method Choice of BIC, AIC or PBIC, a large p BIC.
 #' @param septau If optimal values of \eqn{\lambda} and a can vary with \eqn{\tau}. Default is TRUE. 
-#' @param weights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.
+#' @param tauWeights Weights for each quantile. Useful if you set septau to FALSE but want different weights for the different quantiles. If not specified default is to have \eqn{w_q=1} for all quantiles.
 #' @param ... Additional arguments.
 #'
 #' @return 
@@ -93,18 +95,18 @@ qic.select <- function(obj,...){
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL,...){
+qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,tauWeights=NULL,...){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
 	method <- match.arg(method)
-	if(is.null(weights)==FALSE & septau){
+	if(is.null(tauWeights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
 	}
-	if(is.null(weights) & !septau){
-		weights <- rep(1,length(obj$tau))
+	if(is.null(tauWeights) & !septau){
+		tauWeights <- rep(1,length(obj$tau))
 	}
 	
 	n <- obj$n
-	if(septau & length(weights)==1){
+	if(septau & length(tauWeights)==1){
 		warning("septau set to TRUE, but only one quantile modeled")
 	}
 	nt <- length(obj$tau)
@@ -131,7 +133,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 		tqic_vals <- t(qic_vals)
 		for(i in 1:na){
 			subIC <- subset(tqic_vals, obj$modelsInfo$a==obj$a[i])
-			gic[i,] <- weights %*% subIC
+			gic[i,] <- tauWeights %*% subIC
 		}#
 		minIndex <- which(gic==min(gic),arr.ind=TRUE)
 		returnA <- obj$a[minIndex[1]]
@@ -156,7 +158,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 #' 
 #' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
 #' as
-#' \deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' \deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
 #' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
 #' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
@@ -353,7 +355,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @param coef.cutoff Some of the linear programs will provide very small, but not sparse solutions. Estimates below this number will be set to zero. This is ignored if a non-linear programming algorithm is used. 
 #' @param max.iter Maximum number of iterations of non-linear programming algorithms.
 #' @param converge.eps Convergence threshold for non-linear programming algorithms. 
-#' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights. 
+#' @param lambda.discard Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights.
+#' @param weights Weights for the quantile objective function.  
 #' @param ... Extra parameters. 
 #' 
 #' @description  
@@ -432,9 +435,15 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
 rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
 	penalty.factor = rep(1, ncol(x)),alg=c("huber","br","QICD","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,...){
+	coef.cutoff=1e-8,max.iter=10000,converge.eps=1e-7,lambda.discard=TRUE,weights=NULL,...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(is.null(weights)==FALSE & ( penalty=="ENet" | penalty=="Ridge")){
+		stop("Cannot use weights with elastic net or ridge penalty. Can use it with lasso, though may be much slower than unweighted version.")
+	}
+	if(is.null(weights)==FALSE & penalty=="aLASSO"){
+		warning("Weights are ignored when getting initial (Ridge) estimates for adaptive Lasso")
+	}
 	if(is.matrix(y)==TRUE){
 		y <- as.numeric(y)
 	}
@@ -451,7 +460,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	  if(alg=="QICD"){
 	    stop("QICD not implemented for LASSO")
 	  }
-		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,...)
+		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,weights=weights,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
 			stop("huber alg is only option for Ridge penalty")
@@ -466,7 +475,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		}
 		fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
 	} else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,lambda.discard=lambda.discard,...)
+		fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,gamma,lambda.discard=lambda.discard,weights=weights,...)
 	} 
 	#else if(penalty == "gQuant"){
 		# fit <- rq.pen.gq1y(x,y,tau,lambda,nlambda=100,eps,scalex=FALSE,penalty.factor=penalty.factor, 
@@ -496,6 +505,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 			fit$models[[j]]$nzero <- fit$models[[j]]$nzero[1:lmin]
 		}
 	}
+	fit$weights <- weights
 	fit$call <- match.call()
 	fit
 }
@@ -616,6 +626,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' @param cvSummary Function to summarize the errors across the folds, default is mean. User can specify another function, such as median.
 #' @param tauWeights Weights for the different tau models. 
 #' @param printProgress If set to TRUE prints which partition is being worked on. 
+#' @param weights Weights for the quantile loss objective function.
 #' @param ... Additional arguments passed to rq.pen()
 #' 
 #' @details 
@@ -658,7 +669,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(1,7)))
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,...){
+rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,weights=NULL,...){
 	n <- length(y)
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
@@ -690,16 +701,26 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
   		if(printProgress){
   			print(paste("Working on fold",i))
   		}
-  		train_x <- x[foldid!=i,]
-  		train_y <- y[foldid!=i]
-  		test_x <- x[foldid==i,,drop=FALSE]
-  		test_y <- y[foldid==i]
-  		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,...)
+		trainidx <- foldid!=i
+		testidx <- foldid==i
+		
+  		train_x <- x[trainidx,]
+  		train_y <- y[trainidx]
+		train_wts <- weights[trainidx]
+		
+  		test_x <- x[testidx,,drop=FALSE]
+  		test_y <- y[testidx]
+		test_wts <- weights[testidx]
+  		
+		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,weights=train_wts,...)
   		if(is.null(cvFunc)){
   			testErrors <- check.errors(trainModel,train_x,train_y)
   		} else{
   			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
   		}
+		if(is.null(weights)==FALSE){
+			testErrors <- lapply(testErrors,"*",test_wts)
+		}
   		if(!groupError){
   			indErrors <- indErrors + sapply(testErrors,apply,2,sum)
   		}
@@ -2575,6 +2596,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		lmin <- min(sapply(return_val$models,lambdanum))
 		return_val$lambda <- return_val$lambda[1:lmin]
 	}
+	return_val$weights <- weights
 	return_val
 }
 
