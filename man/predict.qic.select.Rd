@@ -4,12 +4,12 @@
 \alias{predict.qic.select}
 \title{Predictions from a qic.select object}
 \usage{
-\method{predict}{qic.select}(object, newdata, ...)
+\method{predict}{qic.select}(object, newx, ...)
 }
 \arguments{
 \item{object}{qic.select object}
 
-\item{newdata}{Data matrix to make predictions from.}
+\item{newx}{Data matrix to make predictions from.}
 
 \item{...}{optional arguments}
 }

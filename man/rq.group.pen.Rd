@@ -24,6 +24,7 @@ rq.group.pen(
   converge.eps = 1e-04,
   gamma = IQR(y)/10,
   lambda.discard = TRUE,
+  weights = NULL,
   ...
 )
 }
@@ -65,6 +66,8 @@ rq.group.pen(
 \item{gamma}{The tuning parameter for the Huber loss.}
 
 \item{lambda.discard}{Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions.}
+
+\item{weights}{Weights used in the quanitle loss objective function.}
 
 \item{...}{Additional parameters}
 }

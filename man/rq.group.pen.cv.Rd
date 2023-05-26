@@ -19,6 +19,7 @@ rq.group.pen.cv(
   cvSummary = mean,
   tauWeights = rep(1, length(tau)),
   printProgress = FALSE,
+  weights = NULL,
   ...
 )
 }
@@ -48,6 +49,8 @@ rq.group.pen.cv(
 \item{tauWeights}{Weights for the tau penalty.}
 
 \item{printProgress}{If set to TRUE will print which fold the process is working on.}
+
+\item{weights}{Weights for the quantile loss function. Used in both model fitting and cross-validation.}
 
 \item{...}{Additional parameters that will be sent to rq.group.pen().}
 }

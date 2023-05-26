@@ -21,6 +21,7 @@ rq.pen(
   max.iter = 10000,
   converge.eps = 1e-07,
   lambda.discard = TRUE,
+  weights = NULL,
   ...
 )
 }
@@ -56,6 +57,8 @@ rq.pen(
 \item{converge.eps}{Convergence threshold for non-linear programming algorithms.}
 
 \item{lambda.discard}{Algorithm may stop for small values of lambda if the coefficient estimates are not changing drastically. One example of this is it is possible for the LLA weights of the non-convex functions to all become zero and smaller values of lambda are extremely likely to produce the same zero weights.}
+
+\item{weights}{Weights for the quantile objective function.}
 
 \item{...}{Extra parameters.}
 }

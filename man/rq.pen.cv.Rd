@@ -19,6 +19,7 @@ rq.pen.cv(
   cvSummary = mean,
   tauWeights = rep(1, length(tau)),
   printProgress = FALSE,
+  weights = NULL,
   ...
 )
 }
@@ -50,6 +51,8 @@ rq.pen.cv(
 \item{tauWeights}{Weights for the different tau models.}
 
 \item{printProgress}{If set to TRUE prints which partition is being worked on.}
+
+\item{weights}{Weights for the quantile loss objective function.}
 
 \item{...}{Additional arguments passed to rq.pen()}
 }

@@ -716,7 +716,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
   		if(is.null(cvFunc)){
   			testErrors <- check.errors(trainModel,train_x,train_y)
   		} else{
-  			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+  			testErrors <- lapply(predErrors(trainModel,test_x,test_y),cvFunc)
   		}
 		if(is.null(weights)==FALSE){
 			testErrors <- lapply(testErrors,"*",test_wts)
@@ -985,7 +985,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 		if(is.null(cvFunc)){
 			testErrors <- check.errors(trainModel,test_x,test_y)
 		} else{
-			testErrors <- lapply(predict.errors(trainModel,test_x,test_y),cvFunc)
+			testErrors <- lapply(predErrors(trainModel,test_x,test_y),cvFunc)
 		}
 		if(is.null(weights)==FALSE){
 			testErrors <- lapply(testErrors,"*",test_wts)

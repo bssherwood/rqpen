@@ -12,10 +12,10 @@ qic.select(obj, ...)
 \item{...}{Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information.}
 }
 \value{
-Returns the plot of how coefficients change with tau.
+Returns a qic.select object.
 }
 \description{
-Select tuning parameters using IC
+Selects tuning parameters using IC. If weights were used for the loss function then same weights will be used in calculating IC.
 }
 \examples{
 set.seed(1)

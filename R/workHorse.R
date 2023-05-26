@@ -14,11 +14,11 @@ quick.predict <- function(coefs,newx){
   cbind(1,newx) %*% coefs
 }
 
-predict.models <- function(object, newx){
+predModels <- function(object, newx){
   cbind(1,newx) %*% object$coefficients
 }
 
-predict.errors <- function(object, newx, newy){
+predErrors <- function(object, newx, newy){
   preds <- predict(object,newx)
   errors <- lapply(preds,subtract,newy)
 }
@@ -28,7 +28,7 @@ check.errors <- function(object,newx,newy){
 }
 
 check.errors.model <- function(object,newx,newy){
-  preds <- predict.models(object,newx)
+  preds <- predErrors(object,newx)
   errors <- newy- preds
   check(errors,object$tau)
 }

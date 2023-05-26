@@ -15,8 +15,8 @@ qic(model, n, method = c("BIC", "AIC", "PBIC"))
 }
 \value{
 Let \eqn{\hat{\beta}} be the coefficient vectors for the estimated model. Function returns the value 
-\deqn{\log(\sum_{i=1}^n \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
-for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. Returns this value for each coefficient vector in the model, so one
+\deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}. The values of w_i default to one and are set using weights when fitting the models. Returns this value for each coefficient vector in the model, so one
 for every value of \eqn{\lambda}.
 }
 \description{
