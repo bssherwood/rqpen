@@ -19,8 +19,12 @@ predModels <- function(object, newx){
 }
 
 predErrors <- function(object, newx, newy){
-  preds <- predict(object,newx)
+  preds <- cbind(1,newx) %*% object$coefficients
   errors <- lapply(preds,subtract,newy)
+}
+
+checkErrors <- function(object,newx,newy){
+  lapply(object$models,check.errors.model,newx,newy)
 }
 
 check.errors <- function(object,newx,newy){
