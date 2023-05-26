@@ -32,7 +32,7 @@ check.errors <- function(object,newx,newy){
 }
 
 check.errors.model <- function(object,newx,newy){
-  preds <- predErrors(object,newx)
+  preds <- predModels(object,newx)
   errors <- newy- preds
   check(errors,object$tau)
 }
