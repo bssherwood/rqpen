@@ -21,6 +21,7 @@ predModels <- function(object, newx){
 predErrors <- function(object, newx, newy){
   preds <- cbind(1,newx) %*% object$coefficients
   errors <- lapply(preds,subtract,newy)
+  errors
 }
 
 checkErrors <- function(object,newx,newy){
