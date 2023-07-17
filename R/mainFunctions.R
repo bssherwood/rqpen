@@ -714,7 +714,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
   		
 		trainModel <- rq.pen(train_x,train_y,tau,lambda=fit$lambda,penalty=penalty,a=fit$a,lambda.discard=FALSE,weights=train_wts,...)
   		if(is.null(cvFunc)){
-  			testErrors <- check.errors(trainModel,train_x,train_y)
+  			testErrors <- check.errors(trainModel,test_x,test_y)
   		} else{
   			testErrors <- lapply(predErrors(trainModel,test_x,test_y),cvFunc)
   		}
