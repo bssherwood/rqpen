@@ -96,7 +96,7 @@ C Output from Public domain Ratfor, version 1.0
       g = mu + deltap*ddot(n,dx,1,z,1)+ deltad*ddot(n,dz,1,x,1) + deltap
      **deltad*ddot(n,dz,1,dx,1)+ deltap*ddot(n,ds,1,w,1)+ deltad*ddot(n,
      *dw,1,s,1) + deltap*deltad*ddot(n,ds,1,dw,1)
-      mu = mu * ((g/mu)**3) /dfloat(2*n)
+      mu = mu * ((g/mu)**3) /dble(2*n)
       do23026 i=1,n
       dr(i)=d(i)*(mu*(1/s(i)-1/x(i))+ dx(i)*dz(i)/x(i)-ds(i)*dw(i)/s(i))
 23026 continue

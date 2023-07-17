@@ -72,7 +72,7 @@ C
   125 K=I
 C                                  SELECT A CENTRAL ELEMENT OF THE
 C                                  ARRAY AND SAVE IT IN LOCATION T
-      IJ = I +  (DFLOAT (J-I) * R)
+      IJ = I +  (dble (J-I) * R)
       T=X(IJ)
 C                                  IF FIRST ELEMENT OF ARRAY IS GREATER
 C                                  THAN T, INTERCHANGE WITH T
