@@ -1,9 +1,14 @@
+rqPen 3.2.1 (Release date: ????-??-??)
+=============
+* Number of folds does not need to be specified when users specify their own fold id. 
+
+
 rqPen 3.2 (Release date: 2023-07-14)
 =============
 * Updated predict functions so they are all using newx. Some were using newdata. 
 * Improved print.rq.pen.seq() output to provide number of nonzero coefficients by lambda for multiple models. 
 * Updated rq.group.pen() to include weights for the quantile loss function
-* Fixed bug in rq.group.pen.cv() where prediction was done on training data instead of testing data
+* Fixed bug in rq.group.pen.cv() and rq.pen.cv() where prediction was done on training data instead of testing data
 * Changed name of some internal functions that were using R defaults in the incorrect way. For instance, predict.errors is now predErrors.
 * Fixed function predErrors to properly return values. 
 

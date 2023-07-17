@@ -673,7 +673,9 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
 	n <- length(y)
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
-    }
+	} else{
+    nfolds <- length(unique(foldid))
+  }
 	if(is.null(a)==FALSE & ( penalty[1] == "LASSO" | penalty[1] == "Ridge")){
 		warning("For Ridge and LASSO the tuning parameter a is ignored")
 	}
@@ -946,7 +948,9 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 	n <- length(y)
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
-    }
+	} else{
+	  nfolds <- length(unique(foldid))    
+  }
 	fit <- rq.group.pen(x,y,tau,lambda=lambda,groups=groups,a=a,...)
 	nt <- length(tau)
 	na <- length(fit$a)
