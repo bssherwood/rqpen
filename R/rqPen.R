@@ -23,4 +23,5 @@ NULL
 #' 
 #' @docType package
 #' @name rqPen
+#' @aliases rqPen-package
 NULL

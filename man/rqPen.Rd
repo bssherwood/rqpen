@@ -3,6 +3,7 @@
 \docType{package}
 \name{rqPen}
 \alias{rqPen}
+\alias{rqPen-package}
 \title{rqPen: A package for estimating quantile regression models using penalized objective functions.}
 \description{
 The package estimates a quantile regression model using LASSO, Adaptive LASSO, SCAD, MCP, elastic net, 
