@@ -15,7 +15,7 @@ rqPen 3.2 (Release date: 2023-07-14)
 
 rqPen 3.1.3 (Release date: 2023-04-11)
 =============
-* A fix for qbic() that was not needed and in 3.1.4 was reverted back to the correct function. 
+* A "fix" had been made for qbic() that was not needed and in 3.1.3 was reverted back to the correct function. 
 
 rqPen 3.1.2 (Release date: 2023-03-28)
 =============
