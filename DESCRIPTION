@@ -6,6 +6,7 @@ Date: 2023-08-24
 Author: Ben Sherwood [aut, cre], Adam Maidman [ctb], Shaobo Li [ctb] 
 Depends: R (>= 3.0.0)
 Imports: methods, quantreg, hqreg, hrqglas, data.table, Rdpack, lifecycle, plyr
+LinkingTo: Rcpp, RcppArmadillo
 RdMacros: Rdpack
 Suggests: splines, knitr
 Maintainer: Ben Sherwood <ben.sherwood@ku.edu>
