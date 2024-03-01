@@ -36,7 +36,7 @@
 #' X<- matrix(rnorm(n*p),n,p)
 #' y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 #' taus <- seq(0.1, 0.9, 0.2)
-#' fit<- hrq_tau_glasso(X, y, taus)
+#' fit<- rq.gq.pen(X, y, taus)
 #' matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
 #' 
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=101, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gamma=0.2, 
