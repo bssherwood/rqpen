@@ -4,7 +4,7 @@
 \alias{print.qic.select}
 \title{Print a qic.select object}
 \usage{
-\method{print}{qic.select}(x, ...)
+print.qic.select(x, ...)
 }
 \arguments{
 \item{x}{qic.select object}

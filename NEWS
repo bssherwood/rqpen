@@ -1,6 +1,7 @@
-rqPen 3.2.2 (Release date: TBD)
+rqPen 3.3 (Release date: TBD)
 =============
 * Fixed issue where QICD algorithm was not working when called from rq.pen(). Thanks to João Cruz for noticing the problem. 
+* Included rq.gq.pen() which enforces consistent variable selection across quantiles. 
 
 rqPen 3.2.1 (Release date: 2023-08-24)
 =============
