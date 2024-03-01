@@ -1513,7 +1513,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #' Plots cross validation results from a rq.pen.seq.cv object
 #'
 #' @param x The rq.pen.seq.cv object
-#' @param septau If set to true then optimal tuning parameters are selected seperately for each quantile and there will be a different plot for each quanitle. 
+#' @param septau If set to true then optimal tuning parameters are selected seperately for each quantile and there will be a different plot for each quantile. 
 #' @param tau Quantiles of interest.
 #' @param logLambda Whether log(lambda) is used for the x-axis
 #' @param main Title to the plot
@@ -2194,7 +2194,7 @@ plot.cv.rq.group.pen <- function (x,...)
     plot(x$cv[, 1], x$cv[, 2],...)
 }
 
-#' Estimates a quantile regression model with a lasso penalized quanitle loss function. 
+#' Estimates a quantile regression model with a lasso penalized quantile loss function. 
 #'
 #' @param x Matrix of predictors. 
 #' @param y Vector of responses.
@@ -2406,7 +2406,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param tau Vector of quantiles. 
 #' @param groups Vector of group assignments for predictors. 
 #' @param penalty Penalty used, choices are group lasso ("gLASSO"), group adaptive lasso ("gAdLASSO"), group SCAD ("gSCAD") and group MCP ("gMCP")
-#' @param lambda Vector of lambda tuning parameters. Will be autmoatically generated if it is not set. 
+#' @param lambda Vector of lambda tuning parameters. Will be automatically generated if it is not set. 
 #' @param nlambda The number of lambda tuning parameters.
 #' @param eps The value to be multiplied by the largest lambda value to determine the smallest lambda value. 
 #' @param alg Algorithm used. Choices are Huber approximation ("huber"), linear programming ("lp") or quantile iterative coordinate descent ("qicd").
@@ -2420,7 +2420,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param converge.eps The convergence criteria for the algorithms. 
 #' @param gamma The tuning parameter for the Huber loss. 
 #' @param lambda.discard Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions. 
-#' @param weights Weights used in the quanitle loss objective function. 
+#' @param weights Weights used in the quantile loss objective function. 
 #' @param ... Additional parameters 
 #' 
 #' @description  
@@ -2603,6 +2603,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	return_val$weights <- weights
 	return_val
 }
+
+
 
 #' Prints a cv.rq.pen object
 #'
