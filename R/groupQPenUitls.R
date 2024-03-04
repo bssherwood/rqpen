@@ -119,7 +119,7 @@ kkt_check.aug<- function(r, weights, w, gamma, tau, group.index, inactive.ind, l
 
 ## use Rcpp implemented neg_gradient_aug()
 kkt_check_aug<- function(r, weights, w, gamma, tau, group.index, inactive.ind, lambda, x, ntau){
-  grad<- -neg_gradient_aug(r, weights, tau, gamma, x, ntau) 
+  grad<- -negGradientAug(r, weights, tau, gamma, x, ntau) 
   grad.norm<- tapply(grad, group.index, l2norm)/w
   bad_spots <- grad.norm > lambda
   if(sum(bad_spots[inactive.ind])==0){

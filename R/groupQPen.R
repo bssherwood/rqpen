@@ -97,9 +97,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=101, weights=NULL, penalty
   ## get sequence of lambda if not supplied
   # l2norm of gradient for each group
   #grad_kR<- -neg.gradient.aug(r=r0, weights=weight_obs_aug, tau=tau, gamma=gamma, x=Xaug, n=n, apprx=apprx)
-  grad_k<- -neg_gradient_aug(r0, weight_obs_aug, tau_aug, gamma, Xaug, ntau) ## Rcpp
+  grad_k<- -negGradientAug(r0, weight_obs_aug, tau_aug, gamma, Xaug, ntau) ## Rcpp
   #grad_k.norm<- tapply(grad_k, groupIndex, l2norm)
-  grad_k.norm<- tapply(grad_k, groupIndex, weighted_norm, normweights=tau.penalty.factor)
+  grad_k.norm<- tapply(grad_k, groupIndex, weightedNorm, normweights=tau.penalty.factor)
   
   lambda.max<- max(grad_k.norm/penalty.factor)
   lambda.flag<- 0
@@ -194,7 +194,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=101, weights=NULL, penalty
       #print(j)
       if(length(active.ind)<p){
         ## use strong rule to determine active group at (i+1) (pre-screening)
-        grad_k<- -neg_gradient_aug(r0, weight_obs_aug, tau_aug, gamma, Xaug, ntau)
+        grad_k<- -negGradientAug(r0, weight_obs_aug, tau_aug, gamma, Xaug, ntau)
         grad_k.norm<- tapply(grad_k, groupIndex, l2norm)
         active.ind<- which(grad_k.norm>=penalty.factor*(2*lambda[j]-lambda[j-1])) 
         n.active.ind<- length(active.ind)
