@@ -9,3 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Imports: Rcpp (>= 1.0.11)
 LinkingTo: Rcpp, RcppArmadillo
+Encoding: UTF-8
+RoxygenNote: 7.2.3

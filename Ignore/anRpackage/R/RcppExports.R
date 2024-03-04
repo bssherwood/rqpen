@@ -2,18 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rcpparma_hello_world <- function() {
-    .Call(`_anRpackage_rcpparma_hello_world`)
+    .Call('_anRpackage_rcpparma_hello_world', PACKAGE = 'anRpackage')
 }
 
 rcpparma_outerproduct <- function(x) {
-    .Call(`_anRpackage_rcpparma_outerproduct`, x)
+    .Call('_anRpackage_rcpparma_outerproduct', PACKAGE = 'anRpackage', x)
 }
 
 rcpparma_innerproduct <- function(x) {
-    .Call(`_anRpackage_rcpparma_innerproduct`, x)
+    .Call('_anRpackage_rcpparma_innerproduct', PACKAGE = 'anRpackage', x)
 }
 
 rcpparma_bothproducts <- function(x) {
-    .Call(`_anRpackage_rcpparma_bothproducts`, x)
+    .Call('_anRpackage_rcpparma_bothproducts', PACKAGE = 'anRpackage', x)
+}
+
+multiplyNumbers <- function(x, y) {
+    .Call('_anRpackage_multiplyNumbers', PACKAGE = 'anRpackage', x, y)
 }
 

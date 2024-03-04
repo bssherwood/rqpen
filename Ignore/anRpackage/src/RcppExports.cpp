@@ -54,12 +54,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// multiplyNumbers
+double multiplyNumbers(double x, double y);
+RcppExport SEXP _anRpackage_multiplyNumbers(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(multiplyNumbers(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_anRpackage_rcpparma_hello_world", (DL_FUNC) &_anRpackage_rcpparma_hello_world, 0},
     {"_anRpackage_rcpparma_outerproduct", (DL_FUNC) &_anRpackage_rcpparma_outerproduct, 1},
     {"_anRpackage_rcpparma_innerproduct", (DL_FUNC) &_anRpackage_rcpparma_innerproduct, 1},
     {"_anRpackage_rcpparma_bothproducts", (DL_FUNC) &_anRpackage_rcpparma_bothproducts, 1},
+    {"_anRpackage_multiplyNumbers", (DL_FUNC) &_anRpackage_multiplyNumbers, 2},
     {NULL, NULL, 0}
 };
 
