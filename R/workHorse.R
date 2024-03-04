@@ -246,7 +246,7 @@ rq.huber.deriv<- function(r, tau, gamma){
   return(l.vec)
 } 
 
-neg.gradient <- function(r,weights,tau,gamma,x,apprx){
+neg.gradient <- function(r,weights,tau,gamma,x){
   #if(apprx=="huber"){
   wt_deriv <- as.vector(weights*rq.huber.deriv(r, tau, gamma))
   #}else{
