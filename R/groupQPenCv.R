@@ -192,7 +192,7 @@ cv.hrq_tau_glasso<- function(model_obj=NULL, nfolds=5, loss="rq", wt_tau_loss=NU
 #' @param cv.fit cv object from \code{cv.hrq_tau_glasso}
 #' @param s optimal lambda value
 #'
-#' @return
+#' @return coefficients
 #' @export
 #'
 coef.cv.hrq_tau_glasso<- function(cv.fit, s){
