@@ -13,7 +13,7 @@ NumericVector stlSort(NumericVector x) {
 }
 
 // [[Rcpp::export]]
-NumericVector find_indices(NumericVector x, int k) {
+NumericVector findIndices(NumericVector x, int k) {
   NumericVector indices;
   
   for (int i = 0; i < x.size(); i++) {
@@ -27,7 +27,7 @@ NumericVector find_indices(NumericVector x, int k) {
 
 /* Quantile loss function for augmented data (tau needs to be vectorized) */
 // [[Rcpp::export]]
-NumericVector rq_loss_aug(NumericVector r, NumericVector tau) {
+NumericVector rqLossAug(NumericVector r, NumericVector tau) {
   int n = r.size();
   NumericVector val(n);
   
@@ -54,7 +54,7 @@ NumericVector rq_loss_aug(NumericVector r, NumericVector tau) {
 
 /* First order derivative w.r.t. residual*/
 // [[Rcpp::export]]
-NumericVector rq_huber_deriv_aug(NumericVector r, NumericVector tau, double gamma) {
+NumericVector rqHuberDerivAug(NumericVector r, NumericVector tau, double gamma) {
   int n = r.size();
   NumericVector result(n);
   
@@ -72,13 +72,13 @@ NumericVector rq_huber_deriv_aug(NumericVector r, NumericVector tau, double gamm
 
 /* Negative gradient of huberized quantile loss (w.r.t. beta) */
 // [[Rcpp::export]]
-NumericVector neg_gradient_aug(NumericVector r, arma::vec weights, NumericVector tau, double gamma, arma::sp_mat x, int ntau) {
+NumericVector negGradientAug(NumericVector r, arma::vec weights, NumericVector tau, double gamma, arma::sp_mat x, int ntau) {
   int n = r.size();
   //int p = x.ncol();
   int p = x.n_cols;
   NumericVector grad(p);
   //NumericVector deriv_b(n); 
-  NumericVector deriv = rq_huber_deriv_aug(r, tau, gamma);
+  NumericVector deriv = rqHuberDerivAug(r, tau, gamma);
   arma::vec deriv_arma(deriv.begin(), n, false); // Convert deriv to Armadillo vector
   
   for (int j = 0; j < p; j++) {
@@ -106,7 +106,7 @@ NumericVector neg_gradient_aug(NumericVector r, arma::vec weights, NumericVector
 
 /* l2norm weighted */
 // [[Rcpp::export]]
-double weighted_norm(Rcpp::NumericVector x, Rcpp::NumericVector normweights) {
+double weightedNorm(Rcpp::NumericVector x, Rcpp::NumericVector normweights) {
   double result = 0.0;
   int n = x.size();
   
@@ -131,7 +131,7 @@ List solvebetaCpp(arma::sp_mat x, arma::vec y, int n, NumericVector tau, double 
   NumericVector beta1 = beta0;
   NumericVector int0Aug = rep_each(int0, n);
   NumericVector unique_groups = unique(groupIndex);
-  NumericVector unique_groups1 = stl_sort(unique_groups);
+  NumericVector unique_groups1 = stlSort(unique_groups);
   //Rcout << "unique_groups1 " << unique_groups1 << std::endl;
   int nGroup = groupIndex.length()/ntau;
   
@@ -150,7 +150,7 @@ List solvebetaCpp(arma::sp_mat x, arma::vec y, int n, NumericVector tau, double 
   while (delta>epsilon && iter<maxIter){
     iter++;
     arma::mat Xint = arma::kron(arma::eye<arma::mat>(ntau, ntau), ones(n));
-    NumericVector int1 = int0 + neg_gradient_aug(r01, weights, tau, gamma, sp_mat(Xint), ntau)*gamma;
+    NumericVector int1 = int0 + negGradientAug(r01, weights, tau, gamma, sp_mat(Xint), ntau)*gamma;
     r01 = r01-rep_each(int1, n)+rep_each(int0, n);
     
     for (int i = 0; i < nGroup; i++) {
@@ -158,12 +158,12 @@ List solvebetaCpp(arma::sp_mat x, arma::vec y, int n, NumericVector tau, double 
       //NumericVector ind = find_indices(groupIndex, k);
       IntegerVector ind = seq(i * ntau + 1, (i+1)*ntau);
       arma::sp_mat subX = x.cols(i*ntau, (i+1)*ntau-1);
-      u = neg_gradient_aug(r01, weights, tau, gamma, subX, ntau);
+      u = negGradientAug(r01, weights, tau, gamma, subX, ntau);
       NumericVector subBeta = beta0[Rcpp::Range(i * ntau, (i+1)*ntau-1)];
       //Rcout << "sumU " << sum(u) << std::endl;
       NumericVector temp1 = (u+subBeta*eigenval[k-1]);
       //double temp2 = l2_norm(temp1);
-      double temp2 = weighted_norm(temp1, wtau);
+      double temp2 = weightedNorm(temp1, wtau);
       NumericVector beta1_k(ntau);
       if(temp2>lambdaj*wlambda[k-1]){
         beta1_k = temp1*(1-lambdaj*wlambda[k-1]/temp2)/eigenval[k-1];

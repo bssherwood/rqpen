@@ -11,57 +11,57 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// stl_sort
-NumericVector stl_sort(NumericVector x);
-RcppExport SEXP _rqPen_stl_sort(SEXP xSEXP) {
+// stlSort
+NumericVector stlSort(NumericVector x);
+RcppExport SEXP _rqPen_stlSort(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(stl_sort(x));
+    rcpp_result_gen = Rcpp::wrap(stlSort(x));
     return rcpp_result_gen;
 END_RCPP
 }
-// find_indices
-NumericVector find_indices(NumericVector x, int k);
-RcppExport SEXP _rqPen_find_indices(SEXP xSEXP, SEXP kSEXP) {
+// findIndices
+NumericVector findIndices(NumericVector x, int k);
+RcppExport SEXP _rqPen_findIndices(SEXP xSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    rcpp_result_gen = Rcpp::wrap(find_indices(x, k));
+    rcpp_result_gen = Rcpp::wrap(findIndices(x, k));
     return rcpp_result_gen;
 END_RCPP
 }
-// rq_loss_aug
-NumericVector rq_loss_aug(NumericVector r, NumericVector tau);
-RcppExport SEXP _rqPen_rq_loss_aug(SEXP rSEXP, SEXP tauSEXP) {
+// rqLossAug
+NumericVector rqLossAug(NumericVector r, NumericVector tau);
+RcppExport SEXP _rqPen_rqLossAug(SEXP rSEXP, SEXP tauSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(rq_loss_aug(r, tau));
+    rcpp_result_gen = Rcpp::wrap(rqLossAug(r, tau));
     return rcpp_result_gen;
 END_RCPP
 }
-// rq_huber_deriv_aug
-NumericVector rq_huber_deriv_aug(NumericVector r, NumericVector tau, double gamma);
-RcppExport SEXP _rqPen_rq_huber_deriv_aug(SEXP rSEXP, SEXP tauSEXP, SEXP gammaSEXP) {
+// rqHuberDerivAug
+NumericVector rqHuberDerivAug(NumericVector r, NumericVector tau, double gamma);
+RcppExport SEXP _rqPen_rqHuberDerivAug(SEXP rSEXP, SEXP tauSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type tau(tauSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(rq_huber_deriv_aug(r, tau, gamma));
+    rcpp_result_gen = Rcpp::wrap(rqHuberDerivAug(r, tau, gamma));
     return rcpp_result_gen;
 END_RCPP
 }
-// neg_gradient_aug
-NumericVector neg_gradient_aug(NumericVector r, arma::vec weights, NumericVector tau, double gamma, arma::sp_mat x, int ntau);
-RcppExport SEXP _rqPen_neg_gradient_aug(SEXP rSEXP, SEXP weightsSEXP, SEXP tauSEXP, SEXP gammaSEXP, SEXP xSEXP, SEXP ntauSEXP) {
+// negGradientAug
+NumericVector negGradientAug(NumericVector r, arma::vec weights, NumericVector tau, double gamma, arma::sp_mat x, int ntau);
+RcppExport SEXP _rqPen_negGradientAug(SEXP rSEXP, SEXP weightsSEXP, SEXP tauSEXP, SEXP gammaSEXP, SEXP xSEXP, SEXP ntauSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,19 +71,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type ntau(ntauSEXP);
-    rcpp_result_gen = Rcpp::wrap(neg_gradient_aug(r, weights, tau, gamma, x, ntau));
+    rcpp_result_gen = Rcpp::wrap(negGradientAug(r, weights, tau, gamma, x, ntau));
     return rcpp_result_gen;
 END_RCPP
 }
-// weighted_norm
-double weighted_norm(Rcpp::NumericVector x, Rcpp::NumericVector normweights);
-RcppExport SEXP _rqPen_weighted_norm(SEXP xSEXP, SEXP normweightsSEXP) {
+// weightedNorm
+double weightedNorm(Rcpp::NumericVector x, Rcpp::NumericVector normweights);
+RcppExport SEXP _rqPen_weightedNorm(SEXP xSEXP, SEXP normweightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type normweights(normweightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(weighted_norm(x, normweights));
+    rcpp_result_gen = Rcpp::wrap(weightedNorm(x, normweights));
     return rcpp_result_gen;
 END_RCPP
 }
