@@ -208,7 +208,3 @@ List solvebetaCpp(arma::sp_mat x, arma::vec y, int n, NumericVector tau, double 
                             Named("gradient") = -u);
   
 }
-
-
-
-

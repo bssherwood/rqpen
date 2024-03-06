@@ -10,6 +10,7 @@
 #' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR resid
 #' @importFrom Rdpack reprompt
 #' @importFrom methods is
+#' @importFrom Rcpp evalCpp
 #' @useDynLib rqPen, .registration=TRUE
 NULL 
 
