@@ -305,7 +305,7 @@ getLamMax <- function(x,y,tau=.5,penalty="LASSO",scalex=TRUE,a=NULL,tau.penalty.
 			  gamma.max <- .001
 			}
 			gamma0<- max(gamma.max, quantile(abs(r), probs = gamma.q))
-			grad_k<- -neg.gradient(r, weights, tau_val, gamma=gamma0, x, apprx="huber")[validspots]
+			grad_k<- -neg.gradient(r, weights, tau_val, gamma=gamma0, x)[validspots]
 			returnVal <- max(c(returnVal,abs(grad_k)/pf))
 			tspot <- tspot + 1
 		}
@@ -347,7 +347,7 @@ getLamMaxGroup <- function(x,y,group.index,tau=.5,group.pen.factor,gamma=.2,gamm
 	  r <- resid(q1)
 		gamma0<- min(gamma.max, max(gamma, quantile(abs(r), probs = gamma.q)))
 
-		grad_k<- -neg.gradient(r, weights, tau_val, gamma=gamma0, x, apprx="huber")
+		grad_k<- -neg.gradient(r, weights, tau_val, gamma=gamma0, x)
 		if(norm==2){
 		  grad_k.norm<- tapply(grad_k, group.index, l2norm)
 		}
