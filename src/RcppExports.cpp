@@ -112,3 +112,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_rqPen_stlSort", (DL_FUNC) &_rqPen_stlSort, 1},
+    {"_rqPen_findIndices", (DL_FUNC) &_rqPen_findIndices, 2},
+    {"_rqPen_rqLossAug", (DL_FUNC) &_rqPen_rqLossAug, 2},
+    {"_rqPen_rqHuberDerivAug", (DL_FUNC) &_rqPen_rqHuberDerivAug, 3},
+    {"_rqPen_negGradientAug", (DL_FUNC) &_rqPen_negGradientAug, 6},
+    {"_rqPen_weightedNorm", (DL_FUNC) &_rqPen_weightedNorm, 2},
+    {"_rqPen_solvebetaCpp", (DL_FUNC) &_rqPen_solvebetaCpp, 15},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_rqPen(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}
