@@ -64,7 +64,7 @@ cv.rq.pen(
 }
 \value{
 Returns the following:
-\itemize{
+\describe{
 \item{models}{List of penalized models fit. Number of models will match number of lambdas and correspond to cv$lambda.}
 \item{cv}{Data frame with "lambda" and second column is the evaluation based on the criteria selected.}
 \item{lambda.min}{Lambda which provides the smallest statistic for the selected criteria.}

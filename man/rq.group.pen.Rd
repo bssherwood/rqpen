@@ -73,7 +73,7 @@ rq.group.pen(
 }
 \value{
 An rq.pen.seq object. 
-\itemize{
+\describe{
 \item{models}{A list of each model fit for each tau and a combination.}
 \item{n}{Sample size.}
 \item{p}{Number of predictors.}
@@ -86,7 +86,7 @@ An rq.pen.seq object.
 \item{call}{Original call.}
 }
 Each model in the models list has the following values. 
-\itemize{
+\describe{
 \item{coefficients}{Coefficients for each value of lambda.}
 \item{rho}{The unpenalized objective function for each value of lambda.}
 \item{PenRho}{The penalized objective function for each value of lambda.}
@@ -101,7 +101,7 @@ Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models for Q q
 \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
 Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. The value of \eqn{k} is chosen by \code{norm}.
 Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
-\itemize{
+\describe{
 \item{Group LASSO (gLASSO)}{\eqn{P(||\beta||_k,\lambda,a)=\lambda||\beta||_k}}
 \item{Group SCAD}{\eqn{P(||\beta||_k,\lambda,a)=SCAD(||\beta||_k,\lambda,a)}}
 \item{Group MCP}{\eqn{P(||\beta||_k,\lambda,a)=MCP(||\beta||_k,\lambda,a)}}

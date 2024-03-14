@@ -64,7 +64,7 @@ rq.pen(
 }
 \value{
 An rq.pen.seq object. 
-\itemize{
+\describe{
 \item{models: }{ A list of each model fit for each tau and a combination.}
 \item{n:}{ Sample size.}
 \item{p:}{ Number of predictors.}
@@ -77,7 +77,7 @@ An rq.pen.seq object.
 \item{call:}{ Original call.}
 }
 Each model in the models list has the following values. 
-\itemize{
+\describe{
 \item{coefficients:}{ Coefficients for each value of lambda.}
 \item{rho:}{ The unpenalized objective function for each value of lambda.}
 \item{PenRho:}{ The penalized objective function for each value of lambda.}
@@ -85,7 +85,6 @@ Each model in the models list has the following values.
 \item{tau:}{ Quantile of the model.}
 \item{a:}{ Value of a for the penalized loss function.}
 }
-
 If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
 \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
 Where if \eqn{\tau=.5}, we get the usual Huber loss function. The Huber implementation calls the package hqreg which implements the methods of Yi and Huang (2017) 
@@ -96,7 +95,7 @@ with a lasso penalty with different weights for each predictor.
 Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
 \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
-\itemize{
+\describe{
 \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
 \item{SCAD:}{ \eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
 \item{MCP:}{ \eqn{P(\beta,\lambda,a)=MCP(\beta,\lambda,a)}}
@@ -105,7 +104,7 @@ Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.f
 \item{Adaptive LASSO:}{ \eqn{P(\beta,\lambda,a)=\frac{\lambda |\beta|}{|\beta_0|^a}}}
 }
 For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. Three different algorithms are implemented
-\itemize{
+\describe{
 \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
 \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm.} 
 \item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }

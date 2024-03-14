@@ -79,10 +79,12 @@ qic.select <- function(obj,...){
 #' @param ... Additional arguments.
 #'
 #' @return 
+#' \describe{
 #' \item{coefficients}{Coefficients of the selected models.}
 #' \item{ic}{Information criterion values for all considered models.}
 #' \item{modelsInfo}{Model info for the selected models related to the original object obj.}
 #' \item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
+#' }
 #' @export
 #' @examples
 #' set.seed(1)
@@ -170,7 +172,7 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 #' @param ... Additional arguments. 
 #'
 #' @return 
-#' \itemize{
+#' \describe{
 #' \item{coefficients}{Coefficients of the selected models.}
 #' \item{ic}{Information criterion values for all considered models.}
 #' \item{modelsInfo}{Model info for the selected models related to the original object obj.}
@@ -361,7 +363,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
 #' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 #' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
-#' \itemize{
+#' \describe{
 #' \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
 #' \item{SCAD:}{ \eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
 #' \item{MCP:}{ \eqn{P(\beta,\lambda,a)=MCP(\beta,\lambda,a)}}
@@ -370,14 +372,14 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{Adaptive LASSO:}{ \eqn{P(\beta,\lambda,a)=\frac{\lambda |\beta|}{|\beta_0|^a}}}
 #' }
 #' For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with the same value of \eqn{\lambda}. Three different algorithms are implemented
-#' \itemize{
+#' \describe{
 #' \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
 #' \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm.} 
 #' \item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }
 #' }
 #' The huber algorithm offers substantial speed advantages without much, if any, loss in performance. However, it should be noted that it solves an approximation of the quantile loss function.
 #' @return An rq.pen.seq object. 
-#' \itemize{
+#' \describe{
 #' \item{models: }{ A list of each model fit for each tau and a combination.}
 #' \item{n:}{ Sample size.}
 #' \item{p:}{ Number of predictors.}
@@ -390,7 +392,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{call:}{ Original call.}
 #' }
 #' Each model in the models list has the following values. 
-#' \itemize{
+#' \describe{
 #' \item{coefficients:}{ Coefficients for each value of lambda.}
 #' \item{rho:}{ The unpenalized objective function for each value of lambda.}
 #' \item{PenRho:}{ The penalized objective function for each value of lambda.}
@@ -398,7 +400,6 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{tau:}{ Quantile of the model.}
 #' \item{a:}{ Value of a for the penalized loss function.}
 #' }
-#' 
 #' If the Huber algorithm is used than \eqn{\rho_\tau(y_i-x_i^\top\beta)} is replaced by a Huber-type approximation. Specifically, it is replaced by \eqn{h^\tau_\gamma(y_i-x_i^\top\beta)/2} where 
 #' \deqn{h^\tau_\gamma(a) = a^2/(2\gamma)I(|a| \leq \gamma) + (|a|-\gamma/2)I(|a|>\gamma)+(2\tau-1)a.}
 #' Where if \eqn{\tau=.5}, we get the usual Huber loss function. The Huber implementation calls the package hqreg which implements the methods of Yi and Huang (2017) 
@@ -641,7 +642,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' \deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. 
 #' 
 #' @return
-#' \itemize{
+#' \describe{
 #' \item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 #' \item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
 #' \item{fit:}{ The rq.pen.seq object fit to the full data.}
@@ -918,7 +919,7 @@ print.rq.pen <- function(x,...){
 #' @param ... Additional parameters that will be sent to rq.group.pen().
 #'
 #' @return
-#' \itemize{
+#' \describe{
 #' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 #' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
 #' \item{fit}{The rq.pen.seq object fit to the full data.}
@@ -1048,13 +1049,12 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 #' goes from the maximum lambda found to "eps" on the log scale. For non-convex penalties local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
 #'
 #' @return Returns the following:
-#' \itemize{
+#' \describe{
 #' \item{models}{List of penalized models fit. Number of models will match number of lambdas and correspond to cv$lambda.}
 #' \item{cv}{Data frame with "lambda" and second column is the evaluation based on the criteria selected.}
 #' \item{lambda.min}{Lambda which provides the smallest statistic for the selected criteria.}
 #' \item{penalty}{Penalty selected.}
 #' }
-#' 
 #' @keywords internal
 #'
 #' @examples
@@ -1352,7 +1352,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' log scale. Local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
 #'
 #' @return Returns the following:
-#' \itemize{
+#' \describe{
 #' \item{coefficients}{Coefficients from the penalized model.}
 #' \item{PenRho}{Penalized objective function value.}
 #' \item{residuals}{ Residuals from the model.}
@@ -1844,6 +1844,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #'
 #' @return
 #' Returns the following: 
+#' \describe{
 #' \item{beta}{ Matrix of coefficients for different values of lambda}
 #' \item{residuals}{ Matrix of residuals for different values of lambda.}
 #' \item{rho}{Vector of rho, unpenalized portion of the objective function, for different values of lambda.}
@@ -1852,7 +1853,7 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \item{penalty}{ Penalty selected.} 
 #' \item{intercept}{Whether intercept was included in model.}
 #' \item{groups}{Group structure for penalty function.}
-#' 
+#' }
 #' @keywords internal
 #' 
 #' @examples 
@@ -1866,7 +1867,6 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \item Yuan, M. and Lin, Y. (2006). Model selection and estimation in regression with grouped variables. \emph{J. R. Statist. Soc. B}, \bold{68}, 49-67.
 #' \item Peng, B. and Wang, L. (2015). An Iterative Coordinate Descent Algorithm for High-Dimensional Nonconvex Penalized Quantile Regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694.
 #' }
-#'
 cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "SCAD", 
     intercept = TRUE, criteria = "CV", cvFunc = "check", nfolds = 10, 
     foldid = NULL, nlambda = 100, eps = 1e-04, init.lambda = 1,alg="huber",penGroups=NULL,
@@ -2052,8 +2052,8 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' @param penGroups Vector of TRUE and FALSE entries for each group determing if they should be penalized. Default is TRUE for all groups.
 #' @param ... Additional arguments sent to rq.group.lin.prog()
 #'
-#' @return Returns the following:      
-#' \itemize{    
+#' @return Returns the following:    
+#' \describe{  
 #' \item{coefficients}{Coefficients of the model.}
 #' \item{residuals}{ Residuals from the fitted model.}
 #' \item{rho}{Unpenalized portion of the objective function.}
@@ -2061,7 +2061,6 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' \item{n}{Sample size.}
 #' \item{intercept}{Whether intercept was included in model.}
 #' }
-#' 
 #' @description Warning: function is no longer exported. Recommend using rq.group.pen() instead. 
 #' Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
 #' As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
@@ -2207,7 +2206,7 @@ plot.cv.rq.group.pen <- function (x,...)
 #'
 #' @return
 #' Returns the following:
-#' \itemize{
+#' \describe{
 #' \item{coefficients}{ Coefficients from the penalized model.} 
 #' \item{PenRho}{ Penalized objective function value.}
 #' \item{residuals}{ Residuals from the model.}
@@ -2215,7 +2214,6 @@ plot.cv.rq.group.pen <- function (x,...)
 #' \item{tau}{ Conditional quantile being modeled.}
 #' \item{n}{ Sample size.}  
 #' }
-#' 
 #' @description Fits a quantile regression model with the LASSO penalty. Uses the augmented data approach similar to the proposal in Sherwood and Wang (2016).   
 #' 
 #' @keywords internal
@@ -2425,7 +2423,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
 #' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. The value of \eqn{k} is chosen by \code{norm}.
 #' Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
-#' \itemize{
+#' \describe{
 #' \item{Group LASSO (gLASSO)}{\eqn{P(||\beta||_k,\lambda,a)=\lambda||\beta||_k}}
 #' \item{Group SCAD}{\eqn{P(||\beta||_k,\lambda,a)=SCAD(||\beta||_k,\lambda,a)}}
 #' \item{Group MCP}{\eqn{P(||\beta||_k,\lambda,a)=MCP(||\beta||_k,\lambda,a)}}
@@ -2438,7 +2436,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' Where if \eqn{\tau=.5}, we get the usual Huber loss function. 
 #' 
 #' @return An rq.pen.seq object. 
-#' \itemize{
+#' \describe{
 #' \item{models}{A list of each model fit for each tau and a combination.}
 #' \item{n}{Sample size.}
 #' \item{p}{Number of predictors.}
@@ -2451,7 +2449,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \item{call}{Original call.}
 #' }
 #' Each model in the models list has the following values. 
-#' \itemize{
+#' \describe{
 #' \item{coefficients}{Coefficients for each value of lambda.}
 #' \item{rho}{The unpenalized objective function for each value of lambda.}
 #' \item{PenRho}{The penalized objective function for each value of lambda.}
@@ -2459,7 +2457,6 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \item{tau}{Quantile of the model.}
 #' \item{a}{Value of a for the penalized loss function.}
 #' }
-#' 
 #' @export
 #'
 #' @examples

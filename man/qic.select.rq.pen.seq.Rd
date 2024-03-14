@@ -24,10 +24,12 @@
 \item{...}{Additional arguments.}
 }
 \value{
+\describe{
 \item{coefficients}{Coefficients of the selected models.}
 \item{ic}{Information criterion values for all considered models.}
 \item{modelsInfo}{Model info for the selected models related to the original object obj.}
 \item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
+}
 }
 \description{
 Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated

@@ -24,7 +24,7 @@
 \item{...}{Additional arguments.}
 }
 \value{
-\itemize{
+\describe{
 \item{coefficients}{Coefficients of the selected models.}
 \item{ic}{Information criterion values for all considered models.}
 \item{modelsInfo}{Model info for the selected models related to the original object obj.}

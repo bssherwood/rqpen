@@ -52,7 +52,7 @@ rq.nc.fit(
 }
 \value{
 Returns the following:
-\itemize{
+\describe{
 \item{coefficients}{Coefficients from the penalized model.}
 \item{PenRho}{Penalized objective function value.}
 \item{residuals}{ Residuals from the model.}

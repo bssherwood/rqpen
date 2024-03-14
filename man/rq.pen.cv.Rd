@@ -57,7 +57,7 @@ rq.pen.cv(
 \item{...}{Additional arguments passed to rq.pen()}
 }
 \value{
-\itemize{
+\describe{
 \item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 \item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
 \item{fit:}{ The rq.pen.seq object fit to the full data.}

@@ -42,8 +42,8 @@ rq.group.fit(
 \item{...}{Additional arguments sent to rq.group.lin.prog()}
 }
 \value{
-Returns the following:      
-\itemize{    
+Returns the following:    
+\describe{  
 \item{coefficients}{Coefficients of the model.}
 \item{residuals}{ Residuals from the fitted model.}
 \item{rho}{Unpenalized portion of the objective function.}
