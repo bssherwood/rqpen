@@ -61,7 +61,6 @@ cv.rq.group.pen(
 }
 \value{
 Returns the following: 
-\itemize{         
 \item{beta}{ Matrix of coefficients for different values of lambda}
 \item{residuals}{ Matrix of residuals for different values of lambda.}
 \item{rho}{Vector of rho, unpenalized portion of the objective function, for different values of lambda.}
@@ -70,7 +69,6 @@ Returns the following:
 \item{penalty}{ Penalty selected.} 
 \item{intercept}{Whether intercept was included in model.}
 \item{groups}{Group structure for penalty function.}
-}
 }
 \description{
 This function is no longer exported. Recommend using rq.group.pen.cv() instead.

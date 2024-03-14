@@ -1846,7 +1846,6 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #'
 #' @return
 #' Returns the following: 
-#' \itemize{         
 #' \item{beta}{ Matrix of coefficients for different values of lambda}
 #' \item{residuals}{ Matrix of residuals for different values of lambda.}
 #' \item{rho}{Vector of rho, unpenalized portion of the objective function, for different values of lambda.}
@@ -1855,7 +1854,6 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' \item{penalty}{ Penalty selected.} 
 #' \item{intercept}{Whether intercept was included in model.}
 #' \item{groups}{Group structure for penalty function.}
-#' }
 #' 
 #' @keywords internal
 #' 
