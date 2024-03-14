@@ -13,7 +13,7 @@ rq.group.pen(
   lambda = NULL,
   nlambda = 100,
   eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
-  alg = c("huber", "br", "qicd"),
+  alg = c("huber", "br"),
   a = NULL,
   norm = 2,
   group.pen.factor = NULL,
@@ -45,7 +45,7 @@ rq.group.pen(
 
 \item{eps}{The value to be multiplied by the largest lambda value to determine the smallest lambda value.}
 
-\item{alg}{Algorithm used. Choices are Huber approximation ("huber"), linear programming ("lp") or quantile iterative coordinate descent ("qicd").}
+\item{alg}{Algorithm used. Choices are Huber approximation ("huber") or linear programming ("lp").}
 
 \item{a}{The additional tuning parameter for adaptive lasso, SCAD and MCP.}
 

@@ -12,7 +12,7 @@ rq.group.fit(
   lambda,
   intercept = TRUE,
   penalty = "SCAD",
-  alg = "QICD",
+  alg = "LP",
   a = 3.7,
   penGroups = NULL,
   ...
@@ -33,7 +33,7 @@ rq.group.fit(
 
 \item{penalty}{Type of penalty used: SCAD, MCP or LASSO.}
 
-\item{alg}{Type of algorithm used: QICD or LP.}
+\item{alg}{Only LP, QICD no longer available}
 
 \item{a}{Additional tuning parameter for SCAD and MCP.}
 
@@ -57,7 +57,7 @@ Warning: function is no longer exported. Recommend using rq.group.pen() instead.
 Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
 As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
 Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
-needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015).
+needed for the SCAD and MCP algorithm.
 }
 \references{
 \itemize{

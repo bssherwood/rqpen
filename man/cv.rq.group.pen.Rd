@@ -53,11 +53,11 @@ cv.rq.group.pen(
 
 \item{init.lambda}{Initial lambda used to find the maximum lambda. Not needed if lambda values are set.}
 
-\item{alg}{Algorithm used for fit. "QICD" or "LP".}
+\item{alg}{Algorithm used for fit. Only "LP", "QICD" is no longer available.}
 
 \item{penGroups}{Specify which groups will be penalized. Default is to penalize all groups.}
 
-\item{...}{Additional arguments to be sent to rq.group.fit or groupQICDMultLambda.}
+\item{...}{Additional arguments to be sent to rq.group.fit}
 }
 \value{
 Returns the following: 

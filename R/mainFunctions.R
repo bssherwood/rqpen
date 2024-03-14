@@ -375,7 +375,6 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \describe{
 #' \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
 #' \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm.} 
-#' \item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }
 #' }
 #' The huber algorithm offers substantial speed advantages without much, if any, loss in performance. However, it should be noted that it solves an approximation of the quantile loss function.
 #' @return An rq.pen.seq object. 
@@ -383,7 +382,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \item{models: }{ A list of each model fit for each tau and a combination.}
 #' \item{n:}{ Sample size.}
 #' \item{p:}{ Number of predictors.}
-#' \item{alg:}{ Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
+#' \item{alg:}{ Algorithm used. Options are "huber" or any method implemented in rq(), such as "br". }
 #' \item{tau:}{ Quantiles modeled.}
 #' \item{a:}{ Tuning parameters a used.}
 #' \item{modelsInfo:}{ Information about the quantile and a value for each model.}
@@ -456,9 +455,6 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 		x <- scale(x)
 	}
 	if(penalty=="LASSO"){
-	  if(alg=="QICD"){
-	    stop("QICD not implemented for LASSO")
-	  }
 		fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,weights=weights,...)
 	} else if(penalty=="Ridge"){
 		if(alg != "huber"){
@@ -1019,315 +1015,6 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 	class(returnVal) <- "rq.pen.seq.cv"
 	returnVal
 }
- 
-
-
-#' Cross Validated quantile regression
-#'
-#' @param x Matrix of predictors.
-#' @param y Numeric vector of response values.
-#' @param tau  Conditional quantile being modelled.
-#' @param lambda  Vector of lambdas. Default is for lambdas to be automatically generated.
-#' @param weights Weights for the objective function.
-#' @param penalty Type of penalty: "LASSO", "SCAD" or "MCP".
-#' @param intercept Whether model should include an intercept. Constant does not need to be included in "x".
-#' @param criteria How models will be evaluated. Either cross-validation "CV", BIC "BIC" or large P BIC "PBIC".
-#' @param cvFunc If cross-validation is used how errors are evaluated. Check function "check", "SqErr" (Squared Error) or "AE" (Absolute Value).
-#' @param nfolds  K for K-folds cross-validation.
-#' @param foldid  Group id for cross-validation. Function will randomly generate groups if not specified.
-#' @param nlambda Number of lambdas for which models are fit.
-#' @param eps Smallest lambda used.
-#' @param init.lambda Initial lambda used to find the maximum lambda. Not needed if lambda values are set.
-#' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
-#' @param alg Algorithm that will be used, either linear programming (LP) or coordinate descent (QICD) algorithm from Peng and Wang (2015).
-#' @param internal If this is an internal call to this function. 
-#' @param ... Additional arguments to be sent to rq.lasso.fit or rq.nc.fit.
-#' 
-#' @description 
-#' Warning: this function is depracated and will not be exported in future rqPen releases. Produces penalized quantile regression models for a range of lambdas and penalty of choice. 
-#' If lambda is unselected than an iterative algorithm is used to find a maximum lambda such  that the penalty is large enough to produce an intercept only model. Then range of lambdas 
-#' goes from the maximum lambda found to "eps" on the log scale. For non-convex penalties local linear approximation approach used by Wang, Wu and Li to extend LLA as proposed by Zou and Li (2008) to the quantile regression setting.  
-#'
-#' @return Returns the following:
-#' \describe{
-#' \item{models}{List of penalized models fit. Number of models will match number of lambdas and correspond to cv$lambda.}
-#' \item{cv}{Data frame with "lambda" and second column is the evaluation based on the criteria selected.}
-#' \item{lambda.min}{Lambda which provides the smallest statistic for the selected criteria.}
-#' \item{penalty}{Penalty selected.}
-#' }
-#' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' x <- matrix(rnorm(800),nrow=100)
-#' y <- 1 + x[,1] - 3*x[,5] + rnorm(100)
-#' cv_model <- cv.rq.pen(x,y)
-#' }
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",intercept=TRUE,criteria = "CV",cvFunc="check",nfolds=10,foldid=NULL,nlambda=100,eps=.0001,init.lambda=1,penVars=NULL,alg=ifelse(ncol(x)<50,"LP","QICD"),internal=FALSE,...){
-# x is a n x p matrix without the intercept term
-# y is a n x 1 vector
-# criteria used to select lambda is cross-validation (CV), BIC, or PBIC (large P)
-# nfolds: number of folds for cross validation
-# foldid: preset id of folds
-# penVar: variables to be penalized, default is all non-intercept terms
-
-  # Pre-algorithm setup/ get convenient values
-  if(length(tau)>1){
-      stop("cv.rq.pen() only allows for a single value of tau. The new and improved rq.pen.cv() allows for multiple")
-  }
-  if(is.matrix(y)){
-    stop("y must be a numeric vector not a matrix")
-  }
-  
-  m.c <- match.call() # This stores all the arguments in the function call as a list
-  
-  p <- dim(x)[2]
-  if(is.null(penVars)){
-    penVars <- 1:p
-  }
-  p_range <- penVars + intercept
-  n <- dim(x)[1]
-  pen_func <- switch(which(c("LASSO","SCAD","MCP")==penalty), lasso, scad, mcp)
- 
-  ### QICD ###
-  if( alg=="QICD" & penalty!="LASSO" ){
-    if(criteria=="CV"){
-      stop("CV criteria not implemented for QICD algorithm with nonconvex penalties. Please use BIC or PBIC instead")
-    }
-    m.c[["alg"]] <- "LP" #maybe this should be moved inside the is.null initial beta if statement. I don't think it matters, but might be cleaner code
-    penname <- penalty
-
-    if( !all(penVars==1:p) ){ # Some unpenalized coefficients
-      z    <- as.matrix(x[,-penVars])
-      xpen <- as.matrix(x[,penVars])
-      QICD_func <- QICD.nonpen
-      mapback <- order( c(penVars, (1:p)[-penVars]) ) # reorders the coefficients properly if some (non-intercept) coefficients are not penalized 
-      if( intercept )
-        mapback <- c(1, 1+mapback)
-    } else { # All penalized coefficients
-      z <- NULL
-      xpen <- x
-      QICD_func <- QICD
-      mapback <- 1:p # no reordering necessary if all (non-intercept) coefficients are penalized
-      if( intercept )
-        mapback <- c(1, 1+mapback)
-    }
-
-    # The QICD algorithm needs good starting values, use LASSO solution 
-    ## Speed things up using BIC, not k-fold, to select lambda for LASSO
-    ## Can skip this part if starting values are provided
-    if( is.null(m.c[["initial_beta"]]) ){
-      m.c[["penalty"]] <- "LASSO"
-      m.c[["criteria"]] <- "BIC"
-	  if(is.null(m.c[["lambda"]])==FALSE){
-		m.c[["lambda"]] <- NULL
-	  }
-      suppressWarnings(
-        m.c[["initial_beta"]] <- coefficients( eval.parent(m.c) )
-        # QICD.start <- coefficients( cv.rq.pen(x,y,tau=tau,lambda=lambda,penalty="LASSO",intercept=intercept,criteria="BIC",nlambda=nlambda,eps=eps,init.lambda=lambda,penVars=penVars,...) ) # Use the LASSO with BIC
-      )
-    }
-
-    # Start in middle of lambda vector
-    ## Increase lambda until intercept only model (or all penlized coefficients are zero)
-    ## Decrease lambda until full model (Sparsity assumption => full model is bad)
-    m.c[[1]] <- QICD_func#as.name(QICD_func)
-    m.c[["penalty"]] <- penalty
-    m.c[["x"]] <- xpen
-    m.c$z <- z
-
-    if( is.null(lambda) ){
-      lambdas <- exp( seq(-7, 1, length=100) ) 
-    } else {
-      lambdas <- lambda
-    }
-    
-    coefs <- matrix(NA, p+intercept, length(lambdas))
-
-    ### Loop for increasing lambda
-    for( i in floor(length(lambdas)/2):length(lambdas) ){
-      m.c[["lambda"]] <- lambdas[i]
-      coefs[,i] <- eval.parent( m.c )[mapback]
-      # coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
-      #                       penalty=penalty, initial_beta=QICD.start, ... )[mapback]
-      if( all(coefs[p_range,i] == 0) )
-        break()
-    }
-
-    ### Loop for decreasing lambda
-    for( i in floor(length(lambdas)/2):2 -1 ){
-      m.c[["lambda"]] <- lambdas[i]
-      coefs[,i] <- eval.parent( m.c )[mapback]
-      # coefs[,i] <- QICD_func( y=y,x=x, z=z, tau=tau, lambda=lambdas[i], intercept=intercept, 
-      #                       penalty=penalty, initial_beta=QICD.start, ... )[mapback]
-      if( all(coefs[p_range,i] != 0) )
-        break()
-    }
-
-    #### Remove the NA columns from coefs and corresponding lambdas
-    lambdas.keep <- which( !is.na(coefs[1,]) )
-    lambdas <- lambdas[lambdas.keep]
-    coefs <- coefs[,lambdas.keep]
-    rownames(coefs) <- names( m.c[["initial_beta"]] )
-    XB <- x%*%coefs[p_range,]
-    if( intercept )
-      XB <- XB + matrix(coefs[1,], n, ncol(coefs), byrow=TRUE)
-
-    residuals <- y - XB
-    rho <- colSums( check(residuals, tau=tau) )
-    if( is.null(m.c[["a"]]) )
-      a <- 3.7
-    PenRho <- rho + colSums(apply( rbind(lambdas, coefs), 2, 
-                    function(xx) pen_func(xx[1+p_range], lambda=xx[1], a=a) ))
-
-    cv <- data.frame(lambda=lambdas, cve=NA)
-    
-	if( criteria=="AIC" ){
-	  cv$cve <- log(rho) + colSums(coefs!=0)/n
-      names(cv)[2] <- "BIC"
-	}
-    if( criteria=="BIC" ){
-      cv$cve <- log(rho) + colSums(coefs!=0)*log(n)/(2*n)
-      names(cv)[2] <- "BIC"
-    } else { # PBIC
-      cv$cve <- log(rho) + colSums(coefs!=0)*log(n)*log(nrow(coefs))/(2*n)
-      names(cv)[2] <- "PBIC"
-    }
-
-    lambda.min <- lambdas[which.min(cv[,2])]
-
-    # Final cleanup for QICD
-    ## First get models for each lambda
-    models <- vector( "list", length(lambdas) )
-    for( j in 1:length(models) ){
-      models[[j]]$coefficients <- coefs[,j]
-      models[[j]]$PenRho <- PenRho[j]
-      models[[j]]$residuals <- residuals[,j]
-      models[[j]]$rho <- rho[j]
-      models[[j]]$tau <- tau
-      models[[j]]$n <- n
-      models[[j]]$intercept <- intercept
-      models[[j]]$penalty <- penalty
-      class(models[[j]]) <- c("rq.pen", "rqNC")
-    }
-
-    return_val <- list( models=models, cv=cv, lambda.min=lambda.min, penalty=penalty )
-    class(return_val) <- "cv.rq.pen"
-  } else{
-  ############
-
-
-
-  # If no lambdas provided, find reasonable lambdas to use
-  if(is.null(lambda)){
-  # find a lambda that sets all coefficients to zero. 
-  # Strategy is to get \lambda \sum p_\lambda(|\beta_j}) >= \sum \rho_\tau(y-quantile(y,tau)
-  # do this by fitting model with lambda = init.lambda and then set new lambda such that 
-  # \lambda* = \sum \rho_\tau(y-quantile(y,tau)) / \sum p_\lambda(|beta_j|) repeat as needed
-     sample_q <- quantile(y,tau)
-     inter_only_rho <- sum(check(y-sample_q,tau))
-     #lambda_star <- rep(0,p)
-     #lambda_star[penVars] <- init.lambda
-	 lambda_star <- init.lambda
-     searching <- TRUE
-     while(searching){
-       if(penalty=="LASSO"){
-         init_fit <- rq.lasso.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,...)
-       } else{
-         init_fit <- rq.nc.fit(x,y,tau,lambda=lambda_star,weights,intercept,penVars=penVars,internal=TRUE,...)
-       }
-       if(sum(init_fit$coefficients[p_range])==0){
-         searching <- FALSE     
-       } else{
-         lambda_star <- inter_only_rho / sum(sapply(init_fit$coefficients[p_range],pen_func,1)) 
-         #1 used here because solving for lambda
-       }
-     }
-     lambda_min <- eps*lambda_star
-     lambda <- exp(seq(log(max(lambda_min)),log(max(lambda_star)),length.out=nlambda))#max is included to handle cases where
-     # some variables are unpenalized and thus lambda is a multivalued vector with some zeros
-  }
-  # lambda is the vector of reasonable choices of lambda to use in the penalty
-
-  models <- list()
-  fit_models <- TRUE
-  lam_pos <- 1
-  if(penalty=="LASSO"){
-   while(fit_models){
-		if(fit_models){
-			models[[lam_pos]] <- rq.lasso.fit(x,y,tau,lambda[lam_pos],weights,intercept,penVars=penVars,...)
-      
-		}
-		if(sum(abs(coefficients(models[[lam_pos]])[p_range]))==0 || lam_pos==length(lambda)){
-		#if we got a fully sparse model, no need to fit more sparse models
-			fit_models <- FALSE
-			lambda <- lambda[1:lam_pos]
-		}
-    lam_pos <- lam_pos + 1
-	 }
-  } else{
-  	while(fit_models){
-  		if(fit_models){
-  			models[[lam_pos]] <- rq.nc.fit(x,y,tau,lambda[lam_pos],weights,intercept,penalty=penalty,penVars=penVars,...)
-      }
-  		if(sum(abs(coefficients(models[[lam_pos]])[p_range]))==0 || lam_pos==length(lambda)){
-  			fit_models <- FALSE
-  			lambda <- lambda[1:lam_pos]
-  		}
-      lam_pos <- lam_pos + 1
-  	 }
-     #models <- lapply(lambda,rq.nc.fit, x=x,y=y,tau=tau,weights=weights,intercept=intercept,penalty=penalty,
-     #                                   penVars=penVars,...)
-  }
-  cv_results <- NULL
-  if(criteria=="CV"){
-    if(is.null(foldid)){
-      foldid <- randomly_assign(n,nfolds)
-    }
-    for(i in 1:nfolds){
-      train_x <- x[foldid!=i,]
-      train_y <- y[foldid!=i]
-      test_x <- x[foldid==i,,drop=FALSE]
-      test_y <- y[foldid==i]
-	  train_weights <- weights[foldid!=i] #not sure this line is needed
-	  if(is.null(weights)){
-		train_weights <- test_weights <- NULL
-	  } else{
-	    train_weights <- weights[foldid!=i]
-		test_weights <- weights[foldid==i]
-	  }
-      if(penalty=="LASSO"){
-         cv_models <- lapply(lambda,rq.lasso.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penVars=penVars,...)
-      } else{
-         cv_models <- lapply(lambda,rq.nc.fit, x=train_x,y=train_y,tau=tau,weights=train_weights,intercept=intercept,penalty=penalty,penVars=penVars,...)
-      }
-      if(cvFunc=="check"){
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, tau=tau))
-      } else{
-         cv_results <- cbind(cv_results, sapply(cv_models,model_eval, test_x, test_y, test_weights, func=cvFunc))
-      } 
-    }
-    cv_results <- apply(cv_results,1,mean)
-  }
-  if(criteria=="BIC"){
-    cv_results <- sapply(models,qbic)
-  }
-  if(criteria=="PBIC"){
-    cv_results <- sapply(models,qbic,largeP=TRUE)
-  }
-  lambda.min <- lambda[which.min(cv_results)]
-  return_val <- NULL
-  return_val$models <- models
-  return_val$cv <- data.frame(lambda=lambda, cve=cv_results)
-  colnames(return_val$cv)[2] <- criteria
-  return_val$lambda.min <- lambda.min
-  return_val$penalty <- penalty
-  class(return_val) <- "cv.rq.pen"
-  }
-
-  return_val
-}
 
 #' Non-convex penalized quantile regression
 #' 
@@ -1341,7 +1028,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' @param a Additional tuning parameter for SCAD and MCP
 #' @param iterations Number of iterations to be done for iterative LLA algorithm.
 #' @param converge_criteria Difference in betas from iteration process that would satisfy convergence.
-#' @param alg Defaults for small p to linear programming (LP), see Wang, Wu and Li (2012) for details. Otherwise a coordinate descent algorithm is used (QICD), see Peng and Wang (2015) for details. Both methods rely on the One-step sparse estimates algorithm.
+#' @param alg Defaults for small p to linear programming (LP), see Wang, Wu and Li (2012) for details. QICD is no longer available. 
 #' @param penVars Variables that should be penalized. With default value of NULL all variables are penalized.
 #' @param internal Whether call to this function has been made internally or not. 
 #' @param ... Additional items to be sent to rq.lasso.fit.
@@ -1381,7 +1068,7 @@ cv.rq.pen <- function(x,y,tau=.5,lambda=NULL,weights=NULL,penalty="LASSO",interc
 #' }
 rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
                       penalty="SCAD",a=3.7,iterations=1,converge_criteria=1e-06,
-                      alg=ifelse(p<50,"LP","QICD"),penVars=NULL,internal=FALSE,...){
+                      alg="LP",penVars=NULL,internal=FALSE,...){
 # x is a n x p matrix without the intercept term
 # y is a n x 1 vector
 # lambda takes values of 1 or p
@@ -1392,51 +1079,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
   }
   p <- ncol(x)
   n <- nrow(x)
-
-  if( alg=="QICD" ){
-  ### QICD Algorithm ###
-	coefnames <- paste("x",1:p, sep="") ### Coefficient names
-    if( length(lambda) != 1 )
-      stop( "QICD Algorithm only allows 1 lambda value")	
-    ### Check if we are using QICD or QICD.nonpen
-    if( is.null(penVars) | length(penVars) == p){ ### No unpenalized coefficients
-      
-      coefs <- QICD(y, x, tau, lambda, intercept, penalty, eps=converge_criteria, a=a, ...)
-      penbeta <- intercept + 1:p ### Use later to calculate objective function
-    } else { ### Some unpenalized coefficients
-      z    <- as.matrix(x[,-penVars])
-      xpen <- as.matrix(x[,penVars])
-      #coefnames <- paste("x",1:ncol(xpen), sep="") ### Coefficient names
-      #coefnames <- c( coefnames, paste("z",1:ncol(z), sep="") )
-      penbeta <- intercept + penVars ### Use later to calculate objective function
-      coefs <- QICD.nonpen(y, xpen, z, tau, lambda, intercept, penalty, eps=converge_criteria, a=a, ...)
-	  coefs <- re_order_nonpen_coefs(coefs, penVars, intercept)
-    }
-
-    ### Add extra information to QICD output
-    
-    if( intercept ){ ### Residuals
-      residuals <- c( y - x%*%(coefs[-1]) - coefs[1] )
-	  names(coefs) <- c("intercept",coefnames)
-    } else {
-      residuals <- c( y - x%*%coefs )
-	  names(coefs) <- coefnames
-    }
-    rho <- sum( check(residuals) )
-	#1/n*sum( check(residuals) ) ### rho
-    if( penalty == "LASSO" ){ ### PenRho for LASSO
-      PenRho <- sum( abs( coefs[penbeta] )*lambda )
-    } else if( penalty == "SCAD" ){ ### PenRho for SCAD
-      PenRho <- sum( scad( coefs[penbeta], lambda, a ))
-    } else { ### PenRho for MCP
-      PenRho <- sum( mcp( coefs[penbeta], lambda, a ))
-    }
-    PenRho <- rho + PenRho
-
-    sub_fit <- list( coefficients=coefs,  PenRho=PenRho, residuals=residuals,
-                     rho=rho, tau=tau, n=n , intercept=intercept)
-  ######################
-  } else {  
+  
   ###  LP Algorithm  ###
 	   if(penalty=="SCAD"){
 		 deriv_func <- scad_deriv
@@ -1499,7 +1142,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 		  }
 	   }
     ######################
-    }
+    
 	 sub_fit$penalty <- penalty
 	 class(sub_fit) <-  c("rq.pen", "rqNC")
 	 return_val <- sub_fit
@@ -1835,9 +1478,9 @@ cv_plots <- function(model,logLambda=TRUE,loi=NULL,...){
 #' @param nlambda Number of lambdas for which models are fit.
 #' @param eps Multiple of lambda max for Smallest lambda used.
 #' @param init.lambda Initial lambda used to find the maximum lambda. Not needed if lambda values are set.
-#' @param alg Algorithm used for fit. "QICD" or "LP".
+#' @param alg Algorithm used for fit. Only "LP", "QICD" is no longer available. 
 #' @param penGroups Specify which groups will be penalized. Default is to penalize all groups.
-#' @param ... Additional arguments to be sent to rq.group.fit or groupQICDMultLambda.   
+#' @param ... Additional arguments to be sent to rq.group.fit  
 #' 
 #' @description 
 #' This function is no longer exported. Recommend using rq.group.pen.cv() instead. 
@@ -1883,47 +1526,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 	}
   n <- dim(x)[1]
   pen_func <- switch(which(c("LASSO", "SCAD", "MCP") == penalty), 
-        lasso, scad, mcp)
-  if(alg=="QICD" & penalty != "LASSO"){
-    if(criteria== "CV"){
-       stop("QICD algorithm wtih non-convex penalties setup only to use BIC or PBIC as the criteria")
-    }
-    #start with lasso fit
-    lasso_fit <- cv.rq.group.pen(x,y,groups,tau,lambda,penalty="LASSO",intercept,criteria="BIC",cvFunc,nfolds,foldid,
-                                   nlambda, eps, init.lambda,alg="LP",penGroups,...)
-    #then iterate through lasso models to get new models
-    model_coefs <- NULL
-    lambda_vals <- lasso_fit$cv$lambda
-    lasso_beta <- lasso_fit$beta
-    for(model_num in 1:dim(lasso_beta)[2]){
-       model_coefs <- cbind(model_coefs, QICD.group(y, x, groups, tau, lambda_vals[model_num], intercept, penalty, 
-                 initial_beta=lasso_beta[,model_num], eps = eps,...))
-    }
-    return_val <- NULL
-    return_val$beta <- model_coefs
-    if(intercept){
-       fits <- cbind(1,x) %*% model_coefs
-    } else{
-       fits <- x %*% model_coefs
-    }
-    return_val$residuals <- y - fits
-    return_val$rho <- apply(check(return_val$residuals,tau),2,sum)
-    non_zero_count <- apply(model_coefs!=0,2,sum)
-    if( criteria=="BIC" ){
-      cve <- log(return_val$rho) + non_zero_count*log(n)/(2*n)
-    } else { # PBIC
-      cve <- log(return_val$rho) + non_zero_count*log(n)*log(nrow(model_coefs))/(2*n)
-    }
-       
-    return_val$cv <- data.frame(lambda = lambda_vals, cve = cve)
-    colnames(return_val$cv)[2] <- criteria
-    return_val$lambda.min <- lambda_vals[which.min(cve)]
-    return_val$penalty <- penalty
-    return_val$intercept <- intercept
-    return_val$groups <- groups
-    class(return_val) <- c("cv.rq.group.pen", "cv.rq.pen")    
-  }      
-  else{
+        lasso, scad, mcp)      
     if (is.null(lambda)) {
         sample_q <- quantile(y, tau)
         inter_only_rho <- sum(check(y - sample_q, tau))
@@ -1982,7 +1585,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
          lambda_min <- eps*lambda_star
          lambda <- exp(seq(log(lambda_star), log(lambda_min),  length.out = nlambda))
        }
-    }
+    
     
     models <- groupMultLambda(x = x, y = y, groups = groups, 
         tau = tau, lambda = lambda, intercept = intercept, penalty=penalty,alg=alg,penGroups=penGroups, ...)
@@ -2047,7 +1650,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' @param lambda Single value or seperate value for each group.
 #' @param intercept Whether intercept should be included in the model or not.
 #' @param penalty Type of penalty used: SCAD, MCP or LASSO. 
-#' @param alg Type of algorithm used: QICD or LP. 
+#' @param alg Only LP, QICD no longer available
 #' @param a Additional tuning parameter for SCAD and MCP. 
 #' @param penGroups Vector of TRUE and FALSE entries for each group determing if they should be penalized. Default is TRUE for all groups.
 #' @param ... Additional arguments sent to rq.group.lin.prog()
@@ -2065,7 +1668,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' Similar to cv.rq.pen function, but uses group penalty. Group penalties use the L1 norm instead of L2 for computational convenience. 
 #' As a result of this the group lasso penalty is the same as the typical lasso penalty and thus you should only use a SCAD or MCP penalty. 
 #' Only the SCAD and MCP penalties incorporate the group structure into the penalty. The group lasso penalty is implemented because it is 
-#' needed for the SCAD and MCP algorithm. We use a group penalty extension of the QICD algorithm presented by Peng and Wang (2015). 
+#' needed for the SCAD and MCP algorithm.
 #' 
 #' @keywords internal
 #' 
@@ -2077,7 +1680,7 @@ cv.rq.group.pen <- function (x, y, groups, tau = 0.5, lambda = NULL, penalty = "
 #' \item Peng, B. and Wang, L. (2015). An Iterative Coordinate Descent Algorithm for High-Dimensional Nonconvex Penalized Quantile Regression. \emph{Journal of Computational and Graphical Statistics}, \bold{24}, 676-694.
 #' }
 rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, 
-                penalty = "SCAD", alg="QICD", a=3.7,penGroups=NULL, ...) 
+                penalty = "SCAD", alg="LP", a=3.7,penGroups=NULL, ...) 
 {
   #warning("recommend using rq.group.pen() instead, this is an older function with fewer options and does not include faster algorithms")
   ### Some cleaning/checking before getting to the algorithms
@@ -2106,39 +1709,6 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
 	pen_func <- mcp
   }
 
-  if (alg == "QICD") {
-  ### QICD Algorithm ###
-    if( length(lambda) != 1 )
-      stop( "QICD Algorithm only allows 1 lambda value")
-
-    coefs <- QICD.group(y, x, groups, tau, lambda, intercept, penalty,a=a, ...)
-
-    ### Add extra information to QICD output
-    coefnames <- paste("x",1:p, sep="") ### Coefficient names
-    if(intercept)
-      coefnames <- c("(Intercept)", coefnames)
-    names(coefs) <- coefnames
-    if( intercept ){ ### Residuals
-      residuals <- c( y - x%*%(coefs[-1]) - coefs[1] )
-	  pen_vars <- coefs[-1]
-    } else {
-      residuals <- c( y - x%*%coefs )
-	  pen_vars <- coefs
-    }
-	if(penalty=="LASSO"){
-		pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda))
-	} else{
-		pen_val <- sum(pen_func(tapply(abs(pen_vars),groups,sum),lambda=lambda,a=a))
-	}
-	
-    rho <- sum( check(residuals) ) # rho (similiar to quantreg)
-		#1/n*sum( check(residuals) ) ### rho
-	PenRho <- rho+pen_val
-
-    return_val <- list( coefficients=coefs, PenRho=PenRho, residuals=residuals, rho=rho, tau=tau, n=n, intercept=intercept, penalty=penalty)
-	class(return_val) <- c("rq.group.pen", "rq.pen")
-  ######################
-  } else {
         group_num <- length(unique(groups))
         if (length(lambda) == 1) {
             lambda <- rep(lambda, group_num)
@@ -2171,7 +1741,7 @@ rq.group.fit <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE,
             return_val <- rq.group.lin.prog(x,y,groups,tau,lambda,intercept=intercept,penalty=penalty,penGroups=penGroups,a=a,...)
             class(return_val) <- c("rq.group.pen", "rq.pen")
         }
-    }
+    
     return_val
 }
 
@@ -2403,7 +1973,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @param lambda Vector of lambda tuning parameters. Will be autmoatically generated if it is not set. 
 #' @param nlambda The number of lambda tuning parameters.
 #' @param eps The value to be multiplied by the largest lambda value to determine the smallest lambda value. 
-#' @param alg Algorithm used. Choices are Huber approximation ("huber"), linear programming ("lp") or quantile iterative coordinate descent ("qicd").
+#' @param alg Algorithm used. Choices are Huber approximation ("huber") or linear programming ("lp").
 #' @param a The additional tuning parameter for adaptive lasso, SCAD and MCP. 
 #' @param norm Whether a L1 or L2 norm is used for the grouped coefficients. 
 #' @param group.pen.factor Penalty factor for each group. Default is 1 for all groups if norm=1 and square root of group size if norm=2. 
@@ -2479,7 +2049,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' @references 
 #' \insertRef{qr_cd}{rqPen}
 rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLASSO","gSCAD","gMCP"),
-						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01),alg=c("huber","br","qicd"), 
+						lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01),alg=c("huber","br"), 
 						a=NULL, norm=2, group.pen.factor=NULL,tau.penalty.factor=rep(1,length(tau)),
 						scalex=TRUE,coef.cutoff=1e-8,max.iter=500,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE,weights=NULL, ...){
 	penalty <- match.arg(penalty)
@@ -2542,9 +2112,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(penalty=="gAdLASSO" & alg != "huber"){
 		warning("huber algorithm used to derive ridge regression initial estimates for adaptive lasso. Second stage of algorithm used lp")
 	}
-	if(penalty=="gAdLASSO" & alg == "qicd"){
-		stop("No qicd algorithm for adaptive lasso.")
-	}
 	if(sum(tau <= 0 | tau >=1)>0){
 		stop("tau needs to be between 0 and 1")
 	}
@@ -2572,11 +2139,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 									a=0,max.iter=max.iter,converge.eps=converge.eps,gamma=gamma,lambda.discard=lambda.discard,...)
 		} else{
 			if(norm == 1){
-				if(alg == "qicd"){
-					init.alg <- "br"
-				} else{
-					init.alg <- alg
-				}
+			  init.alg <- alg
 				init.model <- rq.lasso(x,y,tau,alg=init.alg,lambda=lambda,penalty.factor=penalty.factor,scalex=scalex,
 							tau.penalty.factor=tau.penalty.factor,max.iter=max.iter,coef.cutoff=coef.cutoff,converge.eps=converge.eps,
 							gamma=gamma,lambda.discard=lambda.discard,weights,...)

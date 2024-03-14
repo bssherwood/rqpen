@@ -15,7 +15,7 @@ rq.nc.fit(
   a = 3.7,
   iterations = 1,
   converge_criteria = 1e-06,
-  alg = ifelse(p < 50, "LP", "QICD"),
+  alg = "LP",
   penVars = NULL,
   internal = FALSE,
   ...
@@ -42,7 +42,7 @@ rq.nc.fit(
 
 \item{converge_criteria}{Difference in betas from iteration process that would satisfy convergence.}
 
-\item{alg}{Defaults for small p to linear programming (LP), see Wang, Wu and Li (2012) for details. Otherwise a coordinate descent algorithm is used (QICD), see Peng and Wang (2015) for details. Both methods rely on the One-step sparse estimates algorithm.}
+\item{alg}{Defaults for small p to linear programming (LP), see Wang, Wu and Li (2012) for details. QICD is no longer available.}
 
 \item{penVars}{Variables that should be penalized. With default value of NULL all variables are penalized.}
 

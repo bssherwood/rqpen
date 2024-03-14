@@ -68,7 +68,7 @@ An rq.pen.seq object.
 \item{models: }{ A list of each model fit for each tau and a combination.}
 \item{n:}{ Sample size.}
 \item{p:}{ Number of predictors.}
-\item{alg:}{ Algorithm used. Options are "huber", "qicd" or any method implemented in rq(), such as "br". }
+\item{alg:}{ Algorithm used. Options are "huber" or any method implemented in rq(), such as "br". }
 \item{tau:}{ Quantiles modeled.}
 \item{a:}{ Tuning parameters a used.}
 \item{modelsInfo:}{ Information about the quantile and a value for each model.}
@@ -107,7 +107,6 @@ For Adaptive LASSO the values of \eqn{\beta_0} come from a Ridge solution with t
 \describe{
 \item{huber:}{ Uses a Huber approximation of the quantile loss function. See Yi and Huang 2017 for more details.}
 \item{br:}{ Solution is found by re-formulating the problem so it can be solved with the rq() function from quantreg with the br algorithm.} 
-\item{QICD:}{ A coordinate descent algorithm for SCAD and MCP penalties, see Peng and Wang (2015) for details. }
 }
 The huber algorithm offers substantial speed advantages without much, if any, loss in performance. However, it should be noted that it solves an approximation of the quantile loss function.
 }
