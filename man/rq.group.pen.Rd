@@ -39,7 +39,7 @@ rq.group.pen(
 
 \item{penalty}{Penalty used, choices are group lasso ("gLASSO"), group adaptive lasso ("gAdLASSO"), group SCAD ("gSCAD") and group MCP ("gMCP")}
 
-\item{lambda}{Vector of lambda tuning parameters. Will be automatically generated if it is not set.}
+\item{lambda}{Vector of lambda tuning parameters. Will be autmoatically generated if it is not set.}
 
 \item{nlambda}{The number of lambda tuning parameters.}
 
@@ -67,7 +67,7 @@ rq.group.pen(
 
 \item{lambda.discard}{Whether lambdas should be discarded if for small values of lambda there is very little change in the solutions.}
 
-\item{weights}{Weights used in the quantile loss objective function.}
+\item{weights}{Weights used in the quanitle loss objective function.}
 
 \item{...}{Additional parameters}
 }

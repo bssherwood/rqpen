@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{The rq.pen.seq.cv object}
 
-\item{septau}{If set to true then optimal tuning parameters are selected seperately for each quantile and there will be a different plot for each quantile.}
+\item{septau}{If set to true then optimal tuning parameters are selected seperately for each quantile and there will be a different plot for each quanitle.}
 
 \item{tau}{Quantiles of interest.}
 

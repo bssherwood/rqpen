@@ -1,8 +1,7 @@
 library(devtools)
 install_github("bssherwood/rqpen", force=TRUE)
-3
+
 library(rqPen)
-rq.gq.pen()
 
 x <- matrix(rnorm(800),ncol=80)
 x_diff <- x

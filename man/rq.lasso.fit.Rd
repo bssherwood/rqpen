@@ -2,7 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{rq.lasso.fit}
 \alias{rq.lasso.fit}
-\title{Estimates a quantile regression model with a lasso penalized quantile loss function.}
+\title{Estimates a quantile regression model with a lasso penalized quanitle loss function.}
 \usage{
 rq.lasso.fit(
   x,

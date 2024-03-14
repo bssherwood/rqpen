@@ -4,9 +4,9 @@
 \alias{print.rq.pen}
 \title{Prints an rq.pen object}
 \usage{
-print.rq.pen(x, ...)
+\method{print}{rq.pen}(x, ...)
 
-print.rq.pen(x, ...)
+\method{print}{rq.pen}(x, ...)
 }
 \arguments{
 \item{x}{A rq.pen object}
