@@ -79,12 +79,10 @@ qic.select <- function(obj,...){
 #' @param ... Additional arguments.
 #'
 #' @return 
-#' \itemize{
 #' \item{coefficients}{Coefficients of the selected models.}
 #' \item{ic}{Information criterion values for all considered models.}
 #' \item{modelsInfo}{Model info for the selected models related to the original object obj.}
 #' \item{gic}{Information criterion summarized across all quantiles. Only returned if septau set to FALSE}
-#' }
 #' @export
 #' @examples
 #' set.seed(1)
