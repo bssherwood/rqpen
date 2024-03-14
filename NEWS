@@ -1,4 +1,4 @@
-rqPen 3.2.2 (Release date: TBD)
+rqPen 3.2.2 (Release date: 2024-03-13)
 =============
 * Fixed issue where QICD algorithm was not working when called from rq.pen(). 
 
