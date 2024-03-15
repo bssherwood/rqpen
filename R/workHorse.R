@@ -1390,3 +1390,20 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		par(ask=FALSE)
 	}
 }
+
+#Modified March 15 2024 to get rid of references to QICD code
+groupMultLambda <- function (x, y, groups, tau = 0.5, lambda, intercept = TRUE, penalty="LASSO", 
+                             #initial_beta = NULL,
+                             alg="huber",penGroups=NULL, ...) 
+{
+    return_val <- list()
+    pos <- 1
+    for (lam in lambda) {
+      return_val[[pos]] <- rq.group.fit(x = x, y = y, groups = groups, 
+                                        tau = tau, lambda = lam, intercept = intercept, penalty=penalty,alg=alg, penGroups=penGroups,
+                                        ...)
+      #initial_beta <- return_val[[pos]]$coefficients
+      pos <- pos + 1
+    }
+  return_val
+}
