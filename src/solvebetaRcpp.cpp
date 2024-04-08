@@ -76,7 +76,7 @@ NumericVector rq_huber_deriv_aug(NumericVector r, NumericVector tau, double gmma
 
 /* Negative gradient of huberized quantile loss (w.r.t. beta) */
 // [[Rcpp::export]]
-NumericVector neg_gradient_aug(NumericVector r, vec weights, NumericVector tau, double gmma, arma::sp_mat x, int ntau) {
+NumericVector neg_gradient_aug(NumericVector r, arma::vec weights, NumericVector tau, double gmma, arma::sp_mat x, int ntau) {
   int n = r.size();
   //int p = x.ncol();
   int p = x.n_cols;
@@ -124,7 +124,7 @@ double weighted_norm(Rcpp::NumericVector x, Rcpp::NumericVector normweights) {
 
 /* coordinate descent for solving beta */
 // [[Rcpp::export]]
-List solvebetaCpp(arma::sp_mat x, vec y, int n, NumericVector tau, double gmma, vec weights, 
+List solvebetaCpp(arma::sp_mat x, arma::vec y, int n, NumericVector tau, double gmma, arma::vec weights, 
                   NumericVector groupIndex, double lambdaj, NumericVector wlambda, NumericVector wtau, 
                   NumericVector eigenval, NumericVector betaini, int maxIter, double epsilon, int ntau){
   
