@@ -95,6 +95,27 @@ NumericVector neg_gradient_aug(NumericVector r, arma::vec weights, NumericVector
   
 }
 
+/* Negative gradient of huberized quantile loss (w.r.t. beta) */
+// [[Rcpp::export]]
+NumericVector negGradientAug(NumericVector r, arma::vec weights, NumericVector tau, double gmma, arma::sp_mat x, int ntau) {
+  int n = r.size();
+  //int p = x.ncol();
+  int p = x.n_cols;
+  NumericVector grad(p);
+  //NumericVector deriv_b(n); 
+  NumericVector deriv = rq_huber_deriv_aug(r, tau, gmma);
+  arma::vec deriv_arma(deriv.begin(), n, false); // Convert deriv to Armadillo vector
+  
+  for (int j = 0; j < p; j++) {
+    //arma::vec col_j = weights_arma % x.col(j) % deriv_arma;
+    //std::copy(col_j.begin(), col_j.end(), deriv_b.begin()); // Copy the result to the NumericVector
+    grad[j] = accu(weights % x.col(j) % deriv_arma);	
+  }
+  
+  return grad/n*ntau;
+  
+}
+
 /* l2norm */
 // [[Rcpp::export]]
 double l2_norm(NumericVector x) {
