@@ -4,6 +4,9 @@
 #' @import hrqglas
 #' @import data.table
 #' @import lifecycle
+#' @import Matrix
+#' @import Rcpp
+#' @import RcppArmadillo
 #' @importFrom splines bs
 #' @importFrom graphics lines plot par segments points legend
 #' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR resid
