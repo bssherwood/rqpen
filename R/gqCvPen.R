@@ -49,7 +49,7 @@ gq.cv.pen <- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=NULL, x=
     lambda<- model_obj$lambda
     fullmodel<- model_obj
   }else{
-    fullmodel<- hrq_tau_glasso(x=x, y=y, tau=tau, ...)
+    fullmodel<- gq.pen(x=x, y=y, tau=tau, ...)
     lambda<- fullmodel$lambda
     tau<- fullmodel$tau
     ntau <- length(tau)
