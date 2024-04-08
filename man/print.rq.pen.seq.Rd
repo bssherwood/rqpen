@@ -4,7 +4,7 @@
 \alias{print.rq.pen.seq}
 \title{Print a rq.pen.seq object}
 \usage{
-\method{print}{rq.pen.seq}(x, ...)
+print.rq.pen.seq(x, ...)
 }
 \arguments{
 \item{x}{rq.pen.seq object}

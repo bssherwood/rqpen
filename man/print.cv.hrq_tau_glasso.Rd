@@ -4,7 +4,7 @@
 \alias{print.cv.hrq_tau_glasso}
 \title{Title Print a summary from \code{cv.hrq_tau_glasso}}
 \usage{
-\method{print}{cv.hrq_tau_glasso}(cv.fit)
+print.cv.hrq_tau_glasso(cv.fit)
 }
 \arguments{
 \item{cv.fit}{The CV object from \code{cv.hrq_tau_glasso}}

@@ -4,9 +4,9 @@
 \alias{print.cv.rq.pen}
 \title{Prints a cv.rq.pen object.}
 \usage{
-\method{print}{cv.rq.pen}(x, ...)
+print.cv.rq.pen(x, ...)
 
-\method{print}{cv.rq.pen}(x, ...)
+print.cv.rq.pen(x, ...)
 }
 \arguments{
 \item{x}{A cv.rq.pen object}
