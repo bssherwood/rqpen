@@ -87,6 +87,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// negGradientAug
+NumericVector negGradientAug(NumericVector r, arma::vec weights, NumericVector tau, double gmma, arma::sp_mat x, int ntau);
+RcppExport SEXP _rqPen_negGradientAug(SEXP rSEXP, SEXP weightsSEXP, SEXP tauSEXP, SEXP gmmaSEXP, SEXP xSEXP, SEXP ntauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< double >::type gmma(gmmaSEXP);
+    Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type ntau(ntauSEXP);
+    rcpp_result_gen = Rcpp::wrap(negGradientAug(r, weights, tau, gmma, x, ntau));
+    return rcpp_result_gen;
+END_RCPP
+}
 // l2_norm
 double l2_norm(NumericVector x);
 RcppExport SEXP _rqPen_l2_norm(SEXP xSEXP) {
@@ -143,6 +159,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rqPen_tanh_loss", (DL_FUNC) &_rqPen_tanh_loss, 2},
     {"_rqPen_rq_huber_deriv_aug", (DL_FUNC) &_rqPen_rq_huber_deriv_aug, 3},
     {"_rqPen_neg_gradient_aug", (DL_FUNC) &_rqPen_neg_gradient_aug, 6},
+    {"_rqPen_negGradientAug", (DL_FUNC) &_rqPen_negGradientAug, 6},
     {"_rqPen_l2_norm", (DL_FUNC) &_rqPen_l2_norm, 1},
     {"_rqPen_weighted_norm", (DL_FUNC) &_rqPen_weighted_norm, 2},
     {"_rqPen_solvebetaCpp", (DL_FUNC) &_rqPen_solvebetaCpp, 15},

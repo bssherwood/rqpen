@@ -25,6 +25,10 @@ neg_gradient_aug <- function(r, weights, tau, gmma, x, ntau) {
     .Call('_rqPen_neg_gradient_aug', PACKAGE = 'rqPen', r, weights, tau, gmma, x, ntau)
 }
 
+negGradientAug <- function(r, weights, tau, gmma, x, ntau) {
+    .Call('_rqPen_negGradientAug', PACKAGE = 'rqPen', r, weights, tau, gmma, x, ntau)
+}
+
 l2_norm <- function(x) {
     .Call('_rqPen_l2_norm', PACKAGE = 'rqPen', x)
 }
