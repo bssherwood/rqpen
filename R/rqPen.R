@@ -12,6 +12,7 @@
 #' @importFrom stats coef coefficients predict quantile residuals sd xtabs fitted weighted.mean IQR resid
 #' @importFrom Rdpack reprompt
 #' @importFrom methods is
+#' @useDynLib rqPen
 NULL 
 
 #' rqPen: A package for estimating quantile regression models using penalized objective functions.
