@@ -296,6 +296,7 @@ predict.qic.select <- function(object, newx, ...){
 #' @return If only one model, prints a data.frame of the number of nonzero coefficients and lambda. Otherwise prints information about the quantiles being modeled and choices for a.
 #' @export
 #'
+#' @method print rq.pen.seq
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.rq.pen.seq <- function(x,...){
   nt <- length(x$tau)
@@ -753,6 +754,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
 #' @return Print of btr and gtr from a rq.pen.seq.cv object. If only one quantile is modeled then only btr is returned. 
 #' @export
 #'
+#' @method print rq.pen.seq.cv
 print.rq.pen.seq.cv <- function(x,...){
 	if(length(x$fit$tau)==1){
 		cat("\nCross validation tuning parameter choices\n")
@@ -877,23 +879,6 @@ print.cv.rq.pen <- function(x,...){
    print(coefficients(x,...))
    cat("\nCross Validation (or BIC) Results\n")
    print(x$cv)
-}
-
-
-#' Prints an rq.pen object
-#' 
-#' @description Warning this function is no longer exported. 
-#'
-#' @param x The rq.pen object
-#' @param ... Additional parameters sent to function
-#'
-#' @return Prints the coefficients of the object.
-#' @export
-#'
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-print.rq.pen <- function(x,...){
-    cat("\nCoefficients:\n")
-	print(coefficients(x,...))
 }
 
 #' Performs cross validation for a group penalty. 
@@ -2158,39 +2143,6 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	}
 	return_val$weights <- weights
 	return_val
-}
-
-#' Prints a cv.rq.pen object
-#'
-#'
-#' @param x A cv.rq.pen object
-#' @param ... Additional arguments
-#' 
-#' @description Warning: this function is no longer exported. 
-#'
-#' @keywords internal
-#'
-#' @return Prints coefficients and cross validation results. 
-#'
-print.cv.rq.pen <- function(x,...){
-   cat("\nCoefficients:\n")
-   print(coefficients(x,...))
-   cat("\nCross Validation (or BIC) Results\n")
-   print(x$cv)
-}
-
-#' Prints a rq.pen object
-#'
-#' @param x A rq.pen object
-#' @param ... Additional arguments
-#'
-#' @keywords internal
-#' 
-#' @return prints coefficients
-#'
-print.rq.pen <- function(x,...){
-  cat("\nCoefficients:\n")
-	print(coefficients(x,...))
 }
 
 
