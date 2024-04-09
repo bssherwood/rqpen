@@ -36,7 +36,7 @@
 #' X<- matrix(rnorm(n*p),n,p)
 #' y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 #' taus <- seq(0.1, 0.9, 0.2)
-#' fit<- gq.pen(X, y, taus)
+#' fit<- rq.gq.pen(X, y, taus)
 #' matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
 #' 
 #' 
@@ -384,7 +384,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   models <- list()
   modelsInfo <- rnmi <-  NULL
   for(i in 1:ntau){
-    coefs <- getGQCoefs(output$beta,taupos,p+1,ntau)
+    coefs <- getGQCoefs(output$beta,i,p+1,ntau)
     models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
     modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
