@@ -390,6 +390,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
   }
   rownames(modelsInfo) <- modelnames
+  modelsInfo <- data.frame(modelsInfo)
+  colnames(modelsInfo) <- c("modelIndex","a","tau")
   names(models) <- modelnames
   returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau, a=1,modelsInfo=modelsInfo,lambda=lambda[1:ncol(coefs)],penalty="gq",call=match.call())
   class(returnVal) <- "rq.pen.seq"

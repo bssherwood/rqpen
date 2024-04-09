@@ -1,6 +1,10 @@
 library(devtools)
 install_github("bssherwood/rqpen", force=TRUE)
 
+
+detach("package:rqPen", unload=TRUE)
+
+
 library(rqPen)
 
 x <- matrix(rnorm(800),ncol=80)
