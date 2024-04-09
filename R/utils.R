@@ -218,5 +218,5 @@ kkt_check_aug<- function(r, weights, w, gmma, tau, group.index, inactive.ind, la
 } # end of function
 
 getGQCoefs <- function(beta,taupos,p,k){
-  beta[seq(taupos:(k*(p-1)+taupos),by=k),]
+  beta[seq(taupos,(k*(p-1)+taupos,by=k),]
 }
