@@ -5,21 +5,17 @@
 \title{Prints a cv.rq.pen object.}
 \usage{
 print.cv.rq.pen(x, ...)
-
-print.cv.rq.pen(x, ...)
 }
 \arguments{
-\item{x}{A cv.rq.pen object}
+\item{x}{cv.rq.pen object}
 
-\item{...}{Additional arguments}
+\item{...}{Optional arguments, not used.}
 }
 \value{
 Prints cross validation or information criterion values by lambda.
-
-Prints coefficients and cross validation results.
 }
 \description{
-Warning: this function is no longer exported.
+Prints a cv.rq.pen object.
 }
 \details{
 Warning this function is no longer exported.
@@ -27,4 +23,3 @@ Warning this function is no longer exported.
 \author{
 Ben Sherwood, \email{ben.sherwood@ku.edu}
 }
-\keyword{internal}

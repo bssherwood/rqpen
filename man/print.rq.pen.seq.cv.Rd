@@ -4,7 +4,7 @@
 \alias{print.rq.pen.seq.cv}
 \title{Prints a rq.pen.seq.cv object}
 \usage{
-print.rq.pen.seq.cv(x, ...)
+\method{print}{rq.pen.seq.cv}(x, ...)
 }
 \arguments{
 \item{x}{A req.pen.seq.cv object.}
