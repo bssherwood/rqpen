@@ -1,8 +1,12 @@
 library(devtools)
 install_github("bssherwood/rqpen", force=TRUE)
+n<- 200
+p<- 20
+X<- matrix(rnorm(n*p),n,p)
+y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
+taus <- seq(0.1, 0.9, 0.2)
+fit<- rq.gq.pen(X, y, taus)
 
-
-detach("package:rqPen", unload=TRUE)
 
 
 library(rqPen)

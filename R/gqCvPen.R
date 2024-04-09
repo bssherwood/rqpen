@@ -1,7 +1,6 @@
 
 #' Title Cross validation for consistent variable selection across multiple quantiles
 #'
-#' @param model_obj fitted model from gq.pen This is optional. Default is NULL.
 #' @param nfolds number of folds
 #' @param loss loss function to be evaluated. Supported loss functions include quantile and squared loss. Default is the quantile loss.
 #' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
@@ -38,22 +37,22 @@
 #' cvfit<- gq.cv.pen(x=X, y=y, tau=taus)
 #' cvfit$cv_all
 #' 
-gq.cv.pen <- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=NULL, x=NULL, y=NULL, tau=NULL, folds=NULL, ...){
+rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_loss=NULL,  folds=NULL, ...){
   
   ## two ways to call this function
-  if(!is.null(model_obj)){
-    y<- model_obj$y
-    x<- model_obj$x
-    tau<- model_obj$tau
-    ntau <- length(tau)
-    lambda<- model_obj$lambda
-    fullmodel<- model_obj
-  }else{
-    fullmodel<- gq.pen(x=x, y=y, tau=tau, ...)
-    lambda<- fullmodel$lambda
-    tau<- fullmodel$tau
-    ntau <- length(tau)
-  }
+  #if(!is.null(model_obj)){
+   # y<- model_obj$y
+  #  x<- model_obj$x
+   # tau<- model_obj$tau
+  #  ntau <- length(tau)
+  #  lambda<- model_obj$lambda
+  #  fullmodel<- model_obj
+  #}else{
+  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau, ...)
+  lambda<- fullmodel$lambda
+  tau<- fullmodel$tau
+  ntau <- length(tau)
+  #}
   
   if(is.null(wt_tau_loss)){
     wt_tau_loss <- rep(1, ntau)/ntau
@@ -81,7 +80,7 @@ gq.cv.pen <- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=NULL, x=
     test_x<- x[ind,]
     test_y<- y[ind]
     
-    train_model<- gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
+    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
     pred<- predict.hrq_tau_glasso(train_model, newX = test_x)
     
     if(loss == "se"){
