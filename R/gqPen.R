@@ -40,7 +40,7 @@
 #' matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
 #' 
 #' 
-gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
+rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
                           maxIter=200, lambda.discard=TRUE, epsilon=1e-4, beta0=NULL){
   
   ## basic info about dimensions
@@ -384,7 +384,7 @@ gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL, ta
   models <- list()
   modelsInfo <- rnmi <-  NULL
   for(i in 1:ntau){
-    coefs <- getGQCoefs(fit$beta,taupos,p+1,ntau)
+    coefs <- getGQCoefs(output$beta,taupos,p+1,ntau)
     models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
     modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
