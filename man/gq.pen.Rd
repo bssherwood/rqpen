@@ -9,9 +9,9 @@ gq.pen(
   y,
   tau,
   lambda = NULL,
-  weight_obs = NULL,
-  weight_lam = NULL,
-  weight_tau = NULL,
+  weights = NULL,
+  penalty.factor = NULL,
+  tau.penalty.factor = NULL,
   gmma = 0.2,
   maxIter = 200,
   lambda.discard = TRUE,
@@ -28,11 +28,11 @@ gq.pen(
 
 \item{lambda}{shrinkage parameter. Default is NULL, and the algorithm provides a solution path.}
 
-\item{weight_obs}{observation weights. Default is NULL, which means equal weights.}
+\item{weights}{observation weights. Default is NULL, which means equal weights.}
 
-\item{weight_lam}{weights for the shrinkage parameter for each covariate. Default is equal weight.}
+\item{penalty.factor}{weights for the shrinkage parameter for each covariate. Default is equal weight.}
 
-\item{weight_tau}{weights for different quantiles. Default is equal weight.}
+\item{tau.penalty.factor}{weights for different quantiles. Default is equal weight.}
 
 \item{gmma}{tuning parameter for the Huber loss}
 

@@ -872,7 +872,6 @@ qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
 
 #need to update this and think about what penalty.factor needs to be used. 
 rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL){
-# for loop that could be removed
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
 	if(is.null(ncol(coefs))==FALSE){
@@ -952,6 +951,10 @@ elastic <- function(x,lambda,a){
 	a*lasso(x,lambda)+(1-a)*ridge(x,lambda)
 }
 
+#placeholder to deal with that group quantile lasso does not provide an individual penalty
+gq <- function(x,lambda,a){
+  0
+}
 
 getPenfunc <- function(penalty){
 	if(penalty == "LASSO" | penalty == "gLASSO" | penalty=="aLASSO" | penalty=="gAdLASSO"){
@@ -964,6 +967,8 @@ getPenfunc <- function(penalty){
 		penfunc <- mcp
 	} else if(penalty=="ENet"){
 		penfunc <- elastic
+	} else if(penalty=="gq"){
+	  penfunc <- gq
 	}
 	penfunc
 }
