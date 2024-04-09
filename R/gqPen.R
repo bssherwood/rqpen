@@ -382,15 +382,14 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
     
   } # end of else condition
   models <- list()
-  modelsInfo <- rnmi <-  NULL
+  modelsInfo <- modelnames <-  NULL
   for(i in 1:ntau){
     coefs <- getGQCoefs(output$beta,i,p+1,ntau)
     models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
     modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
-    rnmi <- c(rnmi, paste0("tau",tau[i],"a",1))
   }
-  rownames(modelsInfo) <- rnmi
+  rownames(modelsInfo) <- modelnames
   names(models) <- modelnames
   returnVal <- list(models=models, n=n, p=p,alg=alg,tau=tau, a=1,modelsInfo=modelsInfo,lambda=lambda,penalty="gq",call=match.call())
   class(returnVal) <- "rq.pen.seq"
