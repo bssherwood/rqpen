@@ -95,11 +95,15 @@ qic.select <- function(obj,...){
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,tauWeights=NULL,...){
+qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=ifelse(x$penalty!="gq",TRUE,FALSE),tauWeights=NULL,...){
 # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
 	method <- match.arg(method)
 	if(is.null(tauWeights)==FALSE & septau){
 		warning("Weights are only used when septau is set to true.")
+	}
+	if(x$penalty=="gq" & septau){
+	  septau = FALSE
+	  warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
 	}
 	if(is.null(tauWeights) & !septau){
 		tauWeights <- rep(1,length(obj$tau))
@@ -188,12 +192,16 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,
 #' @references 
 #' \insertRef{qrbic}{rqPen}
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=TRUE,weights=NULL,...){
+qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=ifelse(obj$fit$penalty!="gq",TRUE,FALSE),weights=NULL,...){
   # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
   method <- match.arg(method)
   obj <- obj$fit
   if(is.null(weights)==FALSE & septau){
     warning("Weights are only used when septau is set to true.")
+  }
+  if(obj$fit$penalty=="gq" & septau){
+    septau = FALSE
+    warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
   }
   if(is.null(weights) & !septau){
     weights <- rep(1,length(obj$tau))
@@ -563,7 +571,11 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' newx <- matrix(runif(80),ncol=8)
 #' cvpreds <- predict(m1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,...){
+predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,...){
+  if(object$fit$penalty=="gq" & septau){
+    septau = FALSE
+    warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
+  }
   coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
   if(is.null(dim(newx))){
     c(1,newx) %*% coefs  
@@ -1165,7 +1177,7 @@ rq.nc.fit <- function(x,y,tau=.5,lambda=NULL,weights=NULL,intercept=TRUE,
 #' plot(m1)
 #' plot(m1,septau=FALSE)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-plot.rq.pen.seq.cv <- function(x,septau=TRUE,tau=NULL,logLambda=TRUE,main=NULL,...){
+plot.rq.pen.seq.cv <- function(x,septau=ifelse(x$fit$penalty!="gq",TRUE,FALSE),tau=NULL,logLambda=TRUE,main=NULL,...){
 	if(septau){
 		plotsep.rq.pen.seq.cv(x,tau,logLambda,main,...)
 	} else{
@@ -1400,7 +1412,7 @@ bytau.plot.rq.pen.seq <- function(x,a=NULL,lambda=NULL,lambdaIndex=NULL,vars=NUL
 #'  lmcv <- rq.pen.cv(x,y,tau=seq(.1,.9,.1))
 #'  bytau.plot(lmcv)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-bytau.plot.rq.pen.seq.cv <- function(x,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,vars=NULL,...){
+bytau.plot.rq.pen.seq.cv <- function(x,septau=ifelse(x$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,vars=NULL,...){
 	coefs <- coefficients(x,septau,cvmin,useDefaults,tau=x$fit$tau,...)
 	if(ncol(coefs) != length(x$fit$tau)){
 		stop("Too many coefficients returned, function only works with one lambda value")
