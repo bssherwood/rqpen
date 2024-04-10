@@ -1,10 +1,3 @@
-library(Matrix)
-library(Rcpp)
-library(RcppArmadillo)
-source("Rcode/solvebeta.R")
-source("Rcode/utils.R")
-sourceCpp("Rcode/Cpp/solvebetaRcpp.cpp")
-
 #### core function solvebeta is based on Rcpp implementation
 
 #' Title Quantile regression estimation and consistent variable selection across multiple quantiles

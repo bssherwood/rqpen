@@ -77,7 +77,6 @@ predict.hrq_tau_glasso<- function(fit, newX=NULL, s=NULL){
 #' @return predicted response for each tau
 #' @export
 #'
-#' @examples
 predict.cv.hrq_tau_glasso<- function(fit, newX=NULL, s=NULL){
   
   if(is.null(newX)){
