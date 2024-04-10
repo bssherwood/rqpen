@@ -16,9 +16,9 @@
 #' @param beta0 Initial estimates. Default is NULL, and the algorithm starts with the intercepts being the quantiles of response variable and other coefficients being zeros.
 #'
 #' @description  
-#' Uses the group lasso penalty across the quantiles to provide consistent selection across all, $Q$, modeled quantiles. Let $\beta^q$
-#' be the coefficients for the $q$th quantiles, $\beta_j$ be the Q-dimensional vector of the $j$th coefficient for each quantile, and
-#' $\rho_\tau(u)$ is the quantile loss function. The method minimizes
+#' Uses the group lasso penalty across the quantiles to provide consistent selection across all, Q, modeled quantiles. Let \eqn{\beta^q}
+#' be the coefficients for the $q$th quantiles, \eqn{\beta_j} be the Q-dimensional vector of the jth coefficient for each quantile, and
+#' \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
 #' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p\sqrt{Q} ||\beta_j||_2  .}
 #'
 #' @return returns a matrix of estimated coefficients in the sparse matrix format. 
