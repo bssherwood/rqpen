@@ -115,6 +115,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
   if(loss == "rq"){
     cv.mqe<- matrix(apply(mqe, 1, mean), ntau, nlambda)
     cv.mqe.wt<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
+    gcv <- cv.mqe.wt
     colnames(cv.mqe) <- paste("lam", 1:nlambda, sep = "")
     rownames(cv.mqe) <- paste("tau", tau, sep = "")
     
@@ -148,6 +149,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     if(loss=="se"){
       cv.mse<- matrix(apply(mse, 1, mean), ntau, nlambda)
       cv.mse.wt<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
+      gcv <- cv.mse.wt
       colnames(cv.mse) <- paste("lam", 1:nlambda, sep = "")
       rownames(cv.mse) <- paste("tau", tau, sep = "")
       
@@ -182,8 +184,11 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     }
   }
   #output
-  #gtr <- data.table(tau=tau, minCv = output$)
-  returnVal <- list(cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=output, gcve=output, call=match.call())
+  nz <- sapply(fullmodel$models, getNZero)
+  gtr <- data.table(tau=tau, minCv = output$cv_min, lambda=output$lambda_min, lambdaIndex=ind.lambda.min.wt,
+                    lambda1se=output$lambda_1se, lambda1seIndex=ind.lambda.1se.wt, a=1, cvse=output$se[ind.lambda.min.wt], 
+                    modelsIndex=1:ntau, nonzero=nz[ind.lambda.min.wt], nzse=nz[ind.lambda.1se.wt])
+  returnVal <- list(cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=gtr, gcve=gcv, call=match.call())
   class(returnVal) <- "rq.pen.seq.cv"
   returnVal
 }# end of function
