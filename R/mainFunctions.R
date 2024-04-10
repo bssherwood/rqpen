@@ -791,6 +791,10 @@ print.rq.pen.seq.cv <- function(x,...){
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
 coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+  if(object$fit$penalty=="gq" & septau){
+    septau <- FALSE
+    warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
+  }
   if(!useDefaults){
     coefficients(object$fit,tau=tau,...)
   } else{
