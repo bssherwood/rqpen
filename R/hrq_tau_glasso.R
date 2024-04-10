@@ -1,3 +1,10 @@
+library(Matrix)
+library(Rcpp)
+library(RcppArmadillo)
+source("Rcode/solvebeta.R")
+source("Rcode/utils.R")
+sourceCpp("Rcode/Cpp/solvebetaRcpp.cpp")
+
 #### core function solvebeta is based on Rcpp implementation
 
 #' Title Quantile regression estimation and consistent variable selection across multiple quantiles
@@ -6,20 +13,14 @@
 #' @param y a univariate response variable
 #' @param tau a sequence of quantiles to be modeled
 #' @param lambda shrinkage parameter. Default is NULL, and the algorithm provides a solution path.
-#' @param weights observation weights. Default is NULL, which means equal weights.
-#' @param penalty.factor weights for the shrinkage parameter for each covariate. Default is equal weight.
-#' @param tau.penalty.factor weights for different quantiles. Default is equal weight.
+#' @param weight_obs observation weights. Default is NULL, which means equal weights.
+#' @param weight_lam weights for the shrinkage parameter for each covariate. Default is equal weight.
+#' @param weight_tau weights for different quantiles. Default is equal weight.
 #' @param gmma tuning parameter for the Huber loss
 #' @param maxIter maximum number of iteration. Default is 200.
 #' @param lambda.discard Default is TRUE, meaning that the solution path stops if the relative deviance changes sufficiently small. It usually happens near the end of solution path. However, the program returns at least 70 models along the solution path. 
 #' @param epsilon The epsilon level convergence. Default is 1e-4.
 #' @param beta0 Initial estimates. Default is NULL, and the algorithm starts with the intercepts being the quantiles of response variable and other coefficients being zeros.
-#'
-#' @description  
-#' Uses the group lasso penalty across the quantiles to provide consistent selection across all, Q, modeled quantiles. Let \eqn{\beta^q}
-#' be the coefficients for the $q$th quantiles, \eqn{\beta_j} be the Q-dimensional vector of the jth coefficient for each quantile, and
-#' \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
-#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p\sqrt{Q} ||\beta_j||_2  .}
 #'
 #' @return returns a matrix of estimated coefficients in the sparse matrix format. 
 #' Each column corresponds to a lambda value, and is of length (ntau*(p+1)) 
@@ -37,17 +38,16 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{ 
 #' n<- 200
 #' p<- 20
 #' X<- matrix(rnorm(n*p),n,p)
 #' y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 #' taus <- seq(0.1, 0.9, 0.2)
-#' fit<- rq.gq.pen(X, y, taus)
+#' fit<- hrq_tau_glasso(X, y, taus)
 #' matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
-#' }
 #' 
-rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
+#' 
+hrq_tau_glasso<- function(x, y, tau, lambda=NULL, weight_obs=NULL, weight_lam=NULL, weight_tau=NULL, gmma=0.2, 
                           maxIter=200, lambda.discard=TRUE, epsilon=1e-4, beta0=NULL){
   
   ## basic info about dimensions
@@ -61,9 +61,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   if(ntau==1){
     stop("please provide at least two tau values!")
   }
-  if(is.null(penalty.factor)) penalty.factor<- sqrt(nng)
-  if(is.null(weights)) weights<- rep(1, n)
-  if(is.null(tau.penalty.factor)) tau.penalty.factor<- rep(1, ntau)
+  if(is.null(weight_lam)) weight_lam<- sqrt(nng)
+  if(is.null(weight_obs)) weight_obs<- rep(1, n)
+  if(is.null(weight_tau)) weight_tau<- rep(1, ntau)
   
   # ## standardize X
   # if(scalex){
@@ -81,7 +81,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   groupIndex <- sort(groupIndex)
   
   Yaug <- rep(y, ntau)
-  weights_aug <- rep(weights, ntau)
+  weight_obs_aug <- rep(weight_obs, ntau)
   tau_aug <- rep(tau, each=n)
   
   ## initial value
@@ -91,7 +91,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
     b.int<- quantile(y, probs = tau)
     r<- Yaug-rep(b.int, each=n)
     # null devience
-    dev0<- sum(weights_aug*rq.loss.aug(r,tau,n))
+    dev0<- sum(weight_obs_aug*rq.loss.aug(r,tau,n))
     gmma.max<- 4; gmma<- min(gmma.max, max(gmma0, quantile(abs(r), probs = 0.1)))
     beta0<- c(t(rbind(b.int, matrix(0,p, ntau)))) 
   } else{
@@ -104,12 +104,12 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   
   ## get sequence of lambda if not supplied
   # l2norm of gradient for each group
-  #grad_kR<- -neg.gradient.aug(r=r0, weights=weights_aug, tau=tau, gmma=gmma, x=Xaug, n=n, apprx=apprx)
-  grad_k<- -neg_gradient_aug(r0, weights_aug, tau_aug, gmma, Xaug, ntau) ## Rcpp
+  #grad_kR<- -neg.gradient.aug(r=r0, weights=weight_obs_aug, tau=tau, gmma=gmma, x=Xaug, n=n, apprx=apprx)
+  grad_k<- -neg_gradient_aug(r0, weight_obs_aug, tau_aug, gmma, Xaug, ntau) ## Rcpp
   #grad_k.norm<- tapply(grad_k, groupIndex, l2norm)
-  grad_k.norm<- tapply(grad_k, groupIndex, weighted_norm, normweights=tau.penalty.factor)
+  grad_k.norm<- tapply(grad_k, groupIndex, weighted_norm, normweights=weight_tau)
   
-  lambda.max<- max(grad_k.norm/penalty.factor)
+  lambda.max<- max(grad_k.norm/weight_lam)
   lambda.flag<- 0
   if(is.null(lambda)){
     lambda.min<- ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
@@ -130,13 +130,13 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
         betaEst <- rbind(b.int, matrix(0,p, ntau))
         rownames(betaEst) <- c("Intercept", paste("V", 1:p, sep = ""))
         colnames(betaEst) <- paste("tau_", tau, sep = "")
-        #return(list(beta=betaEst))
+        return(list(beta=betaEst))
       }
     }
   }
   
   ## QM condition in Yang and Zou, Lemma 1 (2) -- PD matrix H
-  # H<- 2*t(Xaug)%*%diag(weights_aug)%*%Xaug/(n*gmma)
+  # H<- 2*t(Xaug)%*%diag(weight_obs_aug)%*%Xaug/(n*gmma)
   # # get eigen values of sub matrices for each group
   # eigen.sub.H<- rep(0, ng)
   # for(k in 1:ng){
@@ -147,14 +147,14 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   
   ## obtain maximum eigenvalues of submatrix for each group.
   ##  we do not need to compute eigenvalues because for each group, X^TWX is diagonal and all elements are the same.
-  eigen.sub.H <- colSums(weights*x^2)/(n*gmma)
+  eigen.sub.H <- colSums(weight_obs*x^2)/(n*gmma)
   
   
   ### for loop over lambda's
   if(length(lambda)==2){
     lambda<- lambda[2]
-    update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weights_aug, groupIndex, lambda, penalty.factor, 
-                          tau.penalty.factor, eigen.sub.H, beta0, maxIter, epsilon, ntau)
+    update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weight_obs_aug, groupIndex, lambda, weight_lam, 
+                          weight_tau, eigen.sub.H, beta0, maxIter, epsilon, ntau)
     beta1<- update$beta_update
     iter_num <- update$n_iter
     converge_status <- update$converge
@@ -168,7 +168,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
     #   X <- x
     # }
     
-    dev1<- sum(weights_aug*rq.loss.aug(update.r, tau, n))
+    dev1<- sum(weight_obs_aug*rq.loss.aug(update.r, tau, n))
     
     pen.loss<- dev1/n+lambda*sum(eigen.sub.H*sapply(1:p, function(xx) l2norm(beta1[-(1:ntau)][groupIndex==xx])))
     group.index.out<- unique(groupIndex[beta1[-(1:ntau)]!=0])
@@ -183,9 +183,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
     
     output<- list(beta=betaEst, lambda=lambda, null.dev=dev0, pen.loss=pen.loss, loss=dev1/n, tau=tau, 
                   n.nonzero.beta=length(group.index.out), index.nonzero.beta=group.index.out, X=x, y=y)
-    #output.hide<- list(converge=update$converge, iter=update$iter, rel_dev=dev1/dev0)
-    #class(output)<- "hrq_tau_glasso"
-    #return(output)
+    output.hide<- list(converge=update$converge, iter=update$iter, rel_dev=dev1/dev0)
+    class(output)<- "hrq_tau_glasso"
+    return(output)
     
   }else{
     
@@ -206,9 +206,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
       #print(j)
       if(length(active.ind)<p){
         ## use strong rule to determine active group at (i+1) (pre-screening)
-        grad_k<- -neg_gradient_aug(r0, weights_aug, tau_aug, gmma, Xaug, ntau)
+        grad_k<- -neg_gradient_aug(r0, weight_obs_aug, tau_aug, gmma, Xaug, ntau)
         grad_k.norm<- tapply(grad_k, groupIndex, l2norm)
-        active.ind<- which(grad_k.norm>=penalty.factor*(2*lambda[j]-lambda[j-1])) 
+        active.ind<- which(grad_k.norm>=weight_lam*(2*lambda[j]-lambda[j-1])) 
         n.active.ind<- length(active.ind)
         
         if(length(active.ind)==p){ # first time strong rule suggests length(active.ind)=p
@@ -218,8 +218,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
           max_iter<- 50
 
           # update beta and residuals
-          update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weights_aug, groupIndex, 
-                                lambda[j], penalty.factor, tau.penalty.factor, eigen.sub.H, beta0, maxIter, epsilon, ntau)
+          update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weight_obs_aug, groupIndex, 
+                                lambda[j], weight_lam, weight_tau, eigen.sub.H, beta0, maxIter, epsilon, ntau)
           beta0<- update$beta_update
           update.iter <- update$n_iter
           update.converge <- update$converge
@@ -256,8 +256,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
             reduced.eigen <- eigen.sub.H[u.reduced.group.index]
             
             # update beta and residuals
-            update<- solvebetaCpp(x.sub, Yaug, n, tau_aug, gmma, weights_aug, reduced.group.index, 
-                                  lambda[j], penalty.factor, tau.penalty.factor, eigen.sub.H, beta0[c(1:ntau, reduced.ind+ntau)],
+            update<- solvebetaCpp(x.sub, Yaug, n, tau_aug, gmma, weight_obs_aug, reduced.group.index, 
+                                  lambda[j], weight_lam, weight_tau, eigen.sub.H, beta0[c(1:ntau, reduced.ind+ntau)],
                                   maxIter, epsilon, ntau)
             beta.update <- update$beta_update
             update.r <- as.vector(update$resid)
@@ -267,7 +267,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
             beta0[c(1:ntau, reduced.ind+ntau)]<- beta.update
             
             ## check inactive set by KKT condition
-            kkt_results <- kkt_check_aug(r=update.r,weights=weights_aug,w=penalty.factor,gmma=gmma,tau=tau_aug,group.index=groupIndex,
+            kkt_results <- kkt_check_aug(r=update.r,weights=weight_obs_aug,w=weight_lam,gmma=gmma,tau=tau_aug,group.index=groupIndex,
                                          inactive.ind=inactive.ind,lambda=lambda[j],x=Xaug,ntau=ntau)
             if(kkt_results$kkt==TRUE){
               kkt_met <- TRUE
@@ -286,8 +286,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
         max_iter<- 50
         
         # update beta and residuals
-        update<- solvebetaCpp(x=Xaug, y=Yaug, n=n, tau=tau_aug, gmma=gmma, weights=weights_aug, groupIndex=groupIndex, 
-                              lambdaj=lambda[j], wlambda=penalty.factor, wtau=tau.penalty.factor, eigenval=eigen.sub.H, betaini=beta0, 
+        update<- solvebetaCpp(x=Xaug, y=Yaug, n=n, tau=tau_aug, gmma=gmma, weights=weight_obs_aug, groupIndex=groupIndex, 
+                              lambdaj=lambda[j], wlambda=weight_lam, wtau=weight_tau, eigenval=eigen.sub.H, betaini=beta0, 
                               maxIter=maxIter, epsilon=epsilon, ntau=ntau)
         beta0 <- update$beta_update
         update.r <- as.vector(update$resid)
@@ -314,7 +314,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
       n.grp[j]<- length(grp.ind)
       
       # alternative deviance
-      dev1<- sum(weights_aug*rq.loss.aug(r0, tau, n))
+      dev1<- sum(weight_obs_aug*rq.loss.aug(r0, tau, n))
       loss[j]<- dev1/n
       pen.loss[j]<- dev1/n+lambda[j]*sum(eigen.sub.H*sapply(1:p, function(xx) l2norm(beta0[-(1:ntau)][groupIndex==xx])))
       rel_dev[j]<- dev1/dev0
@@ -348,11 +348,11 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
                     loss=loss[stop.ind], n.nonzero.beta=n.grp[stop.ind], index.nonzero.beta=Matrix(group.index.out[,stop.ind]),
                     tau=tau, X=x, y=y) 
       
-      #output_hide<- list(iter=iter[stop.ind], rel_dev=rel_dev[stop.ind], outer.iter=outer_iter_count[stop.ind], 
-      #                   kkt=kkt_seq[stop.ind], gmma=gmma.seq[stop.ind])
+      output_hide<- list(iter=iter[stop.ind], rel_dev=rel_dev[stop.ind], outer.iter=outer_iter_count[stop.ind], 
+                         kkt=kkt_seq[stop.ind], gmma=gmma.seq[stop.ind])
       #output1<- c(output, output_hide)
-      #class(output) <- "hrq_tau_glasso"
-      #return(output)
+      class(output) <- "hrq_tau_glasso"
+      return(output)
     }
     
     ####################
@@ -378,32 +378,17 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
                     loss=c(rep(loss[1], length.diff), loss[-1]), n.nonzero.beta=c(rep(n.grp[1], length.diff), n.grp[-1]), 
                     index.nonzero.beta=Matrix(cbind(matrix(group.index.out[,1], nrow = nrow(group.index.out), ncol = length.diff),group.index.out[,-1])), 
                     tau=tau, X=x, y=y)
-      #output_hide<- list(iter=c(rep(iter[1], length.diff), iter), rel_dev=c(rep(rel_dev[1], length.diff), rel_dev), outer.iter=outer_iter_count[stop.ind], 
-                       #  kkt=c(rep(kkt_seq[1], length.diff), kkt_seq[-1]), gmma=c(rep(gmma.seq[1], length.diff), gmma.seq[-1]))
+      output_hide<- list(iter=c(rep(iter[1], length.diff), iter), rel_dev=c(rep(rel_dev[1], length.diff), rel_dev), outer.iter=outer_iter_count[stop.ind], 
+                         kkt=c(rep(kkt_seq[1], length.diff), kkt_seq[-1]), gmma=c(rep(gmma.seq[1], length.diff), gmma.seq[-1]))
       
-      #class(output) <- "hrq_tau_glasso"
+      class(output) <- "hrq_tau_glasso"
       warning(paste("first ", length.diff, " lambdas results in pure sparse estimates!", sep = ""))
-      #return(output)
+      return(output)
       
     }
     
   } # end of else condition
-  models <- list()
-  modelsInfo <- modelnames <-  NULL
-  for(i in 1:ntau){
-    coefs <- getGQCoefs(output$beta,i,p+1,ntau)
-    models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
-    modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
-    modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
-  }
-  rownames(modelsInfo) <- modelnames
-  modelsInfo <- data.frame(modelsInfo)
-  colnames(modelsInfo) <- c("modelIndex","a","tau")
-  names(models) <- modelnames
-  returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau, a=1,modelsInfo=modelsInfo,lambda=lambda[1:ncol(coefs)],penalty="gq",call=match.call())
-  class(returnVal) <- "rq.pen.seq"
-  returnVal
+  
 } # end of function
 ########################################
-
 

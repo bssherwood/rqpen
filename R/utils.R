@@ -120,33 +120,6 @@ rq.tanh.deriv.aug<- function(r, tau, gmma, n){
 } # end of function
 ############################
 
-
-#' Negative gradient of huberized quantile loss (w.r.t. beta)
-#'
-#' @param r Residual
-#' @param weights Observation weight
-#' @param tau Huber parameter
-#' @param gmma Percentile
-#' @param x Design matrix
-#' @param n Sample size
-#' @param apprx Approximation method, huber or tanh
-#'
-#' @return Gradient vector
-#' @noRd
-neg.gradient <- function(r,weights,tau,gmma,x,n,apprx){
-  if(apprx=="huber"){
-    wt_deriv <- as.vector(weights*rq.huber.deriv(r, tau, gmma))
-  }else{
-    wt_deriv <- as.vector(weights*rq.tanh.deriv(r, tau, gmma))
-  }
-  
-  if(is.null(dim(x))){
-    mean(x*wt_deriv)
-  } else{
-    apply(x*wt_deriv,2,mean)
-  }
-} # end of function
-
 neg.gradient.aug <- function(r,weights,tau,gmma,x,n,apprx){  # input r, weights, x needs to be the augmented version
   if(apprx=="huber"){
     wt_deriv <- as.vector(weights*rq.huber.deriv.aug(r, tau, gmma, n))
@@ -184,7 +157,7 @@ l2norm<- function(x){
 #' @return True and False to indicate if KKT condition is met.
 #' @noRd
 kkt_check<- function(r, weights, w, gmma, tau, group.index, inactive.ind, lambda, x, n, apprx){
-  grad<- -neg.gradient(r, weights, tau, gmma, x, n, apprx)
+  grad<- -neg.gradient(r, weights, tau, gmma, x, apprx)
   grad.norm<- tapply(grad, group.index, l2norm)/w
   bad_spots <- grad.norm > lambda
   if(sum(bad_spots[inactive.ind])==0){
