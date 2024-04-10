@@ -1,13 +1,13 @@
 
 #' Title Cross validation for consistent variable selection across multiple quantiles
 #'
-#' @param nfolds number of folds
-#' @param loss loss function to be evaluated. Supported loss functions include quantile and squared loss. Default is the quantile loss.
-#' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
 #' @param x covariate matrix. Not needed if \code{model_obj} is supplied.
 #' @param y univariate response. Not needed if \code{model_obj} is supplied.
 #' @param tau a sequence of tau to be modeled
-#' @param folds indices of pre-split testing obervations 
+#' @param nfolds number of folds
+#' @param loss loss function to be evaluated. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.
+#' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
+#' @param foldid indices of pre-split testing obervations 
 #' @param ... other arguments for \code{gq.cv.pen}
 #'
 #' @return The full solution path is returned. It also returns the vector of CV score 
@@ -20,7 +20,7 @@
 #' \item{lambda_1se}{The largest lambda such that CV error is within 1 standard error of the minimum CV error.}
 #' \item{cv_min}{The value of CV error corresponding to \code{lambda_min}.}
 #' \item{cv_1se}{The value of CV error corresponding to \code{lambda_1se}.}
-#' \item{folds}{The vector of indices for k folds split.}
+#' \item{foldid}{The vector of indices for k folds split.}
 #' \item{cvup}{CV error + 1 standard error}
 #' \item{cvlo}{CV error - 1 standard error}
 #' \item{n.nonzero.beta}{The number of selected covariates for each lambda.}
@@ -34,11 +34,11 @@
 #' X<- matrix(rnorm(n*p),n,p)
 #' y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 #' taus <- seq(0.1, 0.9, 0.2)
-#' cvfit<- gq.cv.pen(x=X, y=y, tau=taus)
+#' cvfit<- rq.gq.cv.pen(x=X, y=y, tau=taus)
 #' cvfit$cv_all
 #' 
-rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_loss=NULL,  folds=NULL, ...){
-  
+rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"), wt_tau_loss=NULL,  foldid=NULL, ...){
+  loss <- match.arg(loss)
   ## two ways to call this function
   #if(!is.null(model_obj)){
    # y<- model_obj$y
@@ -61,10 +61,10 @@ rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_
   } 
   
   n <- length(y)
-  if(is.null(folds)){
-    folds <- sample(rep(1:nfolds, length=n))
+  if(is.null(foldid)){
+    foldid <- sample(rep(1:nfolds, length=n))
   } else{
-    nfolds <- max(folds)
+    nfolds <- max(foldid)
   }
   
   nlambda<- length(lambda)
@@ -74,14 +74,14 @@ rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_
   colnames(mse) <- colnames(mqe) <- paste("fold", 1:nfolds, sep = "")
   row_label <- expand.grid(tau, lambda)
   for(i in 1:nfolds){
-    ind<- which(folds==i)
+    ind<- which(foldid==i)
     train_x<- x[-ind,]
     train_y<- y[-ind]
     test_x<- x[ind,]
     test_y<- y[ind]
     
     train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
-    pred<- predict.hrq_tau_glasso(train_model, newX = test_x)
+    pred<- predict(train_model, newx = test_x)
     
     if(loss == "se"){
       se<- sapply(1:nlambda, function(xx) (rep(test_y,ntau)-c(pred[[xx]]))^2)
@@ -141,9 +141,7 @@ rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_
                   lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                   cvup=cv.mqe.wt+cv.mqe.wt.1se, cvlo=cv.mqe.wt-cv.mqe.wt.1se, 
                   eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                  folds=folds, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
-    class(output) <- "cv.hrq_tau_glasso"
-    return(output)
+                  foldid=foldid, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
   }
   else{
     if(loss=="se"){
@@ -179,70 +177,68 @@ rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss="rq", wt_tau_
                     lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                     cvup=cv.mse.wt+cv.mse.wt.1se, cvlo=cv.mse.wt-cv.mse.wt.1se,
                     eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                    folds=folds, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
-      class(output) <- "cv.hrq_tau_glasso"
-      return(output)
-    }else{
-      stop("'loss' is not supported! Supported loss functions are 'rq' and 'se'.")
+                    foldid=foldid, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
     }
   }
+  class(output) <- "rq.pen.seq.cv"
+  output
   
 }# end of function
 ############################
-
-
-#' Title Print a summary from \code{cv.hrq_tau_glasso} 
-#'
-#' @param cv.fit The CV object from \code{cv.hrq_tau_glasso}
-#'
-#' @export
-#'
-print.cv.hrq_tau_glasso <- function(cv.fit){
-  weighted <- c(which(cv.fit$lambda==cv.fit$lambda_min), cv.fit$lambda_min, 
-                which(cv.fit$lambda==cv.fit$lambda_1se), cv.fit$lambda_1se)
-  out <- rbind(cv.fit$eachtau, weighted)
-  rownames(out)[nrow(cv.fit$eachtau)+1] <- "weighted"
-  print(out)
-}
-
-## coefficient
-#' Title Getting the coefficient estimates from \code{cv.hrq_tau_glasso}.
-#'
-#' @param cv.fit The CV object from \code{cv.hrq_tau_glasso}
-#' @param s lambda value, or can be character either "lambda.min" or "lambda.1se". If not specified, "lambda.min" is used.
-#'
-#' @return coefficient estimates corresponding to the specified lambda values. 
-#' @export
-#'
-coef.cv.hrq_tau_glasso<- function(cv.fit, s){
-  lambda<- cv.fit$lambda
-  if(missing(s)){
-    sval<- cv.fit$lambda_min
-  }else{
-    if(is.numeric(s)){
-      sval <- s
-    }else{
-      if(s == "lambda.min") sval<- cv.fit$lambda_min
-      if(s == "lambda.1se") sval<- cv.fit$lambda_1se
-    } 
-  } 
-  
-  if(length(sval)==1){
-    ind<- which.min(abs(sval-lambda))[1]
-    beta<- matrix(cv.fit$beta[,ind], cv.fit$p+1, cv.fit$ntau, byrow = T)
-    rownames(beta)<- c("Intercept", unique(rownames(cv.fit$beta)[-c(1:cv.fit$ntau)]))
-    colnames(beta) <- paste("tau", cv.fit$tau, sep = "")
-    
-  }else{
-    ind <- sapply(1:length(sval), function(xx) which(lambda==sval[xx]))
-    beta <- list()
-    for(i in 1:length(ind)){
-      beta[[i]] <- matrix(cv.fit$beta[,ind[i]], cv.fit$p+1, cv.fit$ntau, byrow = T)
-      rownames(beta[[i]])<- c("Intercept", unique(rownames(cv.fit$beta)[-c(1:cv.fit$ntau)]))
-      colnames(beta[[i]]) <- paste("tau", cv.fit$tau, sep = "")
-    }
-    names(beta) <- paste("best_lam_tau", tau, sep = "")
-  }
-  return(beta)
-}
+#' 
+#' 
+#' #' Title Print a summary from \code{cv.hrq_tau_glasso} 
+#' #'
+#' #' @param cv.fit The CV object from \code{cv.hrq_tau_glasso}
+#' #'
+#' #' @export
+#' #'
+#' print.cv.hrq_tau_glasso <- function(cv.fit){
+#'   weighted <- c(which(cv.fit$lambda==cv.fit$lambda_min), cv.fit$lambda_min, 
+#'                 which(cv.fit$lambda==cv.fit$lambda_1se), cv.fit$lambda_1se)
+#'   out <- rbind(cv.fit$eachtau, weighted)
+#'   rownames(out)[nrow(cv.fit$eachtau)+1] <- "weighted"
+#'   print(out)
+#' }
+#' 
+#' ## coefficient
+#' #' Title Getting the coefficient estimates from \code{cv.hrq_tau_glasso}.
+#' #'
+#' #' @param cv.fit The CV object from \code{cv.hrq_tau_glasso}
+#' #' @param s lambda value, or can be character either "lambda.min" or "lambda.1se". If not specified, "lambda.min" is used.
+#' #'
+#' #' @return coefficient estimates corresponding to the specified lambda values. 
+#' #' @export
+#' #'
+#' coef.cv.hrq_tau_glasso<- function(cv.fit, s){
+#'   lambda<- cv.fit$lambda
+#'   if(missing(s)){
+#'     sval<- cv.fit$lambda_min
+#'   }else{
+#'     if(is.numeric(s)){
+#'       sval <- s
+#'     }else{
+#'       if(s == "lambda.min") sval<- cv.fit$lambda_min
+#'       if(s == "lambda.1se") sval<- cv.fit$lambda_1se
+#'     } 
+#'   } 
+#'   
+#'   if(length(sval)==1){
+#'     ind<- which.min(abs(sval-lambda))[1]
+#'     beta<- matrix(cv.fit$beta[,ind], cv.fit$p+1, cv.fit$ntau, byrow = T)
+#'     rownames(beta)<- c("Intercept", unique(rownames(cv.fit$beta)[-c(1:cv.fit$ntau)]))
+#'     colnames(beta) <- paste("tau", cv.fit$tau, sep = "")
+#'     
+#'   }else{
+#'     ind <- sapply(1:length(sval), function(xx) which(lambda==sval[xx]))
+#'     beta <- list()
+#'     for(i in 1:length(ind)){
+#'       beta[[i]] <- matrix(cv.fit$beta[,ind[i]], cv.fit$p+1, cv.fit$ntau, byrow = T)
+#'       rownames(beta[[i]])<- c("Intercept", unique(rownames(cv.fit$beta)[-c(1:cv.fit$ntau)]))
+#'       colnames(beta[[i]]) <- paste("tau", cv.fit$tau, sep = "")
+#'     }
+#'     names(beta) <- paste("best_lam_tau", tau, sep = "")
+#'   }
+#'   return(beta)
+#' }
 
