@@ -94,23 +94,6 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     } 
   }
   
-  
-  cv.mse<- matrix(apply(mse, 1, mean), ntau, nlambda)
-  cv.mqe<- matrix(apply(mqe, 1, mean), ntau, nlambda)
-  cv.mse.wt<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
-  cv.mqe.wt<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
-  colnames(cv.mse) <- colnames(cv.mqe) <- paste("lam", 1:nlambda, sep = "")
-  rownames(cv.mse) <- rownames(cv.mqe) <- paste("tau", tau, sep = "")
-  cv.mse.1se<- matrix(apply(mse, 1, sd), ntau, nlambda)
-  cv.mqe.1se<- matrix(apply(mqe, 1, sd), ntau, nlambda)
-  cv.mse.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
-  cv.mqe.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
-  # cv.mse.1se<- tapply(apply(mse, 1, sd), rep(1:nlambda, each=ntau), mean)
-  # cv.mqe.1se<- tapply(apply(mqe, 1, sd), rep(1:nlambda, each=ntau), mean)
-  colnames(cv.mse.1se) <- colnames(cv.mqe.1se) <- paste("lam", 1:nlambda, sep = "")
-  rownames(cv.mse.1se) <- rownames(cv.mqe.1se) <- paste("tau", tau, sep = "")
-  
-  
   #med.ind <- which.min(abs(tau-0.5))
   if(loss == "rq"){
     cv.mqe<- matrix(apply(mqe, 1, mean), ntau, nlambda)
