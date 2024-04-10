@@ -145,7 +145,8 @@ cv.hrq_tau_glasso<- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=N
                   lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                   cvup=cv.mqe.wt+cv.mqe.wt.1se, cvlo=cv.mqe.wt-cv.mqe.wt.1se, 
                   eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                  folds=folds, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
+                  folds=folds, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X,
+                  cvwt=cv.mqe.wt)
     class(output) <- "cv.hrq_tau_glasso"
     return(output)
   }
@@ -183,7 +184,8 @@ cv.hrq_tau_glasso<- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=N
                     lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                     cvup=cv.mse.wt+cv.mse.wt.1se, cvlo=cv.mse.wt-cv.mse.wt.1se,
                     eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                    folds=folds, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
+                    folds=folds, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X,
+                    cvwt=cv.mse.wt)
       class(output) <- "cv.hrq_tau_glasso"
       return(output)
     }else{
