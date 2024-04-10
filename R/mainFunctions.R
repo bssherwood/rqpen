@@ -760,8 +760,10 @@ print.rq.pen.seq.cv <- function(x,...){
 		cat("\nCross validation tuning parameter choices\n")
 		print(x$btr)
 	} else{
-		cat("\nCross validation tuning parameter optimized for each quantile\n")
-		print(x$btr)
+	  if(x$fit$penalty != "gq"){
+  		cat("\nCross validation tuning parameter optimized for each quantile\n")
+  		print(x$btr)
+	  }
 		cat("\nCross validation tuning parameter optimized across all quantiles\n")
 		print(x$gtr)
 	}
@@ -790,7 +792,7 @@ print.rq.pen.seq.cv <- function(x,...){
 #'  coefficients(lassoModels,cvmin=FALSE)
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu} 
-coef.rq.pen.seq.cv <- function(object,septau=TRUE,cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
+coef.rq.pen.seq.cv <- function(object,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,tau=NULL,...){
   if(object$fit$penalty=="gq" & septau){
     septau <- FALSE
     warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
