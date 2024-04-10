@@ -138,7 +138,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     cv.min.wt <- cv.mqe.wt[ind.lambda.min.wt]
     cv.1se.wt <- cv.mqe.wt[ind.lambda.1se.wt]
     
-    output<- list(beta=fullmodel$beta, lambda=lambda, cv_all= cv.mqe, err_all=mqe,
+    output<- list(beta=fullmodel$beta, lambda=lambda, cv_all= cv.mqe, err_all=mqe, se=cv.mqe.wt.1se,
                   lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                   cvup=cv.mqe.wt+cv.mqe.wt.1se, cvlo=cv.mqe.wt-cv.mqe.wt.1se, 
                   eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
@@ -174,16 +174,18 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
       cv.min.wt <- cv.mse.wt[ind.lambda.min.wt]
       cv.1se.wt <- cv.mse.wt[ind.lambda.1se.wt]
       
-      output<- list(beta=fullmodel$beta, lambda=lambda, cv_all= cv.mse, err_all=mse,
+      output<- list(beta=fullmodel$beta, lambda=lambda, cv_all= cv.mse, err_all=mse, se=cv.mse.wt.1se,
                     lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                     cvup=cv.mse.wt+cv.mse.wt.1se, cvlo=cv.mse.wt-cv.mse.wt.1se,
                     eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
                     foldid=foldid, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
     }
   }
-  class(output) <- "rq.pen.seq.cv"
-  output
-  
+  #output
+  #gtr <- data.table(tau=tau, minCv = output$)
+  returnVal <- list(cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=output, gcve=output, call=match.call())
+  class(returnVal) <- "rq.pen.seq.cv"
+  returnVal
 }# end of function
 ############################
 #' 
