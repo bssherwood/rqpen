@@ -126,7 +126,8 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
                   lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                   cvup=cv.mqe.wt+cv.mqe.wt.1se, cvlo=cv.mqe.wt-cv.mqe.wt.1se, 
                   eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                  foldid=foldid, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
+                  foldid=foldid, ntau=ntau, n.nonzero.beta=fullmodel$n.nonzero.beta, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X,
+                  me=mqe)
   }
   else{
     if(loss=="se"){
@@ -163,7 +164,8 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
                     lambda_min=lambda.min.wt, lambda_1se=lambda.1se.wt, cv_min=cv.min.wt, cv_1se=cv.1se.wt,
                     cvup=cv.mse.wt+cv.mse.wt.1se, cvlo=cv.mse.wt-cv.mse.wt.1se,
                     eachtau=cbind(optimalmodel=ind.eachtau.min, lambda=lambda.min, optimalmodel_1se=ind.eachtau.1se, lambda_1se=lambda.1se),
-                    foldid=foldid, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X)
+                    foldid=foldid, n.nonzero.beta=fullmodel$n.nonzero.beta, ntau=ntau, p=ncol(test_x), tau=fullmodel$tau, X=fullmodel$X,
+                    me=mse)
     }
   }
   #output
@@ -171,7 +173,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
   gtr <- data.table(tau=tau, minCv = output$cv_min, lambda=output$lambda_min, lambdaIndex=ind.lambda.min.wt,
                     lambda1se=output$lambda_1se, lambda1seIndex=ind.lambda.1se.wt, a=1, cvse=output$se[ind.lambda.min.wt], 
                     modelsIndex=1:ntau, nonzero=nz[ind.lambda.min.wt], nzse=nz[ind.lambda.1se.wt])
-  returnVal <- list(err=output$err_all,cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=gtr, gcve=matrix(gcv,ncol=nlambda), call=match.call())
+  returnVal <- list(me=output$me,err=output$err_all,cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=gtr, gcve=matrix(gcv,ncol=nlambda), call=match.call())
   class(returnVal) <- "rq.pen.seq.cv"
   returnVal
 }# end of function
