@@ -188,7 +188,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
   gtr <- data.table(tau=tau, minCv = output$cv_min, lambda=output$lambda_min, lambdaIndex=ind.lambda.min.wt,
                     lambda1se=output$lambda_1se, lambda1seIndex=ind.lambda.1se.wt, a=1, cvse=output$se[ind.lambda.min.wt], 
                     modelsIndex=1:ntau, nonzero=nz[ind.lambda.min.wt], nzse=nz[ind.lambda.1se.wt])
-  returnVal <- list(cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=gtr, gcve=matrix(gcv,ncol=nlambda, call=match.call())
+  returnVal <- list(cverr=output$cv_all, cvse=output$se, fit=fullmodel, btr=NULL, gtr=gtr, gcve=matrix(gcv,ncol=nlambda), call=match.call())
   class(returnVal) <- "rq.pen.seq.cv"
   returnVal
 }# end of function
