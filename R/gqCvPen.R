@@ -89,7 +89,7 @@ rq.gq.cv.pen <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     } 
     if(loss == "rq"){
       eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
-      mqe[,i]<- as.vector(do.call(c, lapply(eq, apply, 2,mean)))
+      mqe[,i]<- as.vector(apply(eq, 2,mean))
     } 
   }
   
