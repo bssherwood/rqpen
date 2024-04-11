@@ -58,8 +58,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   nng<- rep(ntau, p)
   
   ## some initial checks
-  if(ntau==1){
-    stop("please provide at least two tau values!")
+  if(ntau < 3){
+    stop("please provide at least three tau values!")
   }
   if(is.null(penalty.factor)) penalty.factor<- sqrt(nng)
   if(is.null(weights)) weights<- rep(1, n)

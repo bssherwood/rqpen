@@ -1,3 +1,9 @@
+# new stuff
+1. rq.gq.pen does not work with two quantiles
+
+
+
+
 #Making things nice
 0. Simplify choice of algorithm. So that it has to be from a set list. Think about issue of conquer... do i really want to be checking what quantreg is using... not really. 
 1. codemetar: currenlty not available on CRAN. https://devguide.ropensci.org/building.html
