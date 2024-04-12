@@ -261,9 +261,10 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
       loss[j]<- dev1/n
       pen.loss[j]<- dev1/n+lambda[j]*sum(eigen.sub.H*sapply(1:p, function(xx) l2norm(beta0[-(1:ntau)][groupIndex==xx])))
       rel_dev[j]<- dev1/dev0
-      rel_dev_change<- rel_dev[j]-rel_dev[j-1]
-      if(abs(rel_dev_change)<1e-3 & j>70 & lambda.discard) break
-      
+	  if(j > 1){
+		rel_dev_change<- rel_dev[j]-rel_dev[j-1]
+		if(abs(rel_dev_change)<1e-3 & j>70 & lambda.discard) break
+      }
     } # end of for loop of lambda
     
     
