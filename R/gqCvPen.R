@@ -4,7 +4,7 @@
 #' @param x covariate matrix. Not needed if \code{model_obj} is supplied.
 #' @param y univariate response. Not needed if \code{model_obj} is supplied.
 #' @param tau a sequence of tau to be modeled
-#' \item{lambda}{The sequence of lambdas.}
+#' @param lambda The sequence of lambdas.
 #' @param nfolds number of folds
 #' @param loss loss function to be evaluated. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.
 #' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
@@ -95,7 +95,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
 	  pos <- 1
 	  for(tauval in tau){
 		for(k in 1:nlambda){
-			mqe[,pos] <- mean(rq.loss(test_err[,pos],tauval))
+			mqe[pos,i] <- mean(rq.loss(test_err[,pos],tauval))
 			pos <- pos + 1
 		}
 	  }

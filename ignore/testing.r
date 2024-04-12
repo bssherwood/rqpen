@@ -1,6 +1,6 @@
 library(devtools)
 install_github("bssherwood/rqpen", force=TRUE)
-4
+5
 library(rqPen)
 set.seed(1)
 n<- 30
