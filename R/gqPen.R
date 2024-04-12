@@ -115,7 +115,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   if(is.null(lambda)){
     lambda.min<- ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
-    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda))
+    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda+1))
   }else{
     # user supplied lambda
     lambda.discard<- FALSE
