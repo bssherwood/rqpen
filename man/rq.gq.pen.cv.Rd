@@ -8,6 +8,7 @@ rq.gq.pen.cv(
   x = NULL,
   y = NULL,
   tau = NULL,
+  lambda = NULL,
   nfolds = 10,
   loss = c("rq", "se"),
   wt_tau_loss = NULL,
@@ -20,7 +21,8 @@ rq.gq.pen.cv(
 
 \item{y}{univariate response. Not needed if \code{model_obj} is supplied.}
 
-\item{tau}{a sequence of tau to be modeled}
+\item{tau}{a sequence of tau to be modeled
+\item{lambda}{The sequence of lambdas.}}
 
 \item{nfolds}{number of folds}
 

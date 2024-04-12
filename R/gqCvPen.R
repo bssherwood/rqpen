@@ -50,7 +50,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
   #  lambda<- model_obj$lambda
   #  fullmodel<- model_obj
   #}else{
-  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau,lambda=NULL, ...)
+  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau,lambda=lambda, ...)
   lambda<- fullmodel$lambda
   tau<- fullmodel$tau
   ntau <- length(tau)
@@ -82,7 +82,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
     test_x<- x[ind,]
     test_y<- y[ind]
     
-    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda, lambda.discard=FALSE,...) #,...
+    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
     pred<- predict(train_model, newx = test_x)
     
     if(loss == "se"){
