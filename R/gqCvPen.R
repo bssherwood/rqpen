@@ -84,7 +84,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
     
     train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
     pred<- predict(train_model, newx = test_x)
-    print(pred[,c(5,10,15)])
+    #print(pred[,c(5,10,15)])
     if(loss == "se"){
       se<- (test_y-pred)^2
       mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 

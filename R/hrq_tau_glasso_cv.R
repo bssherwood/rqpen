@@ -86,7 +86,7 @@ cv.hrq_tau_glasso<- function(model_obj=NULL, nfolds=10, loss="rq", wt_tau_loss=N
     
     train_model<- hrq_tau_glasso(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
     pred<- predict.hrq_tau_glasso(train_model, newX = test_x)
-    print(pred$lambda5)
+   #print(pred$lambda5)
     if(loss == "se"){
       se<- sapply(1:nlambda, function(xx) (rep(test_y,ntau)-c(pred[[xx]]))^2)
       mse[,i]<- as.vector(sapply(1:nlambda, function(xx) tapply(se[,xx], rep(1:ntau, each=nrow(test_x)), mean))) 
