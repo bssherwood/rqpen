@@ -111,10 +111,11 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   grad_k.norm<- tapply(grad_k, groupIndex, weighted_norm, normweights=tau.penalty.factor)
   
   lambda.max<- max(grad_k.norm/penalty.factor)
+  lambda.flag<- 0
   if(is.null(lambda)){
     lambda.min<- ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
-    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda+1))
+    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda))
   }
   
   ## QM condition in Yang and Zou, Lemma 1 (2) -- PD matrix H
@@ -131,6 +132,45 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   ##  we do not need to compute eigenvalues because for each group, X^TWX is diagonal and all elements are the same.
   eigen.sub.H <- colSums(weights*x^2)/(n*gmma)
   
+  
+  ### for loop over lambda's
+  if(length(lambda)==2){
+    lambda<- lambda[2]
+    update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weights_aug, groupIndex, lambda, penalty.factor, 
+                          tau.penalty.factor, eigen.sub.H, beta0, maxIter, epsilon, ntau)
+    beta1<- update$beta_update
+    iter_num <- update$n_iter
+    converge_status <- update$converge
+    update.r <- as.vector(update$resid)
+    
+    # if(scalex){
+    #   beta1 <- transform_coefs.aug(beta1, mu_x, sigma_x, ntau)
+    #   X <- x*matrix(sigma_x,n,p,byrow = T)+matrix(mu_x,n,p,byrow = T)
+    # }else{
+    #   beta1 <- beta1
+    #   X <- x
+    # }
+    
+    dev1<- sum(weights_aug*rq.loss.aug(update.r, tau, n))
+    
+    pen.loss<- dev1/n+lambda*sum(eigen.sub.H*sapply(1:p, function(xx) l2norm(beta1[-(1:ntau)][groupIndex==xx])))
+    group.index.out<- unique(groupIndex[beta1[-(1:ntau)]!=0])
+    betaEst <- matrix(beta1, (p+1), ntau, byrow = T)
+    
+    colnames(betaEst) <- paste("tau_", tau, sep = "")
+    if(is.null(colnames(x))){
+      rownames(betaEst)<- c("Intercept", paste("V", 1:p, sep = ""))
+    }else{
+      rownames(betaEst)<- c("Intercept", colnames(x))
+    }
+    
+    output<- list(beta=betaEst, lambda=lambda, null.dev=dev0, pen.loss=pen.loss, loss=dev1/n, tau=tau, 
+                  n.nonzero.beta=length(group.index.out), index.nonzero.beta=group.index.out, X=x, y=y)
+    #output.hide<- list(converge=update$converge, iter=update$iter, rel_dev=dev1/dev0)
+    #class(output)<- "hrq_tau_glasso"
+    #return(output)
+    
+  }else{
     
     group.index.out<- matrix(0, p, length(lambda))
     n.grp<- rep(0, length(lambda)); n.grp[1]<- 0
@@ -145,7 +185,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
     pen.loss<- rep(0, length(lambda)); pen.loss[1]<- dev0/n
     gmma.seq<- rep(0, length(lambda)); gmma.seq[1]<- gmma
     active.ind<- NULL
-    for(j in 1:length(lambda)){ #
+    for(j in 2:length(lambda)){ #
       #print(j)
       if(length(active.ind)<p){
         ## use strong rule to determine active group at (i+1) (pre-screening)
@@ -270,7 +310,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
     stop.ind<- which(rel_dev!=0)
     if(length(stop.ind)==0) stop.ind<- 1:length(lambda)
     
-      stop.ind<- stop.ind#[-1]
+    if(lambda.flag==0){
+      stop.ind<- stop.ind[-1]
       # if(scalex){
       #   beta.final<- apply(beta.all[,stop.ind], 2, transform_coefs.aug, mu_x,sigma_x, ntau)
       #   X <- x*matrix(sigma_x,n,p,byrow = T)+matrix(mu_x,n,p,byrow = T)
@@ -295,8 +336,41 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
       #output1<- c(output, output_hide)
       #class(output) <- "hrq_tau_glasso"
       #return(output)
-
+    }
     
+    ####################
+    if(lambda.flag==1){
+      length.diff<- length(lambda.user)-length(lambda)+1
+      beta.all<- cbind(matrix(beta.all[,1], nrow = ntau*(p+1), ncol = length.diff),beta.all[,-1])
+      # if(scalex){
+      #   beta.final<- apply(beta.all, 2, transform_coefs.aug, mu_x,sigma_x,ntau)
+      #   X <- x*matrix(sigma_x,n,p,byrow = T)+matrix(mu_x,n,p,byrow = T)
+      # } else{
+      #   beta.final <- beta.all
+      #   X <- x
+      # }
+      beta.final <- beta.all
+      
+      if(is.null(colnames(x))){
+        rownames(beta.final)<- c(paste("Intercept(tau=", tau,")", sep = ""), rep(paste("V", 1:p, sep = ""), each=ntau))
+      }else{
+        rownames(beta.final)<- c(paste("Intercept(tau=", tau,")", sep = ""), rep(colnames(x), each=ntau))
+      }
+      
+      output<- list(beta=Matrix(beta.final), lambda=lambda.user, null.dev=dev0, pen.loss=c(rep(pen.loss[1], length.diff), pen.loss[-1]), 
+                    loss=c(rep(loss[1], length.diff), loss[-1]), n.nonzero.beta=c(rep(n.grp[1], length.diff), n.grp[-1]), 
+                    index.nonzero.beta=Matrix(cbind(matrix(group.index.out[,1], nrow = nrow(group.index.out), ncol = length.diff),group.index.out[,-1])), 
+                    tau=tau, X=x, y=y)
+      #output_hide<- list(iter=c(rep(iter[1], length.diff), iter), rel_dev=c(rep(rel_dev[1], length.diff), rel_dev), outer.iter=outer_iter_count[stop.ind], 
+                       #  kkt=c(rep(kkt_seq[1], length.diff), kkt_seq[-1]), gmma=c(rep(gmma.seq[1], length.diff), gmma.seq[-1]))
+      
+      #class(output) <- "hrq_tau_glasso"
+      warning(paste("first ", length.diff, " lambdas results in pure sparse estimates!", sep = ""))
+      #return(output)
+      
+    }
+    
+  } # end of else condition
   models <- list()
   modelsInfo <- modelnames <-  NULL
   for(i in 1:ntau){
