@@ -119,7 +119,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   }else{
     # user supplied lambda
     lambda.discard<- FALSE
-    if(lambda.max> max(lambda)){
+	#kind of a hack here, but not sure why we have the following code. 
+    if(lambda.max/max(lambda) > 1.01){
       lambda<- exp(c(log(lambda.max), log(sort(lambda, decreasing = TRUE))))
     }else{
       if(length(lambda)>1 & min(lambda)<lambda.max){
