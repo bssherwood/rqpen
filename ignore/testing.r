@@ -12,8 +12,8 @@ folds <- rqPen:::randomly_assign(n,10)
 
 bfit <- rq.gq.pen(X,y,taus,nlambda=10)
 
-cvfit <- rq.gq.pen.cv(x=X, y=y, tau=taus, foldid=folds, nlambda=10)
-cvfit2 <- cv.hrq_tau_glasso(x=X, y=y, tau=taus, folds=folds)
+cvfit <- rq.gq.pen.cv(x=X, y=y, tau=taus, foldid=folds, lambda=bfit$lambda)
+cvfit2 <- cv.hrq_tau_glasso(x=X, y=y, tau=taus, folds=folds, lambda=bfit$lambda)
 4
 
 library(rqPen)

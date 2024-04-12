@@ -4,6 +4,7 @@
 #' @param x covariate matrix. Not needed if \code{model_obj} is supplied.
 #' @param y univariate response. Not needed if \code{model_obj} is supplied.
 #' @param tau a sequence of tau to be modeled
+#' \item{lambda}{The sequence of lambdas.}
 #' @param nfolds number of folds
 #' @param loss loss function to be evaluated. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.
 #' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
@@ -38,7 +39,7 @@
 #' cvfit<- rq.gq.cv.pen(x=X, y=y, tau=taus)
 #' }
 #' 
-rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"), wt_tau_loss=NULL,  foldid=NULL, ...){
+rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=c("rq","se"), wt_tau_loss=NULL,  foldid=NULL, ...){
   loss <- match.arg(loss)
   ## two ways to call this function
   #if(!is.null(model_obj)){
@@ -49,7 +50,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
   #  lambda<- model_obj$lambda
   #  fullmodel<- model_obj
   #}else{
-  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau, ...)
+  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau,lambda=NULL, ...)
   lambda<- fullmodel$lambda
   tau<- fullmodel$tau
   ntau <- length(tau)
@@ -81,7 +82,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, nfolds=10, loss=c("rq","se"),
     test_x<- x[ind,]
     test_y<- y[ind]
     
-    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
+    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda, lambda.discard=FALSE,...) #,...
     pred<- predict(train_model, newx = test_x)
     
     if(loss == "se"){
