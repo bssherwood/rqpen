@@ -126,7 +126,8 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
       if(length(lambda)>1 & min(lambda)<lambda.max){
         lambda.flag<- 1
         lambda.user<- lambda
-        lambda<- exp(c(log(lambda.max), log(sort(lambda[lambda<lambda.max], decreasing = TRUE))))
+		lambda <- sort(lambda, decreasing=TRUE)
+        #lambda<- exp(c(log(lambda.max), log(sort(lambda[lambda<lambda.max], decreasing = TRUE))))
       }else{
         #warning("lambda is too large, all coefficients are shrunk to 0!")
         betaEst <- rbind(b.int, matrix(0,p, ntau))
