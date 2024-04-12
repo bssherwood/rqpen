@@ -1,4 +1,4 @@
-rqPen 3.3  
+rqPen 4.0    
 =============
 * Added rq.gq.pen() and rq.gq.pen.cv() for a group lasso penalty across the quantiles that gurantees that when estimating multiple quantiles the same variables are selected across all quantiles. 
 * Removed QICD algorithm. The Huber approaches tend to be more efficient. In addition, maintaing the C and Fortran code with the new C++ code is cumbersome.

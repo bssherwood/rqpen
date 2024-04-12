@@ -86,12 +86,21 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
     pred<- predict(train_model, newx = test_x)
     
     if(loss == "se"){
-      se<- sapply(1:nlambda, function(xx) (test_y-pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)])^2)
-      mse[,i]<- as.vector(do.call(c, lapply(se, apply, 2,mean))) 
+      se<- (test_y-pred)^2
+      mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 
     } 
     if(loss == "rq"){
-      eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
-      mqe[,i]<- as.vector(apply(eq, 2,mean))
+	  #double for loop that could be removed
+	  test_err <- test_y-pred
+	  pos <- 1
+	  for(tauval in tau){
+		for(k in 1:nlambda){
+			mqe[,pos] <- mean(rq.loss(test_err[,pos],tauval))
+			pos <- pos + 1
+		}
+	  }
+      #eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
+      #mqe[,i]<- as.vector(apply(eq, 2,mean))
     } 
   }
   

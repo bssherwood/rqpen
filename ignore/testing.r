@@ -1,6 +1,6 @@
 library(devtools)
 install_github("bssherwood/rqpen", force=TRUE)
-3
+4
 library(rqPen)
 set.seed(1)
 n<- 30
@@ -10,9 +10,9 @@ y<- -2+X[,1]+0.5*X[,2]+rt(n,2)
 taus <- c(.5,.7,.9)
 folds <- rqPen:::randomly_assign(n,10)
 
-bfit <- rq.gq.pen(X,y,taus,nlambda=10)
+bfit <- rq.gq.pen(X,y,taus,nlambda=5)
 
-cvfit <- rqPen:::rq.gq.pen.cv(x=X, y=y, tau=taus, foldid=folds, lambda=bfit$lambda)
+cvfit <- rq.gq.pen.cv(x=X, y=y, tau=taus, foldid=folds, lambda=bfit$lambda)
 cvfit2 <- cv.hrq_tau_glasso(x=X, y=y, tau=taus, folds=folds, lambda=bfit$lambda)
 4
 
