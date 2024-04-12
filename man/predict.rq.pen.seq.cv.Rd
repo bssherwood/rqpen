@@ -8,7 +8,7 @@
   object,
   newx,
   tau = NULL,
-  septau = TRUE,
+  septau = ifelse(object$fit$penalty != "gq", TRUE, FALSE),
   cvmin = TRUE,
   useDefaults = TRUE,
   ...

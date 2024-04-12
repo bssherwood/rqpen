@@ -7,7 +7,7 @@
 \method{qic.select}{rq.pen.seq.cv}(
   obj,
   method = c("BIC", "AIC", "PBIC"),
-  septau = TRUE,
+  septau = ifelse(obj$fit$penalty != "gq", TRUE, FALSE),
   weights = NULL,
   ...
 )

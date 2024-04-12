@@ -7,7 +7,7 @@
 \method{qic.select}{rq.pen.seq}(
   obj,
   method = c("BIC", "AIC", "PBIC"),
-  septau = TRUE,
+  septau = ifelse(obj$penalty != "gq", TRUE, FALSE),
   tauWeights = NULL,
   ...
 )

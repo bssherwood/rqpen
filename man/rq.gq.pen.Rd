@@ -9,6 +9,7 @@ rq.gq.pen(
   y,
   tau,
   lambda = NULL,
+  nlambda = 100,
   weights = NULL,
   penalty.factor = NULL,
   tau.penalty.factor = NULL,
@@ -27,6 +28,8 @@ rq.gq.pen(
 \item{tau}{a sequence of quantiles to be modeled}
 
 \item{lambda}{shrinkage parameter. Default is NULL, and the algorithm provides a solution path.}
+
+\item{nlambda}{Number of lambda values to be considered.}
 
 \item{weights}{observation weights. Default is NULL, which means equal weights.}
 

@@ -4,7 +4,14 @@
 \alias{plot.rq.pen.seq.cv}
 \title{Plots cross validation results from a rq.pen.seq.cv object}
 \usage{
-\method{plot}{rq.pen.seq.cv}(x, septau = TRUE, tau = NULL, logLambda = TRUE, main = NULL, ...)
+\method{plot}{rq.pen.seq.cv}(
+  x,
+  septau = ifelse(x$fit$penalty != "gq", TRUE, FALSE),
+  tau = NULL,
+  logLambda = TRUE,
+  main = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{The rq.pen.seq.cv object}

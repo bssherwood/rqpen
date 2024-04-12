@@ -4,7 +4,14 @@
 \alias{coef.rq.pen.seq.cv}
 \title{Returns coefficients from a rq.pen.seq.cv object.}
 \usage{
-\method{coef}{rq.pen.seq.cv}(object, septau = TRUE, cvmin = TRUE, useDefaults = TRUE, tau = NULL, ...)
+\method{coef}{rq.pen.seq.cv}(
+  object,
+  septau = ifelse(object$fit$penalty != "gq", TRUE, FALSE),
+  cvmin = TRUE,
+  useDefaults = TRUE,
+  tau = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{An rq.pen.seq.cv object.}

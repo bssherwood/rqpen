@@ -6,6 +6,7 @@
 #' @param y a univariate response variable
 #' @param tau a sequence of quantiles to be modeled
 #' @param lambda shrinkage parameter. Default is NULL, and the algorithm provides a solution path.
+#' @param nlambda Number of lambda values to be considered. 
 #' @param weights observation weights. Default is NULL, which means equal weights.
 #' @param penalty.factor weights for the shrinkage parameter for each covariate. Default is equal weight.
 #' @param tau.penalty.factor weights for different quantiles. Default is equal weight.
@@ -47,7 +48,7 @@
 #' matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
 #' }
 #' 
-rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
+rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
                           maxIter=200, lambda.discard=TRUE, epsilon=1e-4, beta0=NULL){
   
   ## basic info about dimensions
@@ -114,7 +115,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, weights=NULL, penalty.factor=NULL,
   if(is.null(lambda)){
     lambda.min<- ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
-    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = 101))
+    lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda))
   }else{
     # user supplied lambda
     lambda.discard<- FALSE

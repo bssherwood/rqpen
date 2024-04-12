@@ -6,7 +6,7 @@
 \usage{
 \method{bytau.plot}{rq.pen.seq.cv}(
   x,
-  septau = TRUE,
+  septau = ifelse(x$fit$penalty != "gq", TRUE, FALSE),
   cvmin = TRUE,
   useDefaults = TRUE,
   vars = NULL,
