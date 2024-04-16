@@ -21,8 +21,9 @@ rq.gq.pen.cv(
 
 \item{y}{univariate response. Not needed if \code{model_obj} is supplied.}
 
-\item{tau}{a sequence of tau to be modeled
-\item{lambda}{The sequence of lambdas.}}
+\item{tau}{a sequence of tau to be modeled}
+
+\item{lambda}{The sequence of lambdas.}
 
 \item{nfolds}{number of folds}
 

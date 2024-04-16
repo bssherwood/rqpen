@@ -90,17 +90,20 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
       mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 
     } 
     if(loss == "rq"){
-	  #double for loop that could be removed
-	  test_err <- test_y-pred
-	  pos <- 1
-	  for(k in 1:nlambda){
-	    for(tauval in tau){
-  	    mqe[pos,i] <- mean(rq.loss(test_err[,pos],tauval))
-  			pos <- pos + 1
-  		}
-	  }
-      #eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
-      #mqe[,i]<- as.vector(apply(eq, 2,mean))
+	    #double for loop that could be removed
+  	  test_err <- test_y-pred
+  	  tpos <- 1
+  	  for(tauval in tau){
+  	    pos <- 1
+  	    posseq <- seq(tpos,(nlambda-1)*ntau+tpos,ntau)
+    		for(k in 1:nlambda){
+    			mqe[posseq[pos],i] <- mean(rq.loss(test_err[,pos],tauval))
+    			pos <- pos + 1
+    		}
+  	    tpos <- tpos+1
+  	  }
+        #eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
+        #mqe[,i]<- as.vector(apply(eq, 2,mean))
     } 
   }
   
