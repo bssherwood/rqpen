@@ -93,11 +93,11 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
 	  #double for loop that could be removed
 	  test_err <- test_y-pred
 	  pos <- 1
-	  for(tauval in tau){
-		for(k in 1:nlambda){
-			mqe[pos,i] <- mean(rq.loss(test_err[,pos],tauval))
-			pos <- pos + 1
-		}
+	  for(k in 1:nlambda){
+	    for(tauval in tau){
+  	    mqe[pos,i] <- mean(rq.loss(test_err[,pos],tauval))
+  			pos <- pos + 1
+  		}
 	  }
       #eq<- sapply(1:nlambda, function(xx) rq.loss.aug(rep(test_y,ntau)-as.vector(pred[,seq(xx,xx+nlambda*(ntau-1),nlambda)]), tau, n=nrow(test_x)))
       #mqe[,i]<- as.vector(apply(eq, 2,mean))
