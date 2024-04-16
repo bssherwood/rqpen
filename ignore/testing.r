@@ -3,8 +3,8 @@ install_github("bssherwood/rqpen", force=TRUE)
 3
 library(rqPen)
 set.seed(1)
-n<- 30
-p<- 3
+n<- 20
+p<- 5
 X<- matrix(rnorm(n*p),n,p)
 y<- -2+X[,1]+0.5*X[,2]+rt(n,2)
 taus <- c(.5,.7,.9)
