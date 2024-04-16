@@ -91,14 +91,14 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
     } 
     if(loss == "rq"){
 	    #double for loop that could be removed
+      #hacky code
   	  test_err <- test_y-pred
   	  tpos <- 1
   	  for(tauval in tau){
-  	    pos <- 1
   	    posseq <- seq(tpos,(nlambda-1)*ntau+tpos,ntau)
+  	    err_seq <- seq((tpos-1)*nlambda+1,nlambda*tpos)
     		for(k in 1:nlambda){
-    			mqe[posseq[pos],i] <- mean(rq.loss(test_err[,pos],tauval))
-    			pos <- pos + 1
+    			mqe[posseq[k],i] <- mean(rq.loss(test_err[,err_seq[k]],tauval))
     		}
   	    tpos <- tpos+1
   	  }
