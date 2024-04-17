@@ -60,5 +60,10 @@ taus <- seq(0.1, 0.9, 0.2)
 cvfit<- rq.gq.pen.cv(x=X, y=y, tau=taus)
 cvCoefs <- coefficients(cvfit)
 }
-
+}
+\references{
+\insertRef{heteroIdQR}{rqPen}
+}
+\author{
+Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 }

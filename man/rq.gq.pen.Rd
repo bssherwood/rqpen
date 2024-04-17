@@ -88,5 +88,10 @@ fit<- rq.gq.pen(X, y, taus)
 #use IC to select best model, see rq.gq.pen.cv() for a cross-validation approach
 qfit <- qic.select(fit)
 }
-
+}
+\references{
+\insertRef{heteroIdQR}{rqPen}
+}
+\author{
+Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 }
