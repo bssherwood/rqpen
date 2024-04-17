@@ -5,7 +5,6 @@
 #' @import data.table
 #' @import lifecycle
 #' @import Matrix
-#' @import RcppArmadillo
 #' @importFrom Rcpp evalCpp
 #' @importFrom splines bs
 #' @importFrom graphics lines plot par segments points legend
