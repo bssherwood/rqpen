@@ -7,14 +7,17 @@
 #' @param tau a sequence of quantiles to be modeled, must be of at least length 3. 
 #' @param lambda shrinkage parameter. Default is NULL, and the algorithm provides a solution path.
 #' @param nlambda Number of lambda values to be considered. 
+#' @param eps If not pre-specified the lambda vector will be from lambda_max to lambda_max times eps
 #' @param weights observation weights. Default is NULL, which means equal weights.
 #' @param penalty.factor weights for the shrinkage parameter for each covariate. Default is equal weight.
+#' @param scalex Whether x should be scaled before fitting the model. Coefficients are returned on the original scale. 
 #' @param tau.penalty.factor weights for different quantiles. Default is equal weight.
 #' @param gmma tuning parameter for the Huber loss
-#' @param maxIter maximum number of iteration. Default is 200.
+#' @param max.iter maximum number of iteration. Default is 200.
 #' @param lambda.discard Default is TRUE, meaning that the solution path stops if the relative deviance changes sufficiently small. It usually happens near the end of solution path. However, the program returns at least 70 models along the solution path. 
-#' @param epsilon The epsilon level convergence. Default is 1e-4.
+#' @param converge.eps The epsilon level convergence. Default is 1e-4.
 #' @param beta0 Initial estimates. Default is NULL, and the algorithm starts with the intercepts being the quantiles of response variable and other coefficients being zeros.
+#'
 #'
 #' @description  
 #' Uses the group lasso penalty across the quantiles to provide consistent selection across all, Q, modeled quantiles. Let \eqn{\beta^q}
@@ -61,8 +64,9 @@
 #' @references 
 #' \insertRef{heteroIdQR}{rqPen}
 #' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
-rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
-                          maxIter=200, lambda.discard=TRUE, epsilon=1e-4, beta0=NULL){
+rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
+                          weights=NULL, penalty.factor=NULL, scalex=TRUE, tau.penalty.factor=NULL, gmma=0.2, 
+                          max.iter=200, lambda.discard=TRUE, converge.eps=1e-4, beta0=NULL){
   
   ## basic info about dimensions
   ntau <- length(tau)
@@ -79,12 +83,12 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   if(is.null(weights)) weights<- rep(1, n)
   if(is.null(tau.penalty.factor)) tau.penalty.factor<- rep(1, ntau)
   
-  # ## standardize X
-  # if(scalex){
-  #   x <- scale(x)
-  #   mu_x <- attributes(x)$`scaled:center`
-  #   sigma_x <- attributes(x)$`scaled:scale`
-  # }
+  ## standardize X
+  if(scalex){
+    x <- scale(x)
+    mu_x <- attributes(x)$`scaled:center`
+    sigma_x <- attributes(x)$`scaled:scale`
+  }
   
   ## augmenting data
   Xaug <- kronecker(diag(ntau), x)
@@ -125,7 +129,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   
   lambda.max<- max(grad_k.norm/penalty.factor)
   if(is.null(lambda)){
-    lambda.min<- ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
+    lambda.min<- lambda.max*eps #ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
     lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda+1))
   }
@@ -175,7 +179,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
 
           # update beta and residuals
           update<- solvebetaCpp(Xaug, Yaug, n, tau_aug, gmma, weights_aug, groupIndex, 
-                                lambda[j], penalty.factor, tau.penalty.factor, eigen.sub.H, beta0, maxIter, epsilon, ntau)
+                                lambda[j], penalty.factor, tau.penalty.factor, eigen.sub.H, beta0, max.iter, converge.eps, ntau)
           beta0<- update$beta_update
           update.iter <- update$n_iter
           update.converge <- update$converge
@@ -214,7 +218,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
             # update beta and residuals
             update<- solvebetaCpp(x.sub, Yaug, n, tau_aug, gmma, weights_aug, reduced.group.index, 
                                   lambda[j], penalty.factor, tau.penalty.factor, eigen.sub.H, beta0[c(1:ntau, reduced.ind+ntau)],
-                                  maxIter, epsilon, ntau)
+                                  max.iter, converge.eps, ntau)
             beta.update <- update$beta_update
             update.r <- as.vector(update$resid)
             update.converge <- update$converge
@@ -244,7 +248,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
         # update beta and residuals
         update<- solvebetaCpp(x=Xaug, y=Yaug, n=n, tau=tau_aug, gmma=gmma, weights=weights_aug, groupIndex=groupIndex, 
                               lambdaj=lambda[j], wlambda=penalty.factor, wtau=tau.penalty.factor, eigenval=eigen.sub.H, betaini=beta0, 
-                              maxIter=maxIter, epsilon=epsilon, ntau=ntau)
+                              maxIter=max.iter, epsilon=converge.eps, ntau=ntau)
         beta0 <- update$beta_update
         update.r <- as.vector(update$resid)
         update.converge <- update$converge
@@ -315,6 +319,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty
   modelsInfo <- modelnames <-  NULL
   for(i in 1:ntau){
     coefs <- getGQCoefs(output$beta,i,p+1,ntau)
+    if(scalex){
+      coefs <- apply(coefs, 2, transform_coefs,mu_x,sigma_x)
+    }
     models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
     modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))

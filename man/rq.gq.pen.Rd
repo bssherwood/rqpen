@@ -10,13 +10,15 @@ rq.gq.pen(
   tau,
   lambda = NULL,
   nlambda = 100,
+  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
   weights = NULL,
   penalty.factor = NULL,
+  scalex = TRUE,
   tau.penalty.factor = NULL,
   gmma = 0.2,
-  maxIter = 200,
+  max.iter = 200,
   lambda.discard = TRUE,
-  epsilon = 1e-04,
+  converge.eps = 1e-04,
   beta0 = NULL
 )
 }
@@ -31,19 +33,23 @@ rq.gq.pen(
 
 \item{nlambda}{Number of lambda values to be considered.}
 
+\item{eps}{If not pre-specified the lambda vector will be from lambda_max to lambda_max times eps}
+
 \item{weights}{observation weights. Default is NULL, which means equal weights.}
 
 \item{penalty.factor}{weights for the shrinkage parameter for each covariate. Default is equal weight.}
+
+\item{scalex}{Whether x should be scaled before fitting the model. Coefficients are returned on the original scale.}
 
 \item{tau.penalty.factor}{weights for different quantiles. Default is equal weight.}
 
 \item{gmma}{tuning parameter for the Huber loss}
 
-\item{maxIter}{maximum number of iteration. Default is 200.}
+\item{max.iter}{maximum number of iteration. Default is 200.}
 
 \item{lambda.discard}{Default is TRUE, meaning that the solution path stops if the relative deviance changes sufficiently small. It usually happens near the end of solution path. However, the program returns at least 70 models along the solution path.}
 
-\item{epsilon}{The epsilon level convergence. Default is 1e-4.}
+\item{converge.eps}{The epsilon level convergence. Default is 1e-4.}
 
 \item{beta0}{Initial estimates. Default is NULL, and the algorithm starts with the intercepts being the quantiles of response variable and other coefficients being zeros.}
 }
