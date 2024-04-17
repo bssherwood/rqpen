@@ -29,7 +29,8 @@
 #' fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
 #' b. Then the cross validation error for fold b is 
 #' \deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
-#' Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. 
+#' Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. Uses a
+#' Huber approximation in the fitting of model, as presented in Sherwood and Li (2022).
 #'  
 #' @export
 #'
@@ -45,6 +46,7 @@
 #' }
 #' @references 
 #' \insertRef{heteroIdQR}{rqPen}
+#' \insertRef{huberGroup}{rqPen}
 #' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFunc=c("rq","se"), tauWeights=NULL,  foldid=NULL, ...){
   cvFunc <- match.arg(cvFunc)

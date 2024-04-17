@@ -24,6 +24,7 @@
 #' be the coefficients for the $q$th quantiles, \eqn{\beta_j} be the Q-dimensional vector of the jth coefficient for each quantile, and
 #' \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
 #' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p\sqrt{Q} ||\beta_j||_2  .}
+#' Uses a Huber approximation in the fitting of model, as presented in Sherwood and Li (2022).
 #'
 #' @return An rq.pen.seq object. 
 #' \describe{
@@ -63,6 +64,7 @@
 #' }
 #' @references 
 #' \insertRef{heteroIdQR}{rqPen}
+#' \insertRef{huberGroup}{rqPen}
 #' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
                           weights=NULL, penalty.factor=NULL, scalex=TRUE, tau.penalty.factor=NULL, gmma=0.2, 
