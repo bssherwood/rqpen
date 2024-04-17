@@ -2,7 +2,7 @@
 % Please edit documentation in R/gqCvPen.R
 \name{rq.gq.pen.cv}
 \alias{rq.gq.pen.cv}
-\title{Title Cross validation for consistent variable selection across multiple quantiles}
+\title{Title Cross validation for consistent variable selection across multiple quantiles.}
 \usage{
 rq.gq.pen.cv(
   x = NULL,
@@ -10,8 +10,8 @@ rq.gq.pen.cv(
   tau = NULL,
   lambda = NULL,
   nfolds = 10,
-  loss = c("rq", "se"),
-  wt_tau_loss = NULL,
+  cvFunc = c("rq", "se"),
+  tauWeights = NULL,
   foldid = NULL,
   ...
 )
@@ -23,17 +23,19 @@ rq.gq.pen.cv(
 
 \item{tau}{a sequence of tau to be modeled, must be at least of length 3.}
 
-\item{lambda}{The sequence of lambdas.}
+\item{lambda}{Values of \eqn{\lambda}. Default will automatically select the \eqn{\lambda} values.}
 
 \item{nfolds}{number of folds}
 
-\item{loss}{loss function to be evaluated. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.}
+\item{cvFunc}{loss function to be evaluated for cross-validation. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.}
 
-\item{wt_tau_loss}{weights for different quantiles in calculating the cv error. Default is equal weight.}
+\item{tauWeights}{weights for different quantiles in calculating the cv error. Default is equal weight.}
 
 \item{foldid}{indices of pre-split testing obervations}
 
 \item{...}{other arguments for \code{gq.cv.pen}}
+
+\item{printProgress}{If set to TRUE prints which partition is being worked on.}
 }
 \value{
 An rq.pen.seq.cv object. 
@@ -48,7 +50,14 @@ An rq.pen.seq.cv object.
 }
 }
 \description{
-Title Cross validation for consistent variable selection across multiple quantiles
+Title Cross validation for consistent variable selection across multiple quantiles.
+}
+\details{
+Let \eqn{y_{b,i}} and \eqn{x_{b,i}} index the observations in 
+fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
+b. Then the cross validation error for fold b is 
+\deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
+Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}.
 }
 \examples{
 \dontrun{ 

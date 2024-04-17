@@ -1,14 +1,15 @@
 
-#' Title Cross validation for consistent variable selection across multiple quantiles
+#' Title Cross validation for consistent variable selection across multiple quantiles. 
 #'
 #' @param x covariate matrix. Not needed if \code{model_obj} is supplied.
 #' @param y univariate response. Not needed if \code{model_obj} is supplied.
 #' @param tau a sequence of tau to be modeled, must be at least of length 3. 
-#' @param lambda The sequence of lambdas.
+#' @param lambda Values of \eqn{\lambda}. Default will automatically select the \eqn{\lambda} values.
 #' @param nfolds number of folds
-#' @param loss loss function to be evaluated. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.
-#' @param wt_tau_loss weights for different quantiles in calculating the cv error. Default is equal weight.
+#' @param cvFunc loss function to be evaluated for cross-validation. Supported loss functions include quantile ("rq") and squared loss("se"). Default is the quantile loss.
+#' @param tauWeights weights for different quantiles in calculating the cv error. Default is equal weight.
 #' @param foldid indices of pre-split testing obervations 
+#' @param printProgress If set to TRUE prints which partition is being worked on. 
 #' @param ... other arguments for \code{gq.cv.pen}
 #'
 #' @return
@@ -22,6 +23,13 @@
 #' \item{gcve:}{ Group, across all quantiles, cross-validation error results for each value of a and lambda.}
 #' \item{call:}{ Original call to the function.}
 #' }
+#' 
+#' @details 
+#' Let \eqn{y_{b,i}} and \eqn{x_{b,i}} index the observations in 
+#' fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
+#' b. Then the cross validation error for fold b is 
+#' \deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
+#' Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. 
 #'  
 #' @export
 #'
@@ -38,8 +46,8 @@
 #' @references 
 #' \insertRef{heteroIdQR}{rqPen}
 #' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
-rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=c("rq","se"), wt_tau_loss=NULL,  foldid=NULL, ...){
-  loss <- match.arg(loss)
+rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFunc=c("rq","se"), tauWeights=NULL,  foldid=NULL, ...){
+  cvFunc <- match.arg(cvFunc)
   ## two ways to call this function
   #if(!is.null(model_obj)){
    # y<- model_obj$y
@@ -55,10 +63,10 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
   ntau <- length(tau)
   #}
   
-  if(is.null(wt_tau_loss)){
-    wt_tau_loss <- rep(1, ntau)/ntau
+  if(is.null(tauWeights)){
+    tauWeights <- rep(1, ntau)/ntau
   }else{
-    wt_tau_loss <- wt_tau_loss/sum(wt_tau_loss)
+    tauWeights <- tauWeights/sum(tauWeights)
   } 
   
   n <- length(y)
@@ -84,11 +92,11 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
     train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
     pred<- predict(train_model, newx = test_x)
     #print(pred[,c(5,10,15)])
-    if(loss == "se"){
+    if(cvFunc == "se"){
       se<- (test_y-pred)^2
       mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 
     } 
-    if(loss == "rq"){
+    if(cvFunc == "rq"){
 	    #double for loop that could be removed
       #hacky code
   	  test_err <- test_y-pred
@@ -107,15 +115,15 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
   }
   
   #med.ind <- which.min(abs(tau-0.5))
-  if(loss == "rq"){
+  if(cvFunc == "rq"){
     cv.mqe<- matrix(apply(mqe, 1, mean), ntau, nlambda)
-    cv.mqe.wt<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
+    cv.mqe.wt<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((tauWeights), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
     gcv <- cv.mqe.wt
     colnames(cv.mqe) <- paste("lam", 1:nlambda, sep = "")
     rownames(cv.mqe) <- paste("tau", tau, sep = "")
     
     cv.mqe.1se<- matrix(apply(mqe, 1, sd), ntau, nlambda)
-    cv.mqe.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
+    cv.mqe.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mqe[,xx]*rep((tauWeights), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
     colnames(cv.mqe.1se) <- paste("lam", 1:nlambda, sep = "")
     rownames(cv.mqe.1se) <- paste("tau", tau, sep = "")
     
@@ -142,15 +150,15 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=
                   me=mqe)
   }
   else{
-    if(loss=="se"){
+    if(cvFunc=="se"){
       cv.mse<- matrix(apply(mse, 1, mean), ntau, nlambda)
-      cv.mse.wt<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
+      cv.mse.wt<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((tauWeights), nlambda), rep(1:nlambda, each=ntau), sum)), 1, mean)
       gcv <- cv.mse.wt
       colnames(cv.mse) <- paste("lam", 1:nlambda, sep = "")
       rownames(cv.mse) <- paste("tau", tau, sep = "")
       
       cv.mse.1se<- matrix(apply(mse, 1, sd), ntau, nlambda)
-      cv.mse.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((wt_tau_loss), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
+      cv.mse.wt.1se<- apply(sapply(1:nfolds, function(xx) tapply(mse[,xx]*rep((tauWeights), nlambda), rep(1:nlambda, each=ntau), sum)), 1, sd)
       colnames(cv.mse.1se) <- paste("lam", 1:nlambda, sep = "")
       rownames(cv.mse.1se) <- paste("tau", tau, sep = "")
       
