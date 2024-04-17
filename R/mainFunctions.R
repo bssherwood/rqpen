@@ -194,11 +194,12 @@ qic.select.rq.pen.seq <- function(obj, method=c("BIC","AIC","PBIC"),septau=ifels
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=ifelse(obj$fit$penalty!="gq",TRUE,FALSE),weights=NULL,...){
   # code help: Maybe think about how the qic values are returned for the septau=TRUE case. Also, potential issue with different values of lambda
-  print("septau",septau)
+  #print("septau",septau)
+  septau = septau
   method <- match.arg(method)
-  print("septau",septau)
+  #print("septau",septau)
   obj <- obj$fit
-  print("septau",septau)
+  #print("septau",septau)
   if(is.null(weights)==FALSE & septau){
     warning("Weights are only used when septau is set to true.")
   }
