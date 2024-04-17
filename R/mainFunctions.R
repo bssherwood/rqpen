@@ -268,6 +268,8 @@ qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=if
 #'
 #' @return Prints the coefficients of the qic.select object
 #' @export
+#' 
+#' @method print qic.select
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.qic.select <- function(x,...){
@@ -894,7 +896,6 @@ coef.rq.pen.seq.cv <- function(object,septau=ifelse(object$fit$penalty!="gq",TRU
 #' @details Warning this function is no longer exported. 
 #'
 #' @return Prints cross validation or information criterion values by lambda. 
-#' @export
 #'
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
 print.cv.rq.pen <- function(x,...){

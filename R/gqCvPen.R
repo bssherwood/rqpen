@@ -10,7 +10,7 @@
 #' @param tauWeights weights for different quantiles in calculating the cv error. Default is equal weight.
 #' @param foldid indices of pre-split testing obervations 
 #' @param printProgress If set to TRUE prints which partition is being worked on. 
-#' @param ... other arguments for \code{gq.cv.pen}
+#' @param ... other arguments for \code{rq.gq.pen.cv} sent to \code{rq.gq.pen}
 #'
 #' @return
 #' An rq.pen.seq.cv object. 
