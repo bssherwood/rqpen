@@ -1,7 +1,7 @@
 rqPen 4.0    
 =============
 * Added rq.gq.pen() and rq.gq.pen.cv() for a group lasso penalty across the quantiles that gurantees that when estimating multiple quantiles the same variables are selected across all quantiles. 
-* Removed QICD algorithm. The Huber approaches tend to be more efficient. In addition, maintaing the C and Fortran code with the new C++ code is cumbersome.
+* Removed QICD algorithm. Maintaing the C and Fortran code used in the QICD approaches along with the new C++ code is cumbersome.  In addition, the Huber approaches tend to be noticeably faster and provide similar solutions. 
 
 rqPen 3.2.2 (Release date: 2024-03-13)
 =============

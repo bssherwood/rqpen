@@ -21,7 +21,7 @@ rq.gq.pen.cv(
 
 \item{y}{univariate response. Not needed if \code{model_obj} is supplied.}
 
-\item{tau}{a sequence of tau to be modeled}
+\item{tau}{a sequence of tau to be modeled, must be at least of length 3.}
 
 \item{lambda}{The sequence of lambdas.}
 
@@ -36,21 +36,16 @@ rq.gq.pen.cv(
 \item{...}{other arguments for \code{gq.cv.pen}}
 }
 \value{
-The full solution path is returned. It also returns the vector of CV score 
-as well as the optimal lambda values in terms of min and 1se of the CV error. 
-\item{beta}{The estimated coefficients for all lambdas, stored in sparse matrix format, where each column corresponds to a lambda.}
-\item{lambda}{The sequence of lambdas.}
-\item{cv_all}{An ntau*nlambda matrix of all values of CV error for each tau and each lambda.}
-\item{err_all}{Errors for all \code{nfolds} folds evaluation. Has row of (ntau*nlambda) and column of nfolds.}
-\item{lambda_min}{The optimal lambda that minimizes the CV error}
-\item{lambda_1se}{The largest lambda such that CV error is within 1 standard error of the minimum CV error.}
-\item{cv_min}{The value of CV error corresponding to \code{lambda_min}.}
-\item{cv_1se}{The value of CV error corresponding to \code{lambda_1se}.}
-\item{foldid}{The vector of indices for k folds split.}
-\item{cvup}{CV error + 1 standard error}
-\item{cvlo}{CV error - 1 standard error}
-\item{n.nonzero.beta}{The number of selected covariates for each lambda.}
-\item{eachtau}{A summary table of optimal lambdas with respect to each individual tau.}
+An rq.pen.seq.cv object. 
+\describe{
+\item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
+\item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
+\item{fit:}{ The rq.pen.seq object fit to the full data.}
+\item{btr:}{ Let blank, unlike rq.pen.seq.cv() or rq.group.pen.cv(), because optmizes the quantiles individually does not make sense with this penalty.}
+\item{gtr:}{ A data.table for the combination of a and lambda that minimize the cross validation error across all tau.}
+\item{gcve:}{ Group, across all quantiles, cross-validation error results for each value of a and lambda.}
+\item{call:}{ Original call to the function.}
+}
 }
 \description{
 Title Cross validation for consistent variable selection across multiple quantiles
@@ -58,11 +53,12 @@ Title Cross validation for consistent variable selection across multiple quantil
 \examples{
 \dontrun{ 
 n<- 200
-p<- 20
+p<- 10
 X<- matrix(rnorm(n*p),n,p)
 y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 taus <- seq(0.1, 0.9, 0.2)
-cvfit<- rq.gq.cv.pen(x=X, y=y, tau=taus)
+cvfit<- rq.gq.pen.cv(x=X, y=y, tau=taus)
+cvCoefs <- coefficients(cvfit)
 }
 
 }

@@ -25,7 +25,7 @@ rq.gq.pen(
 
 \item{y}{a univariate response variable}
 
-\item{tau}{a sequence of quantiles to be modeled}
+\item{tau}{a sequence of quantiles to be modeled, must be of at least length 3.}
 
 \item{lambda}{shrinkage parameter. Default is NULL, and the algorithm provides a solution path.}
 
@@ -48,18 +48,28 @@ rq.gq.pen(
 \item{beta0}{Initial estimates. Default is NULL, and the algorithm starts with the intercepts being the quantiles of response variable and other coefficients being zeros.}
 }
 \value{
-returns a matrix of estimated coefficients in the sparse matrix format. 
-Each column corresponds to a lambda value, and is of length (ntau*(p+1)) 
-which can be restructured to a coefficient matrix for each tau and each covariate. 
-Returned values also include the sequence of lambda, the null deviance, 
-values of penalized loss, and unpenalized loss across the sequence of lambda. 
-\item{beta}{The estimated coefficients for all taus and a sequence of lambdas, stored in sparse matrix format, where each column corresponds to a lambda.}
-\item{lambda}{The sequence of lambdas.}
-\item{null.dev}{The null deviance.}
-\item{pen.loss}{The value of penalized loss for each lambda.}
-\item{loss}{The value of unpenalized loss for each lambda.}
-\item{index.nonzero.beta}{Indices stored in a p*nlambda matrix, indicating if the coefficient is zero.}
-\item{n.nonzero.beta}{The number of nonzero coefficients for each lambda.}
+An rq.pen.seq object. 
+\describe{
+\item{models: }{ A list of each model fit for each tau and a combination.}
+\item{n:}{ Sample size.}
+\item{p:}{ Number of predictors.}
+\item{alg:}{ Algorithm used. Options are "huber" or any method implemented in rq(), such as "br". }
+\item{tau:}{ Quantiles modeled.}
+\item{a:}{ Tuning parameters a used.}
+\item{modelsInfo:}{ Information about the quantile and a value for each model.}
+\item{lambda:}{ Lambda values used for all models. If a model has fewer coefficients than lambda, say k. Then it used the first k values of lambda. Setting lambda.discard to TRUE will gurantee all values use the same lambdas, but may increase computational time noticeably and for little gain.}
+\item{penalty:}{ Penalty used.}
+\item{call:}{ Original call.}
+}
+Each model in the models list has the following values. 
+\describe{
+\item{coefficients:}{ Coefficients for each value of lambda.}
+\item{rho:}{ The unpenalized objective function for each value of lambda.}
+\item{PenRho:}{ The penalized objective function for each value of lambda.}
+\item{nzero:}{ The number of nonzero coefficients for each value of lambda.}
+\item{tau:}{ Quantile of the model.}
+\item{a:}{ Value of a for the penalized loss function.}
+}
 }
 \description{
 Uses the group lasso penalty across the quantiles to provide consistent selection across all, Q, modeled quantiles. Let \eqn{\beta^q}
@@ -70,12 +80,13 @@ be the coefficients for the $q$th quantiles, \eqn{\beta_j} be the Q-dimensional 
 \examples{
 \dontrun{ 
 n<- 200
-p<- 20
+p<- 10
 X<- matrix(rnorm(n*p),n,p)
 y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 taus <- seq(0.1, 0.9, 0.2)
 fit<- rq.gq.pen(X, y, taus)
-matrix(fit$beta[,13], p+1, length(taus), byrow=TRUE)
+#use IC to select best model, see rq.gq.pen.cv() for a cross-validation approach
+qfit <- qic.select(fit)
 }
 
 }

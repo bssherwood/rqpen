@@ -199,7 +199,7 @@ qic.select.rq.pen.seq.cv <- function(obj, method=c("BIC","AIC","PBIC"),septau=if
   if(is.null(weights)==FALSE & septau){
     warning("Weights are only used when septau is set to true.")
   }
-  if(obj$fit$penalty=="gq" & septau){
+  if(obj$penalty=="gq" & septau){
     septau = FALSE
     warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
   }
@@ -651,6 +651,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' \deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr. 
 #' 
 #' @return
+#' An rq.pen.seq.cv object. 
 #' \describe{
 #' \item{cverr:}{ Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 #' \item{cvse:}{ Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
@@ -918,6 +919,7 @@ print.cv.rq.pen <- function(x,...){
 #' @param ... Additional parameters that will be sent to rq.group.pen().
 #'
 #' @return
+#' An rq.pen.seq.cv object. 
 #' \describe{
 #' \item{cverr}{Matrix of cvSummary function, default is average, cross-validation error for each model, tau and a combination, and lambda.}
 #' \item{cvse}{Matrix of the standard error of cverr foreach model, tau and a combination, and lambda.}
