@@ -10,7 +10,7 @@ LinkingTo: Rcpp, RcppArmadillo
 RdMacros: Rdpack
 Suggests: splines, knitr
 Maintainer: Ben Sherwood <ben.sherwood@ku.edu>
-Description: Performs penalized quantile regression with LASSO, elastic net, SCAD and MCP penalty functions including group penalties. Provides a function that automatically generates lambdas and evaluates different models with cross validation or BIC, including a large p version of BIC. Below URL provides a link to a work in progress vignette. 
+Description: Performs penalized quantile regression with LASSO, elastic net, SCAD and MCP penalty functions including group penalties. In addition, offers a group penalty that provides consistent variable selection across quantiles. Provides a function that automatically generates lambdas and evaluates different models with cross validation or BIC, including a large p version of BIC. Below URL provides a link to a work in progress vignette. 
 ByteCompile: TRUE
 Encoding: UTF-8
 License: MIT + file LICENSE
