@@ -64,8 +64,10 @@
 #' }
 #' @references 
 #' \insertRef{heteroIdQR}{rqPen}
+#' 
 #' \insertRef{huberGroup}{rqPen}
-#' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
+#' 
+#' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} 
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
                           weights=NULL, penalty.factor=NULL, scalex=TRUE, tau.penalty.factor=NULL, gmma=0.2, 
                           max.iter=200, lambda.discard=TRUE, converge.eps=1e-4, beta0=NULL){
