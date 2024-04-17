@@ -16,8 +16,8 @@ bfit2 <- hrq_tau_glasso(X,y,taus)
 p1 <- predict(bfit, X)
 p2 <- rqPen:::predict.hrq_tau_glasso(bfit2, newX = X)
 
-cvfit <- rq.gq.pen.cv(x=X, y=y, tau=taus,foldid=folds)
 cvfit2 <- cv.hrq_tau_glasso(x=X, y=y, tau=taus,folds=folds)
+cvfit <- rq.gq.pen.cv(x=X, y=y, tau=taus,foldid=folds,lambda=cvfit2$lambda)
 4
 
 library(rqPen)
