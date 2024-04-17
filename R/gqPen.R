@@ -58,7 +58,9 @@
 #' #use IC to select best model, see rq.gq.pen.cv() for a cross-validation approach
 #' qfit <- qic.select(fit)
 #' }
-#' 
+#' @references 
+#' \insertRef{heteroIdQR}{rqPen}
+#' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100, weights=NULL, penalty.factor=NULL, tau.penalty.factor=NULL, gmma=0.2, 
                           maxIter=200, lambda.discard=TRUE, epsilon=1e-4, beta0=NULL){
   

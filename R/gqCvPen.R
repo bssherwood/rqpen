@@ -35,7 +35,9 @@
 #' cvfit<- rq.gq.pen.cv(x=X, y=y, tau=taus)
 #' cvCoefs <- coefficients(cvfit)
 #' }
-#' 
+#' @references 
+#' \insertRef{heteroIdQR}{rqPen}
+#' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} /
 rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, loss=c("rq","se"), wt_tau_loss=NULL,  foldid=NULL, ...){
   loss <- match.arg(loss)
   ## two ways to call this function
