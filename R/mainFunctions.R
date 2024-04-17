@@ -888,22 +888,6 @@ coef.rq.pen.seq.cv <- function(object,septau=ifelse(object$fit$penalty!="gq",TRU
 # 	}
 # }
 
-#' Prints a cv.rq.pen object.  
-#'
-#' @param x cv.rq.pen object
-#' @param ... Optional arguments, not used. 
-#' 
-#' @details Warning this function is no longer exported. 
-#'
-#' @return Prints cross validation or information criterion values by lambda. 
-#'
-#' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-print.cv.rq.pen <- function(x,...){
-   cat("\nCoefficients:\n")
-   print(coefficients(x,...))
-   cat("\nCross Validation (or BIC) Results\n")
-   print(x$cv)
-}
 
 #' Performs cross validation for a group penalty. 
 #'#'
