@@ -33,7 +33,7 @@ rq.gq.pen.cv(
 
 \item{foldid}{indices of pre-split testing obervations}
 
-\item{...}{other arguments for \code{gq.cv.pen}}
+\item{...}{other arguments for \code{rq.gq.pen.cv} sent to \code{rq.gq.pen}}
 
 \item{printProgress}{If set to TRUE prints which partition is being worked on.}
 }
