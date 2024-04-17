@@ -5,7 +5,7 @@ Version: 4.0
 Date: 2024-04-17
 Author: Ben Sherwood [aut, cre], Adam Maidman [aut], Shaobo Li [aut] 
 Depends: R (>= 3.0.0)
-Imports: methods, quantreg, hqreg, hrqglas, data.table, Rdpack, lifecycle, plyr, Matrix, Rcpp, RcppArmadillo
+Imports: methods, quantreg, hqreg, hrqglas, data.table, Rdpack, lifecycle, plyr, Matrix
 LinkingTo: Rcpp, RcppArmadillo
 RdMacros: Rdpack
 Suggests: splines, knitr
