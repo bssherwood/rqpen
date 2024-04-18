@@ -46,18 +46,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// tanh_loss
-NumericVector tanh_loss(NumericVector r, double gmma);
-RcppExport SEXP _rqPen_tanh_loss(SEXP rSEXP, SEXP gmmaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type r(rSEXP);
-    Rcpp::traits::input_parameter< double >::type gmma(gmmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(tanh_loss(r, gmma));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rq_huber_deriv_aug
 NumericVector rq_huber_deriv_aug(NumericVector r, NumericVector tau, double gmma);
 RcppExport SEXP _rqPen_rq_huber_deriv_aug(SEXP rSEXP, SEXP tauSEXP, SEXP gmmaSEXP) {
@@ -156,7 +144,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rqPen_stl_sort", (DL_FUNC) &_rqPen_stl_sort, 1},
     {"_rqPen_find_indices", (DL_FUNC) &_rqPen_find_indices, 2},
     {"_rqPen_rq_loss_aug", (DL_FUNC) &_rqPen_rq_loss_aug, 2},
-    {"_rqPen_tanh_loss", (DL_FUNC) &_rqPen_tanh_loss, 2},
     {"_rqPen_rq_huber_deriv_aug", (DL_FUNC) &_rqPen_rq_huber_deriv_aug, 3},
     {"_rqPen_neg_gradient_aug", (DL_FUNC) &_rqPen_neg_gradient_aug, 6},
     {"_rqPen_negGradientAug", (DL_FUNC) &_rqPen_negGradientAug, 6},

@@ -19,8 +19,6 @@ rq.loss.aug<- function(r, tau, n){
   (abs(r)+(2*tau.vec-1)*r)/2
 }
 
-# tanh loss (not used for current work)
-tanh.loss<- function(r, gmma) gmma*log(cosh(r/gmma))
 
 
 ##############################
@@ -109,22 +107,12 @@ rq.huber.deriv.aug<- function(r, tau, gmma, n){
   return(l.vec)
 } # end of function
 
-## hypertangent approach, currently not used
-rq.tanh.deriv<- function(r, tau, gmma){
-  (tanh(r/gmma)+2*tau-1)/2
-} # end of function
-
-rq.tanh.deriv.aug<- function(r, tau, gmma, n){
-  tau.vec <- rep(tau, each=n)
-  (tanh(r/gmma)+2*tau.vec-1)/2
-} # end of function
-############################
 
 neg.gradient.aug <- function(r,weights,tau,gmma,x,n,apprx){  # input r, weights, x needs to be the augmented version
   if(apprx=="huber"){
     wt_deriv <- as.vector(weights*rq.huber.deriv.aug(r, tau, gmma, n))
   }else{
-    wt_deriv <- as.vector(weights*rq.tanh.deriv.aug(r, tau, gmma, n))
+    stop("huber approximation is the only allowed approach")
   }
   
   if(is.null(dim(x))){

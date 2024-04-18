@@ -36,25 +36,14 @@ NumericVector rq_loss_aug(NumericVector r, NumericVector tau) {
   NumericVector val(n);
   
   for (int i = 0; i < r.size(); i++) {
-    val[i] = (abs(r[i]) + (2 * tau[i] - 1) * r[i]) / 2;
+    val[i] = (fabs(r[i]) + (2 * tau[i] - 1) * r[i]) / 2;
   }
   
   return val;
 }
 
 
-/* tanh loss (not used for current work) */
-// [[Rcpp::export]]
-NumericVector tanh_loss(NumericVector r, double gmma) {
-  int n = r.size();
-  NumericVector val(n);
-  
-  for (int i = 0; i < r.size(); i++) {
-    val[i] = gmma*log(cosh(r[i]/gmma));
-  }
-  
-  return val;
-}
+
 
 /* First order derivative w.r.t. residual*/
 // [[Rcpp::export]]

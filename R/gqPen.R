@@ -20,11 +20,13 @@
 #'
 #'
 #' @description  
-#' Uses the group lasso penalty across the quantiles to provide consistent selection across all, Q, modeled quantiles. Let \eqn{\beta^q}
-#' be the coefficients for the $q$th quantiles, \eqn{\beta_j} be the Q-dimensional vector of the jth coefficient for each quantile, and
+#' Uses the group lasso penalty across the quantiles to provide consistent selection across all, K, modeled quantiles. Let \eqn{\beta^q}
+#' be the coefficients for the kth quantiles, \eqn{\beta_j} be the Q-dimensional vector of the jth coefficient for each quantile, and
 #' \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
-#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p\sqrt{Q} ||\beta_j||_2  .}
-#' Uses a Huber approximation in the fitting of model, as presented in Sherwood and Li (2022).
+#' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p ||\beta_j||_{2,w}  .}
+#' Uses a Huber approximation in the fitting of model, as presented in Sherwood and Li (2022). Where,
+#' \deqn{||\beta_j||_{2,w} = \sqrt{ \sum_{q=1}^Q \sqrt{\sum_{k=1}^K w_km_j\beta_{kj}^2}}}, where \eqn{w_k} is a quantile weight 
+#' that can be specified by \code{tau.penalty.factor} and \eqn{m_j} is a predictor weight that can be assigned by \code{penalty.factor}. 
 #'
 #' @return An rq.pen.seq object. 
 #' \describe{
@@ -83,7 +85,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(ntau < 3){
     stop("please provide at least three tau values!")
   }
-  if(is.null(penalty.factor)) penalty.factor<- sqrt(nng)
+  if(is.null(penalty.factor)) penalty.factor<- 1
   if(is.null(weights)) weights<- rep(1, n)
   if(is.null(tau.penalty.factor)) tau.penalty.factor<- rep(1, ntau)
   

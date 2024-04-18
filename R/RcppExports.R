@@ -13,10 +13,6 @@ rq_loss_aug <- function(r, tau) {
     .Call('_rqPen_rq_loss_aug', PACKAGE = 'rqPen', r, tau)
 }
 
-tanh_loss <- function(r, gmma) {
-    .Call('_rqPen_tanh_loss', PACKAGE = 'rqPen', r, gmma)
-}
-
 rq_huber_deriv_aug <- function(r, tau, gmma) {
     .Call('_rqPen_rq_huber_deriv_aug', PACKAGE = 'rqPen', r, tau, gmma)
 }
