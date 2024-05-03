@@ -2,8 +2,7 @@
 % Please edit documentation in R/mainFunctions.R
 \name{rq.group.pen.cv}
 \alias{rq.group.pen.cv}
-\title{Performs cross validation for a group penalty. 
-#'}
+\title{Performs cross validation for a group penalty.}
 \usage{
 rq.group.pen.cv(
   x,
@@ -46,7 +45,7 @@ rq.group.pen.cv(
 
 \item{cvSummary}{The}
 
-\item{tauWeights}{Weights for the tau penalty.}
+\item{tauWeights}{Weights for the tau penalty only used in group tau results (gtr).}
 
 \item{printProgress}{If set to TRUE will print which fold the process is working on.}
 
@@ -67,8 +66,20 @@ An rq.pen.seq.cv object.
 }
 }
 \description{
-Performs cross validation for a group penalty. 
-#'
+Performs cross validation for a group penalty.
+}
+\details{
+Two cross validation results are returned. One that considers the best combination of a and lambda for each quantile. The second considers the best combination of the tuning 
+parameters for all quantiles. Let \eqn{y_{b,i}}, \eqn{x_{b,i}}, and \eqn{m_{b,i}} index the response, predictors, and weights of observations in 
+fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
+b. Then the cross validation error for fold b is 
+\deqn{\mbox{CV}(b,\tau) = \frac{1}{n_b} \sum_{i=1}^{n_b} m_{b,i} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau,a,\lambda}^{-b}).}
+Note that \eqn{\rho_\tau()} can be replaced by a different function by setting the cvFunc parameter. The function returns two different cross-validation summaries. The first is btr, by tau results. 
+It provides the values of \code{lambda} and \code{a} that minimize the average, or whatever function is used for \code{cvSummary}, of \eqn{\mbox{CV}(b)}. In addition it provides the 
+sparsest solution that is within one standard error of the minimum results. 
+
+The other approach is the group tau results, gtr. Consider the case of estimating Q quantiles of \eqn{\tau_1,\ldots,\tau_Q} It returns the values of \code{lambda} and \code{a} that minimizes the average, or again whatever function is used for \code{cvSummary}, of 
+\deqn{\sum_{q=1}^Q\mbox{CV}(b,\tau_q).} If only one quantile is modeled then the gtr results can be ignored as they provide the same minimum solution as btr.
 }
 \examples{
 set.seed(1)

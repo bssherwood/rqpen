@@ -25,7 +25,7 @@
 #' \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
 #' \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p ||\beta_j||_{2,w}  .}
 #' Uses a Huber approximation in the fitting of model, as presented in Sherwood and Li (2022). Where,
-#' \deqn{||\beta_j||_{2,w} = \sqrt{\sum_{k=1}^K w_km_j\beta_{kj}^2}}, where \eqn{w_k} is a quantile weight 
+#' \deqn{||\beta_j||_{2,w} = \sqrt{\sum_{k=1}^K w_km_j\beta_{kj}^2},} where \eqn{w_k} is a quantile weight 
 #' that can be specified by \code{tau.penalty.factor} and \eqn{m_j} is a predictor weight that can be assigned by \code{penalty.factor}. 
 #'
 #' @return An rq.pen.seq object. 
@@ -73,7 +73,26 @@
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
                           weights=NULL, penalty.factor=NULL, scalex=TRUE, tau.penalty.factor=NULL, gmma=0.2, 
                           max.iter=200, lambda.discard=TRUE, converge.eps=1e-4, beta0=NULL){
-  
+  if(length(y)!=nrow(x)){
+    stop("length of x and number of rows in x are not the same")
+  }
+  if(is.null(weights)==FALSE){
+    if(length(weights)!=length(y)){
+      stop("number of weights does not match number of responses")
+    }
+    if(sum(weights<=0)>0){
+      stop("all weights most be positive")
+    }
+  }
+  if(is.matrix(y)==TRUE){
+    y <- as.numeric(y)
+  }
+  if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
+    stop("Penalty factors must be non-negative.")
+  }
+  if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
+    stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
+  }
   ## basic info about dimensions
   ntau <- length(tau)
   np<- dim(x)

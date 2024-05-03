@@ -10,6 +10,7 @@
 #' @param tauWeights weights for different quantiles in calculating the cv error. Default is equal weight.
 #' @param foldid indices of pre-split testing obervations 
 #' @param printProgress If set to TRUE prints which partition is being worked on. 
+#' @param weights Weights for the quantile loss objective function.
 #' @param ... other arguments for \code{rq.gq.pen.cv} sent to \code{rq.gq.pen}
 #'
 #' @return
@@ -28,8 +29,8 @@
 #' Let \eqn{y_{b,i}} and \eqn{x_{b,i}} index the observations in 
 #' fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
 #' b. Then the cross validation error for fold b is 
-#' \deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
-#' Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. Uses a
+#' \deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} m_{b,i}v_q \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
+#' Where, \eqn{m_{b,i}} is the weight for the ith observation in fold b and \eqn{v_q} is a quantile specific weight. Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. Uses a
 #' Huber approximation in the fitting of model, as presented in Sherwood and Li (2022).
 #'  
 #' @export
@@ -50,7 +51,7 @@
 #' \insertRef{huberGroup}{rqPen}
 #' 
 #' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} 
-rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFunc=c("rq","se"), tauWeights=NULL,  foldid=NULL, printProgress=FALSE, ...){
+rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFunc=c("rq","se"), tauWeights=NULL,  foldid=NULL, printProgress=FALSE, weights=NULL, ...){
   cvFunc <- match.arg(cvFunc)
   ## two ways to call this function
   #if(!is.null(model_obj)){
@@ -61,17 +62,27 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
   #  lambda<- model_obj$lambda
   #  fullmodel<- model_obj
   #}else{
-  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau,lambda=lambda, ...)
+  
+  
+  if(is.null(weights)){
+    weights <- rep(1,n)
+  }
+  
+  fullmodel<- rq.gq.pen(x=x, y=y, tau=tau,lambda=lambda, weights=weights, ...)
   lambda<- fullmodel$lambda
   tau<- fullmodel$tau
   ntau <- length(tau)
   #}
   
   if(is.null(tauWeights)){
-    tauWeights <- rep(1, ntau)/ntau
-  }else{
-    tauWeights <- tauWeights/sum(tauWeights)
-  } 
+    tauWeights <- rep(1,ntau)
+  }
+  # Code statement: probably a good idea, but removing for consistency with other functions
+  # if(is.null(tauWeights)){
+  #   tauWeights <- rep(1, ntau)/ntau
+  # }else{
+  #   tauWeights <- tauWeights/sum(tauWeights)
+  # } 
   
   n <- length(y)
   if(is.null(foldid)){
@@ -92,12 +103,14 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
     train_y<- y[-ind]
     test_x<- x[ind,]
     test_y<- y[ind]
+    train_wts <- weights[-ind]
+    test_wts <- weights[ind]
     
-    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE,...) #,...
+    train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE, weights=train_wts, ...) #,...
     pred<- predict(train_model, newx = test_x)
     #print(pred[,c(5,10,15)])
     if(cvFunc == "se"){
-      se<- (test_y-pred)^2
+      se<- (test_y-pred)^2*test_wts
       mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 
     } 
     if(cvFunc == "rq"){
@@ -109,7 +122,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
   	    posseq <- seq(tpos,(nlambda-1)*ntau+tpos,ntau)
   	    err_seq <- seq((tpos-1)*nlambda+1,nlambda*tpos)
     		for(k in 1:nlambda){
-    			mqe[posseq[k],i] <- mean(rq.loss(test_err[,err_seq[k]],tauval))
+    			mqe[posseq[k],i] <- mean(rq.loss(test_err[,err_seq[k]],tauval))*test_wts
     		}
   	    tpos <- tpos+1
   	  }

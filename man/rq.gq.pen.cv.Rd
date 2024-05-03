@@ -14,6 +14,7 @@ rq.gq.pen.cv(
   tauWeights = NULL,
   foldid = NULL,
   printProgress = FALSE,
+  weights = NULL,
   ...
 )
 }
@@ -36,6 +37,8 @@ rq.gq.pen.cv(
 
 \item{printProgress}{If set to TRUE prints which partition is being worked on.}
 
+\item{weights}{Weights for the quantile loss objective function.}
+
 \item{...}{other arguments for \code{rq.gq.pen.cv} sent to \code{rq.gq.pen}}
 }
 \value{
@@ -57,8 +60,8 @@ Title Cross validation for consistent variable selection across multiple quantil
 Let \eqn{y_{b,i}} and \eqn{x_{b,i}} index the observations in 
 fold b. Let \eqn{\hat{\beta}_{\tau,a,\lambda}^{-b}} be the estimator for a given quantile and tuning parameters that did not use the bth fold. Let \eqn{n_b} be the number of observations in fold
 b. Then the cross validation error for fold b is 
-\deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
-Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. Uses a
+\deqn{\mbox{CV}(b,\tau) = \sum_{q=1}^Q \frac{1}{n_b} \sum_{i=1}^{n_b} m_{b,i}v_q \rho_\tau(y_{b,i}-x_{b,i}^\top\hat{\beta}_{\tau_q,a,\lambda}^{-b}).}
+Where, \eqn{m_{b,i}} is the weight for the ith observation in fold b and \eqn{v_q} is a quantile specific weight. Note that \eqn{\rho_\tau()} can be replaced squared error loss. Provides results about how the average of the cross-validation error changes with \eqn{\lambda}. Uses a
 Huber approximation in the fitting of model, as presented in Sherwood and Li (2022).
 }
 \examples{

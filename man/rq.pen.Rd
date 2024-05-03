@@ -114,7 +114,7 @@ The huber algorithm offers substantial speed advantages without much, if any, lo
 n <- 200
 p <- 8
 x <- matrix(runif(n*p),ncol=p)
-y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(100)
+y <- 1 + x[,1] + x[,8] + (1+.5*x[,3])*rnorm(n)
 r1 <- rq.pen(x,y) #Lasso fit for median
 # Lasso for multiple quantiles
 r2 <- rq.pen(x,y,tau=c(.25,.5,.75))
