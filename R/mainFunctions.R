@@ -41,7 +41,15 @@ qic <- function(model,n, method=c("BIC","AIC","PBIC")){
 
 #' Select tuning parameters using IC 
 #' 
-#' Selects tuning parameters using IC. If weights were used for the loss function then same weights will be used in calculating IC. 
+#' Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+#' as
+#' \deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+#' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+#' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
+#' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
+#' \deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
+#' where \eqn{w_q} is the weight assigned for the qth quantile model. 
+#'
 #'
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
 #' @param ... Additional arguments see qic.select.rq.pen.seq() or qic.select.rq.pen.seq.cv() for more information. 
@@ -69,7 +77,7 @@ qic.select <- function(obj,...){
 #' for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
 #' If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
 #' be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
-#' \deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n  \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
+#' \deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
 #' where \eqn{w_q} is the weight assigned for the qth quantile model. 
 #'
 #' @param obj A rq.pen.seq or rq.pen.seq.cv object. 
@@ -376,8 +384,8 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' 
 #' @description  
 #' Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
-#' \deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
-#' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
+#' \deqn{\frac{1}{n} \sum_{q=1}^Q m_i \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+#' Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively, and \eqn{m_i} is designated by weights. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
 #' \describe{
 #' \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
 #' \item{SCAD:}{ \eqn{P(\beta,\lambda,a)=SCAD(\beta,\lambda,a)}}
