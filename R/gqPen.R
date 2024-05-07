@@ -74,10 +74,20 @@
 rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x) < ncol(x), 0.01, 0.001),
                           weights=NULL, penalty.factor=NULL, scalex=TRUE, tau.penalty.factor=NULL, gmma=0.2, 
                           max.iter=200, lambda.discard=TRUE, converge.eps=1e-4, beta0=NULL){
-  
+  ## basic info about dimensions
+  ntau <- length(tau)
+  np<- dim(x)
+  n<- np[1]; p<- np[2]
+  #ng<- p
+  nng<- rep(ntau, p)
   if(is.null(penalty.factor)) penalty.factor<- 1
   if(is.null(weights)) weights<- rep(1, n)
   if(is.null(tau.penalty.factor)) tau.penalty.factor<- rep(1, ntau)
+  
+  ## some initial checks
+  if(ntau < 3){
+    stop("please provide at least three tau values!")
+  }
   
   if(length(y)!=nrow(x)){
     stop("length of x and number of rows in x are not the same")
@@ -99,18 +109,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
     stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
   }
-  ## basic info about dimensions
-  ntau <- length(tau)
-  np<- dim(x)
-  n<- np[1]; p<- np[2]
-  #ng<- p
-  nng<- rep(ntau, p)
-  
-  ## some initial checks
-  if(ntau < 3){
-    stop("please provide at least three tau values!")
-  }
-  
+
   ## standardize X
   if(scalex){
     x <- scale(x)
