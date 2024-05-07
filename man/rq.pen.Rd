@@ -93,7 +93,7 @@ with a lasso penalty with different weights for each predictor.
 }
 \description{
 Let q index the Q quantiles of interest. Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models by minimizing the penalized objective function of
-\deqn{\frac{1}{n} \sum_{q=1}^Q m_i \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
+\deqn{\frac{1}{n} \sum_{q=1}^Q \sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{j=1}^p P(\beta^q_p,w_q*v_j*\lambda,a).}
 Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively, and \eqn{m_i} is designated by weights. Value of \eqn{P()} depends on the penalty. See references or vignette for more details,
 \describe{
 \item{LASSO:}{ \eqn{P(\beta,\lambda,a)=\lambda|\beta|}}
