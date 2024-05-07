@@ -83,8 +83,8 @@ be the coefficients for the kth quantiles, \eqn{\beta_j} be the Q-dimensional ve
 \eqn{\rho_\tau(u)} is the quantile loss function. The method minimizes
 \deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\beta^q) + \lambda \sum_{j=1}^p ||\beta_j||_{2,w}  .}
 Uses a Huber approximation in the fitting of model, as presented in Sherwood and Li (2022). Where,
-\deqn{||\beta_j||_{2,w} = \sqrt{\sum_{k=1}^K w_km_j\beta_{kj}^2},} where \eqn{w_k} is a quantile weight 
-that can be specified by \code{tau.penalty.factor}, \eqn{m_j} is a predictor weight that can be assigned by \code{penalty.factor}, 
+\deqn{||\beta_j||_{2,w} = \sqrt{\sum_{k=1}^K w_kv_j\beta_{kj}^2},} where \eqn{w_k} is a quantile weight 
+that can be specified by \code{tau.penalty.factor}, \eqn{v_j} is a predictor weight that can be assigned by \code{penalty.factor}, 
 and \eqn{m_i} is an observation weight that can be set by \code{weights}.
 }
 \examples{
@@ -105,5 +105,5 @@ qfit <- qic.select(fit)
 \insertRef{huberGroup}{rqPen}
 }
 \author{
-Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu}
+Shaobo Li and Ben Sherwood, \email{ben.sherwood@ku.edu}
 }

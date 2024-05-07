@@ -81,5 +81,5 @@ cvCoefs <- coefficients(cvfit)
 \insertRef{huberGroup}{rqPen}
 }
 \author{
-Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu}
+Shaobo Li and Ben Sherwood, \email{ben.sherwood@ku.edu}
 }

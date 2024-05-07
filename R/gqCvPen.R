@@ -50,7 +50,7 @@
 #' 
 #' \insertRef{huberGroup}{rqPen}
 #' 
-#' @author Shaobo Li \email{shaobo.li@ku.edu} and Ben Sherwood, \email{ben.sherwood@ku.edu} 
+#' @author Shaobo Li and Ben Sherwood, \email{ben.sherwood@ku.edu} 
 rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFunc=c("rq","se"), tauWeights=NULL,  foldid=NULL, printProgress=FALSE, weights=NULL, ...){
   cvFunc <- match.arg(cvFunc)
   ## two ways to call this function
