@@ -1,8 +1,8 @@
 Package: rqPen
 Type: Package
 Title: Penalized Quantile Regression
-Version: 4.0
-Date: 2024-04-17
+Version: 4.1
+Date: 2024-05-07
 Author: Ben Sherwood [aut, cre], Adam Maidman [aut], Shaobo Li [aut] 
 Depends: R (>= 3.0.0)
 Imports: methods, quantreg, hqreg, hrqglas, data.table, Rdpack, lifecycle, plyr, Matrix, Rcpp

@@ -16,7 +16,7 @@ rq.group.pen(
   alg = c("huber", "br"),
   a = NULL,
   norm = 2,
-  group.pen.factor = rep(1, length(unique(groups))),
+  group.pen.factor = NULL,
   tau.penalty.factor = rep(1, length(tau)),
   scalex = TRUE,
   coef.cutoff = 1e-08,
