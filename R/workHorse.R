@@ -1368,7 +1368,7 @@ plotsep.rq.pen.seq.cv <- function(x,tau,logLambda,main,...){
 		cvsd <- x$cvse[subbtr$modelsIndex,]
 		
 		if(is.null(dim(suberr))){
-			plot(lambdas,suberr,ylim=c(min(min(suberr),min(besterr-cvsd)),max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,...) 
+			plot(lambdas,suberr,ylim=c(min(min(suberr),min(besterr-cvsd)),max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,pch=20,...) 
 		} else{
 			plot(lambdas,suberr[1,],ylim=c(min(min(suberr),min(besterr-cvsd)),max(max(suberr),max(besterr+cvsd))),ylab="Cross Validation Error", xlab=xtext,main=mainText,type="n",...)
 			for(j in 1:na){
