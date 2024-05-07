@@ -6,6 +6,7 @@ rqPen 4.1 (Release date: 2024-04-22)
 * Cleaned up some minor issues in examples, were code ran fine but presentation was poor. 
 * Added some new error checking to functions.
 * Stopped exporting print() functions
+* Minor changes to plot.rq.pen.seq.cv() output, changing pch=20 for all cases
 
 rqPen 4.0  (Release date: 2024-04-18)
 =============
