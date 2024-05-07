@@ -15,7 +15,14 @@ qic.select(obj, ...)
 Returns a qic.select object.
 }
 \description{
-Selects tuning parameters using IC. If weights were used for the loss function then same weights will be used in calculating IC.
+Selects tuning parameter \eqn{\lambda} and a according to information criterion of choice. For a given \eqn{\hat{\beta}} the information criterion is calculated
+as
+\deqn{\log(\sum_{i=1}^n w_i \rho_\tau(y_i-x_i^\top\hat{\beta})) + d*b/(2n),} where d is the number of nonzero coefficients and b depends on the method used. For AIC \eqn{b=2},
+for BIC \eqn{b=log(n)} and for PBIC \eqn{d=log(n)*log(p)} where p is the dimension of \eqn{\hat{\beta}}.
+If septau set to FALSE then calculations are made across the quantiles. Let \eqn{\hat{\beta}^q} be the coefficient vector for the qth quantile of Q quantiles. In addition let \eqn{d_q} and \eqn{b_q} 
+be d and b values from the qth quantile model. Note, for all of these we are assuming eqn and a are the same. Then the summary across all quantiles is 
+\deqn{\sum_{q=1}^Q w_q[ \log(\sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\hat{\beta}^q)) + d_q*b_q/(2n)],}
+where \eqn{w_q} is the weight assigned for the qth quantile model.
 }
 \examples{
 set.seed(1)
