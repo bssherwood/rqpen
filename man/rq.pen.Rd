@@ -137,5 +137,5 @@ r5 <- rq.pen(x,y,tau=tvals, tau.penalty.factor=sqrt(tvals*(1-tvals)))
 \insertRef{qr_cd}{rqPen}
 }
 \author{
-Ben Sherwood, \email{ben.sherwood@ku.edu} and Adam Maidman
+Ben Sherwood, \email{ben.sherwood@ku.edu}, Shaobo Li, and Adam Maidman
 }

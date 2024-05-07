@@ -98,8 +98,8 @@ Each model in the models list has the following values.
 \description{
 Let the predictors be divided into G groups with G corresponding vectors of coefficients, \eqn{\beta_1,\ldots,\beta_G}. 
 Let \eqn{\rho_\tau(a) = a[\tau-I(a<0)]}. Fits quantile regression models for Q quantiles by minimizing the penalized objective function of
-\deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
-Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively. The value of \eqn{k} is chosen by \code{norm}.
+\deqn{\sum_{q=1}^Q \frac{1}{n} \sum_{i=1}^n m_i \rho_\tau(y_i-x_i^\top\beta^q) + \sum_{q=1}^Q  \sum_{g=1}^G P(||\beta^q_g||_k,w_q*v_j*\lambda,a).}
+Where \eqn{w_q} and \eqn{v_j} are designated by penalty.factor and tau.penalty.factor respectively and \eqn{m_i} can be set by weights. The value of \eqn{k} is chosen by \code{norm}.
 Value of P() depends on the penalty. Briefly, but see references or vignette for more details,
 \describe{
 \item{Group LASSO (gLASSO)}{\eqn{P(||\beta||_k,\lambda,a)=\lambda||\beta||_k}}
