@@ -5,7 +5,6 @@ rqPen 4.1 (Release date: 2024-04-22)
 * Updated rq.gq.pen.cv(), rq.group.pen.cv(), and rq.pen.cv() help files to include use of weights in cross-validation. 
 * Cleaned up some minor issues in examples, were code ran fine but presentation was poor. 
 * Added some new error checking to functions.
-* Changed default in rq.group.pen for group.pen.factor from NULL to weight of one for each group, does not change any output.  
 
 rqPen 4.0  (Release date: 2024-04-18)
 =============
