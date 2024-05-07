@@ -122,7 +122,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
   	    posseq <- seq(tpos,(nlambda-1)*ntau+tpos,ntau)
   	    err_seq <- seq((tpos-1)*nlambda+1,nlambda*tpos)
     		for(k in 1:nlambda){
-    			mqe[posseq[k],i] <- mean(rq.loss(test_err[,err_seq[k]],tauval))*test_wts
+    			mqe[posseq[k],i] <- mean(rq.loss(test_wts*test_err[,err_seq[k]],tauval))
     		}
   	    tpos <- tpos+1
   	  }
