@@ -2110,10 +2110,10 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(is.matrix(y)==TRUE){
 	  y <- as.numeric(y)
 	}
-	if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
+	if(min(group.pen.factor) < 0 | min(tau.penalty.factor) < 0){
 	  stop("Penalty factors must be non-negative.")
 	}
-	if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
+	if(sum(group.pen.factor)==0 | sum(tau.penalty.factor)==0){
 	  stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
 	}
 	

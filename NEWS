@@ -1,4 +1,4 @@
-rqPen 4.0.1 (Release date: 2024-04-22)
+rqPen 4.1 (Release date: 2024-04-22)
 =============
 * Fixed a bug where rq.group.pen() was not working with group SCAD and norm=2.
 * Updated rq.gq.pen.cv() to accomodate notes.
