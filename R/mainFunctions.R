@@ -316,6 +316,7 @@ predict.qic.select <- function(object, newx, ...){
 #' @param ... optional arguments
 #'
 #' @return If only one model, prints a data.frame of the number of nonzero coefficients and lambda. Otherwise prints information about the quantiles being modeled and choices for a.
+#' @export
 #'
 #' @method print rq.pen.seq
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
@@ -789,6 +790,7 @@ rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","a
 #' @param ... Additional arguments. 
 #'
 #' @return Print of btr and gtr from a rq.pen.seq.cv object. If only one quantile is modeled then only btr is returned. 
+#' @export
 #'
 #' @method print rq.pen.seq.cv
 print.rq.pen.seq.cv <- function(x,...){
