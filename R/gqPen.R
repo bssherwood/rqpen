@@ -88,6 +88,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(ntau < 3){
     stop("please provide at least three tau values!")
   }
+  if(min(apply(x,2,sd))==0){
+		stop("At least one of the x predictors has a standard deviation of zero")
+  }
   
   if(length(y)!=nrow(x)){
     stop("length of x and number of rows in x are not the same")

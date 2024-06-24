@@ -462,6 +462,9 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(length(y)!=nrow(x)){
 	  stop("length of x and number of rows in x are not the same")
 	}
+	if(min(apply(x,2,sd))==0){
+		stop("At least one of the x predictors has a standard deviation of zero")
+	}
 	if(is.null(weights)==FALSE){
 	  if( penalty=="ENet" | penalty=="Ridge"){
 		  stop("Cannot use weights with elastic net or ridge penalty. Can use it with lasso, though may be much slower than unweighted version.")
@@ -2089,6 +2092,9 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	alg <- match.arg(alg)
 	
 	g <- length(unique(groups))
+	if(min(apply(x,2,sd))==0){
+		stop("At least one of the x predictors has a standard deviation of zero")
+	}
 	if(is.null(group.pen.factor)){
 	  if(norm == 2){
 	    group.pen.factor <- sqrt(xtabs(~groups))

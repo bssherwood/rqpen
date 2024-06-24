@@ -1,3 +1,7 @@
+rqPen 4.1.2 (Release date: ????-??-??)
+=============
+* Added some error check to make sure that each predictor is not a constant. 
+
 rqPen 4.1.1 (Release date: 2024-05-31)
 =============
 * Fixed issue with print.rq.pen.seq() and print.rq.pen.seq.cv()
