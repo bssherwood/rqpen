@@ -12,6 +12,11 @@ For most up to date versions use the following code. However, be warned the gith
 devtools::install_github("bssherwood/rqpen")
 ```
 
+The following code will install the more stable CRAN version.
+```r
+install.packages("rqPen")
+```
+
 ## Example
 
 ``` r
@@ -19,7 +24,7 @@ library(rqPen)
 n<- 200
 p<- 30
 x0<- matrix(rnorm(n*p),n,p)
-X<- cbind(x0, x0^2, x0^3)[,order(rep(1:p,3))]
+x<- cbind(x0, x0^2, x0^3)[,order(rep(1:p,3))]
 y<- -2+X[,1]+0.5*X[,2]-X[,3]-0.5*X[,7]+X[,8]-0.2*X[,9]+rt(n,2)
 group<- rep(1:p, each=3)
 
