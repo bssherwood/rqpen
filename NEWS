@@ -1,6 +1,9 @@
-rqPen 4.1.2 (Release date: ????-??-??)
+rqPen 4.2 (Release date: ????-??-??)
 =============
 * Added some error check to make sure that each predictor is not a constant. 
+* Added warnings for crossing quantiles in predictions
+* Added an option to sort predictions to ensure that quantiles do not cross 
+* Removed mentions to QICD algoirthm, which has not been implemented since 3.2.2.
 
 rqPen 4.1.1 (Release date: 2024-05-31)
 =============
