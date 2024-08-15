@@ -634,6 +634,9 @@ updateModelReturn <- function(x,y,models,penalty,a,tau,tau.penalty.factor,penalt
   }
   penfunc <- getPenfunc(penalty)
   x.orig = t(apply(x, 1, function(r)r*attr(x,'scaled:scale') + attr(x, 'scaled:center')))
+  if(is.null(a)){
+    a <- 1
+  }
   
   for(i in 1:length(models)){
     taupos <- which(tau==models[[i]]$tau)
