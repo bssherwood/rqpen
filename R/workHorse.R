@@ -389,7 +389,7 @@ rq.lasso <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(
 		stop("tau penalty factor must be of length tau")
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,scalex=scalex,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+		lamMax <- getLamMax(x,y,tau,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	if(alg=="huber"){
@@ -460,11 +460,11 @@ rq.enet <- function(x,y,tau=.5,lambda=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x
 	
 	if(is.null(lambda)){
 	  if(length(a)==1){
-  		lamMax <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+  		lamMax <- getLamMax(x,y,tau,scalex=FALSE,penalty="ENet",a=a,tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
   		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	  } else{
-	    lamMax1 <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=max(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
-	    lamMax2 <- getLamMax(x,y,tau,scalex=scalex,penalty="ENet",a=min(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+	    lamMax1 <- getLamMax(x,y,tau,scalex=FALSE,penalty="ENet",a=max(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
+	    lamMax2 <- getLamMax(x,y,tau,scalex=FALSE,penalty="ENet",a=min(a),tau.penalty.factor=tau.penalty.factor,penalty.factor=penalty.factor)
 	    lambda <-  exp(seq(log(lamMax2),log(eps*lamMax1),length.out=nlambda))
 	  }
 	}
@@ -765,7 +765,7 @@ rq.nc <- function(x, y, tau=.5,  penalty=c("SCAD","aLASSO","MCP"),a=NULL,lambda=
 		stop("Only algorithm for adaptive lasso is huber.")
 	}
 	if(is.null(lambda)){
-		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor, penalty.factor=penalty.factor)
+		lamMax <- getLamMax(x,y,tau,penalty=penalty,scalex=FALSE,tau.penalty.factor=tau.penalty.factor, penalty.factor=penalty.factor)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 	a <- getA(a,penalty)
@@ -827,7 +827,7 @@ rq.glasso <- function(x,y,tau,groups, lambda, group.pen.factor,scalex,tau.penalt
 	for(i in 1:nt){
 		subtau <- tau[i]
 		penf <- group.pen.factor*tau.penalty.factor[i]
-		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=scalex,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,lambda.discard=lambda.discard,weights=weights,...)
+		models[[i]] <- hrq_glasso(x,y,group.index=groups,tau=subtau,lambda=lambda,w.lambda=penf,scalex=FALSE,gamma=gamma,max_iter=max.iter,epsilon=converge.eps,lambda.discard=lambda.discard,weights=weights,...)
 		models[[i]] <- rq.pen.modelreturn(models[[i]]$beta,x,y,subtau,models[[i]]$lambda,rep(1,p),"gLASSO",1,weights=weights)
 		#min_n_coefs <- min(min_n_coefs)
 	}
@@ -868,7 +868,7 @@ qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
 }
 
 
-rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL){
+rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL, scalex){
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
 	if(is.null(ncol(coefs))==FALSE){
@@ -889,6 +889,15 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty
 	
 	fits <- cbind(1,x)%*% return_val$coefficients
 	res <- y - fits
+	
+	if(scalex){
+  	if(!is.null(dim(return_val$coefficients))){
+  	  return_val$coefficients <- apply(return_val$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
+  	} else{
+  	  return_val$coefficients <- transform_coefs(return_val$coefficients,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
+  	}
+	}
+	
 	if(is.null(dim(return_val$coefficients))==TRUE){
 		return_val$rho <- mean(check(res,tau)*weights)	
 		return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*local.penalty.factor,a))
@@ -994,11 +1003,13 @@ getGroupPen <- function(coefs,groups,lambda,group.pen.factor,penalty,norm,a){
 rq.lasso.huber.onetau <- function(x,y,tau,lambda,penalty.factor=rep(1,ncol(x)),scalex=TRUE,max.iter,converge.eps,a=1,lambda.discard,...){
 	dims <- dim(x)
 	p <- dims[2]
-	if(scalex){
-		hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
-	} else{
-		hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
-	}
+	#x has already beend scaled or not
+	hqModel <- hqreg_raw(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
+	# if(scalex){
+	# 	hqModel <- hqreg(x,y,method="quantile",tau=tau,lambda=lambda,penalty.factor=penalty.factor,max.iter=max.iter,eps=converge.eps,alpha=a,...)
+	# } else{
+	# 
+	# }
 	rq.pen.modelreturn(hqModel$beta,x,y,tau,lambda,penalty.factor,"LASSO",a)
 }
 
