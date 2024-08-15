@@ -607,7 +607,7 @@ rq.pen.new <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","
   # }
   #TODO: this should be done in modelreturn but updating all that code is complicated
   if(scalex){
-    fit$models <- updateModelReturn(x,y,models,penalty,a,tau,tau.penalty.factor,penalty.factor)
+    fit$models <- updateModelReturn(x,y,fit$models,penalty,a,tau,tau.penalty.factor,penalty.factor)
   }
   if(lambda.discard){
     #If lambda.discard is used we need to make sure the sequence is the same across all quantiles. 
