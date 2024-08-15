@@ -642,8 +642,8 @@ updateModelReturn <- function(x,y,models,penalty,a,tau,tau.penalty.factor,penalt
       models[[i]]$coefficients <- apply(models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
       res <- y-cbind(1,x.orig)%*%models[[i]]$coefficients
       models[[i]]$rho <- apply(check(res,models[[i]]$tau)*weights,2,mean)
-      for(i in 1:length(models[[i]]$rho)){
-        models[[i]]$PenRho[i] <- models[[i]]$rho[i] + sum(penfunc(models[[i]]$coefficients[-1,i],lambda[i]*local.penalty.factor,a))
+      for(j in 1:length(models[[i]]$rho)){
+        models[[i]]$PenRho[j] <- models[[i]]$rho[j] + sum(penfunc(models[[i]]$coefficients[-1,j],lambda[j]*local.penalty.factor,a))
       }
       
     } else{
