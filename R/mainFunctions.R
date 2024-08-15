@@ -2420,7 +2420,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 		stop("group penalty factor must be of length g")
 	}	
 	if(scalex){
-	  x <-   
+	  x <- scale(x)  
 	}
 	if(is.null(lambda)){
 		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma,weights=weights)
