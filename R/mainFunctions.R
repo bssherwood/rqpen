@@ -652,7 +652,8 @@ updateModelReturn <- function(x,y,models,penalty,a,tau,tau.penalty.factor,penalt
       models[[i]]$rho <- mean(check(res,tau)*weights)	
       models[[i]]$PenRho <-  models[[i]]$rho + sum(penfunc( models[[i]]$coefficients[-1],lambda*local.penalty.factor,a))
     }
-  }  
+  }
+  models
 }
 
 rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL){
