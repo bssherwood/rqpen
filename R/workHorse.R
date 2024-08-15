@@ -963,6 +963,8 @@ getPenfunc <- function(penalty){
 		penfunc <- elastic
 	} else if(penalty=="gq"){
 	  penfunc <- gq
+	} else if(penalty=="Ridge"){
+	  penfunc <- ridge
 	}
 	penfunc
 }
