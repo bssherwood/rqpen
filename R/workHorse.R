@@ -868,7 +868,6 @@ qaSIS <- function(x,y,tau=.5,linear=FALSE,...){#n.cores=1,...){
 }
 
 
-#need to update this and think about what penalty.factor needs to be used. 
 rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL){
 	penfunc <- getPenfunc(penalty)
 	return_val <- NULL
@@ -880,7 +879,6 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty
 		weights <- rep(1,n)
 	}
 	return_val$coefficients <- coefs
-	#return_val$penalty.factor <- penalty.factor
 	p <- ncol(x)
 	if(is.null(colnames(x))){
 		x_names <- paste("x",1:p,sep="")
@@ -889,9 +887,7 @@ rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty
 	}
 	x_names <- c("intercept",x_names)
 	
-	#need to think about how the fits will be, along with the rest. Maybe should I be transposing matrix. Maybe check code to see how other betas are done. 
 	fits <- cbind(1,x)%*% return_val$coefficients
-	#return_val$fitted <- fits
 	res <- y - fits
 	if(is.null(dim(return_val$coefficients))==TRUE){
 		return_val$rho <- mean(check(res,tau)*weights)	
@@ -970,6 +966,7 @@ getPenfunc <- function(penalty){
 	}
 	penfunc
 }
+
 
 
 
