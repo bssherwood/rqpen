@@ -417,7 +417,7 @@ coef.cv.rq.pen <- function(object, lambda='min',...){
 #' \describe{
 #' \item{coefficients:}{ Coefficients for each value of lambda.}
 #' \item{rho:}{ The unpenalized objective function for each value of lambda.}
-#' \item{PenRho:}{ The penalized objective function for each value of lambda.}
+#' \item{PenRho:}{ The penalized objective function for each value of lambda. If scalex=TRUE then this is the value for the scaled version of x.}
 #' \item{nzero:}{ The number of nonzero coefficients for each value of lambda.}
 #' \item{tau:}{ Quantile of the model.}
 #' \item{a:}{ Value of a for the penalized loss function.}
@@ -515,7 +515,6 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 							# max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,
 							# gamma=gamma)
 	# }
-	#TODO: this should be done in modelreturn but updating all that code is complicated
 	if(scalex){
 		for(i in 1:length(fit$models)){
 			if(!is.null(dim(fit$models[[i]]$coefficients))){
@@ -542,234 +541,6 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	fit$call <- match.call()
 	fit
 }
-
-rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
-                   penalty.factor = rep(1, ncol(x)),alg=c("huber","br","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-                   coef.cutoff=1e-8,max.iter=5000,converge.eps=1e-4,lambda.discard=TRUE,weights=NULL,...){
-  penalty <- match.arg(penalty)
-  alg <- match.arg(alg)
-  if(length(y)!=nrow(x)){
-    stop("length of x and number of rows in x are not the same")
-  }
-  if(min(apply(x,2,sd))==0){
-    stop("At least one of the x predictors has a standard deviation of zero")
-  }
-  if(is.null(weights)==FALSE){
-    if( penalty=="ENet" | penalty=="Ridge"){
-      stop("Cannot use weights with elastic net or ridge penalty. Can use it with lasso, though may be much slower than unweighted version.")
-    }
-    if(penalty=="aLASSO"){
-      warning("Weights are ignored when getting initial (Ridge) estimates for adaptive Lasso")
-    }
-    if(length(weights)!=length(y)){
-      stop("number of weights does not match number of responses")
-    }
-    if(sum(weights<=0)>0){
-      stop("all weights most be positive")
-    }
-  }
-  if(is.matrix(y)==TRUE){
-    y <- as.numeric(y)
-  }
-  if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
-    stop("Penalty factors must be non-negative.")
-  }
-  if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
-    stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
-  }
-  if(scalex){
-    x <- scale(x)
-  }
-  if(penalty=="LASSO"){
-    fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,weights=weights,...)
-  } else if(penalty=="Ridge"){
-    if(alg != "huber"){
-      stop("huber alg is only option for Ridge penalty")
-    }
-    fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex,tau.penalty.factor,a=0,max.iter,converge.eps,lambda.discard=lambda.discard,...)
-  } else if(penalty == "ENet"){
-    if(alg != "huber"){
-      stop("huber alg is only option for ENet penalty")
-    }
-    if(is.null(a)){
-      stop("Specify a value for a for ENet penalty")
-    }
-    fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
-  } else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-    fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,weights=weights,...)
-  } 
-  #else if(penalty == "gQuant"){
-  # fit <- rq.pen.gq1y(x,y,tau,lambda,nlambda=100,eps,scalex=FALSE,penalty.factor=penalty.factor, 
-  # tau.penalty.factor=tau.penalty.factor,
-  # max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,
-  # gamma=gamma)
-  # }
-  #TODO: this should be done in modelreturn but updating all that code is complicated
-  if(scalex){
-    for(i in 1:length(fit$models)){
-      if(!is.null(dim(fit$models[[i]]$coefficients))){
-        fit$models[[i]]$coefficients <- apply(fit$models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
-      } else{
-        fit$models[[i]]$coefficients <- transform_coefs(fit$models[[i]]$coefficients,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
-      }
-    }
-  }
-  if(lambda.discard){
-    #If lambda.discard is used we need to make sure the sequence is the same across all quantiles. 
-    #A to-do thing would be to consider how to allow downstream functions such as coef() to allow for different sequence lengths,
-    # but that seems unnecessarliy complicated right now. 
-    lmin <- min(sapply(fit$models,lambdanum))
-    fit$lambda <- fit$lambda[1:lmin]
-    for(j in 1:length(fit$models)){
-      fit$models[[j]]$coefficients <- fit$models[[j]]$coefficients[,1:lmin]
-      fit$models[[j]]$rho <- fit$models[[j]]$rho[1:lmin]
-      fit$models[[j]]$PenRho <- fit$models[[j]]$PenRho[1:lmin]
-      fit$models[[j]]$nzero <- fit$models[[j]]$nzero[1:lmin]
-    }
-  }
-  fit$weights <- weights
-  fit$call <- match.call()
-  fit
-}
-
-
-# rq.pen.new <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,nlambda=100,eps=ifelse(nrow(x)<ncol(x),.05,.01), 
-#                    penalty.factor = rep(1, ncol(x)),alg=c("huber","br","fn"),scalex=TRUE,tau.penalty.factor=rep(1,length(tau)),
-#                    coef.cutoff=1e-8,max.iter=5000,converge.eps=1e-4,lambda.discard=TRUE,weights=NULL,...){
-#   penalty <- match.arg(penalty)
-#   alg <- match.arg(alg)
-#   if(length(y)!=nrow(x)){
-#     stop("length of x and number of rows in x are not the same")
-#   }
-#   if(min(apply(x,2,sd))==0){
-#     stop("At least one of the x predictors has a standard deviation of zero")
-#   }
-#   if(is.null(weights)==FALSE){
-#     if( penalty=="ENet" | penalty=="Ridge"){
-#       stop("Cannot use weights with elastic net or ridge penalty. Can use it with lasso, though may be much slower than unweighted version.")
-#     }
-#     if(penalty=="aLASSO"){
-#       warning("Weights are ignored when getting initial (Ridge) estimates for adaptive Lasso")
-#     }
-#     if(length(weights)!=length(y)){
-#       stop("number of weights does not match number of responses")
-#     }
-#     if(sum(weights<=0)>0){
-#       stop("all weights most be positive")
-#     }
-#   }
-#   if(is.matrix(y)==TRUE){
-#     y <- as.numeric(y)
-#   }
-#   if(min(penalty.factor) < 0 | min(tau.penalty.factor) < 0){
-#     stop("Penalty factors must be non-negative.")
-#   }
-#   if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
-#     stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
-#   }
-#   if(scalex){
-#     x <- scale(x)
-#   }
-#   if(penalty=="LASSO"){
-#     fit <- rq.lasso(x,y,tau,lambda,nlambda,eps,penalty.factor,alg,scalex=FALSE,tau.penalty.factor,coef.cutoff,max.iter,converge.eps,lambda.discard=lambda.discard,weights=weights,...)
-#   } else if(penalty=="Ridge"){
-#     if(alg != "huber"){
-#       stop("huber alg is only option for Ridge penalty")
-#     }
-#     fit <-  rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a=0,max.iter,converge.eps,lambda.discard=lambda.discard,...)
-#   } else if(penalty == "ENet"){
-#     if(alg != "huber"){
-#       stop("huber alg is only option for ENet penalty")
-#     }
-#     if(is.null(a)){
-#       stop("Specify a value for a for ENet penalty")
-#     }
-#     fit <- rq.enet(x,y,tau,lambda,nlambda,eps, penalty.factor,scalex=FALSE,tau.penalty.factor,a,max.iter,converge.eps,gamma,lambda.discard=lambda.discard,...)
-#   } else if(penalty == "aLASSO" | penalty=="SCAD" | penalty == "MCP"){
-#     fit <- rq.nc(x,y,tau,penalty,a,lambda,nlambda=nlambda,eps=eps,penalty.factor=penalty.factor,alg=alg,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,coef.cutoff=coef.cutoff,max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,weights=weights,...)
-#   } 
-#   #else if(penalty == "gQuant"){
-#   # fit <- rq.pen.gq1y(x,y,tau,lambda,nlambda=100,eps,scalex=FALSE,penalty.factor=penalty.factor, 
-#   # tau.penalty.factor=tau.penalty.factor,
-#   # max.iter=max.iter,converge.eps=converge.eps,lambda.discard=lambda.discard,
-#   # gamma=gamma)
-#   # }
-#   #TODO: this should be done in modelreturn but updating all that code is complicated
-#   if(scalex){
-#     fit$models <- updateModelReturn(x,y,fit$models,penalty,a,tau,tau.penalty.factor,penalty.factor,weights)
-#   }
-#   if(lambda.discard){
-#     #If lambda.discard is used we need to make sure the sequence is the same across all quantiles. 
-#     #A to-do thing would be to consider how to allow downstream functions such as coef() to allow for different sequence lengths,
-#     # but that seems unnecessarliy complicated right now. 
-#     lmin <- min(sapply(fit$models,lambdanum))
-#     fit$lambda <- fit$lambda[1:lmin]
-#     for(j in 1:length(fit$models)){
-#       fit$models[[j]]$coefficients <- fit$models[[j]]$coefficients[,1:lmin]
-#       fit$models[[j]]$rho <- fit$models[[j]]$rho[1:lmin]
-#       fit$models[[j]]$PenRho <- fit$models[[j]]$PenRho[1:lmin]
-#       fit$models[[j]]$nzero <- fit$models[[j]]$nzero[1:lmin]
-#     }
-#   }
-#   fit$weights <- weights
-#   fit$call <- match.call()
-#   fit
-# }
-# 
-# updateModelReturn <- function(x,y,models,penalty,a,tau,tau.penalty.factor,penalty.factor,weights){
-#   n <- length(y)
-#   if(is.null(weights)){
-#     weights <- rep(1,n)
-#   }
-#   penfunc <- getPenfunc(penalty)
-#   x.orig = t(apply(x, 1, function(r)r*attr(x,'scaled:scale') + attr(x, 'scaled:center')))
-#   if(is.null(a)){
-#     a <- 1
-#   }
-#   
-#   for(i in 1:length(models)){
-#     taupos <- which(tau==models[[i]]$tau)
-#     local.penalty.factor <- penalty.factor*tau.penalty.factor[taupos]
-#     if(!is.null(dim(models[[i]]$coefficients))){
-#       models[[i]]$coefficients <- apply(models[[i]]$coefficients,2,transform_coefs,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
-#       res <- y-cbind(1,x.orig)%*%models[[i]]$coefficients
-#       models[[i]]$rho <- apply(check(res,models[[i]]$tau)*weights,2,mean)
-#       for(j in 1:length(models[[i]]$rho)){
-#         models[[i]]$PenRho[j] <- models[[i]]$rho[j] + sum(penfunc(models[[i]]$coefficients[-1,j],lambda[j]*local.penalty.factor,a))
-#       }
-#       
-#     } else{
-#       models[[i]]$coefficients <- transform_coefs(models[[i]]$coefficients,attributes(x)$`scaled:center`,attributes(x)$`scaled:scale`)
-#       res <- y-cbind(1,x.orig)%*%models[[i]]$coefficients
-#       models[[i]]$rho <- mean(check(res,tau)*weights)	
-#       models[[i]]$PenRho <-  models[[i]]$rho + sum(penfunc( models[[i]]$coefficients[-1],lambda*local.penalty.factor,a))
-#     }
-#   }
-#   models
-# }
-
-rq.pen.modelreturn <- function(coefs,x,y,tau,lambda,local.penalty.factor,penalty,a,weights=NULL){
-  
-  
-  fits <- cbind(1,x)%*% return_val$coefficients
-  res <- y - fits
-  if(is.null(dim(return_val$coefficients))==TRUE){
-    return_val$rho <- mean(check(res,tau)*weights)	
-    return_val$PenRho <- return_val$rho + sum(penfunc(return_val$coefficients[-1],lambda*local.penalty.factor,a))
-    return_val$nzero <- sum(return_val$coefficients!=0)
-  } else{
-    return_val$rho <- apply(check(res,tau)*weights,2,mean)	
-    rownames(return_val$coefficients) <- x_names
-    for(i in 1:length(return_val$rho)){
-      return_val$PenRho[i] <- return_val$rho[i] + sum(penfunc(return_val$coefficients[-1,i],lambda[i]*local.penalty.factor,a))
-    }
-    return_val$nzero <- apply(return_val$coefficients!=0,2,sum)
-  }
-  return_val$tau <- tau
-  return_val$a <- a
-  return_val
-}
-
 
 #' Returns coefficients of a rq.pen.seq object
 #'
@@ -1302,7 +1073,7 @@ rq.group.pen.cv <- function(x,y,tau=.5,groups=1:ncol(x),lambda=NULL,a=NULL,cvFun
 #' @return Returns the following:
 #' \describe{
 #' \item{coefficients}{Coefficients from the penalized model.}
-#' \item{PenRho}{Penalized objective function value.}
+#' \item{PenRho}{Penalized objective function value.  If scalex=TRUE then this is the value for the scaled version of x.}
 #' \item{residuals}{ Residuals from the model.}
 #' \item{rho}{ Objective function evaluation without the penalty.}
 #' \item{coefficients}{ Coefficients from the penalized model.} 
@@ -2043,7 +1814,7 @@ plot.cv.rq.group.pen <- function (x,...)
 #' Returns the following:
 #' \describe{
 #' \item{coefficients}{ Coefficients from the penalized model.} 
-#' \item{PenRho}{ Penalized objective function value.}
+#' \item{PenRho}{ Penalized objective function value.  If scalex=TRUE then this is the value for the scaled version of x.}
 #' \item{residuals}{ Residuals from the model.}
 #' \item{rho}{ Objective function evaluation without the penalty.}
 #' \item{tau}{ Conditional quantile being modeled.}
@@ -2287,7 +2058,7 @@ coef.cv.rq.group.pen <- function(object, lambda='min',...){
 #' \describe{
 #' \item{coefficients}{Coefficients for each value of lambda.}
 #' \item{rho}{The unpenalized objective function for each value of lambda.}
-#' \item{PenRho}{The penalized objective function for each value of lambda.}
+#' \item{PenRho}{The penalized objective function for each value of lambda.  If scalex=TRUE then this is the value for the scaled version of x.}
 #' \item{nzero}{The number of nonzero coefficients for each value of lambda.}
 #' \item{tau}{Quantile of the model.}
 #' \item{a}{Value of a for the penalized loss function.}
@@ -2419,11 +2190,8 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(lpf!=g){
 		stop("group penalty factor must be of length g")
 	}	
-	if(scalex){
-	  x <- scale(x)  
-	}
 	if(is.null(lambda)){
-		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=FALSE,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma,weights=weights)
+		lamMax <- getLamMaxGroup(x,y,groups,tau,group.pen.factor,penalty=penalty,scalex=scalex,tau.penalty.factor=tau.penalty.factor,norm=norm,gamma=gamma,weights=weights)
 		lambda <- exp(seq(log(lamMax),log(eps*lamMax),length.out=nlambda))
 	}
 
