@@ -587,6 +587,7 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @param septau Whether tuning parameter should be optimized separately for each quantile. 
 #' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
 #' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
+#' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue. 
 #' @param ... Additional parameters sent to coef.rq.pen.seq.cv(). 
 #'
 #' @return A matrix of predictions for each tau and a combination
@@ -599,17 +600,32 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' newx <- matrix(runif(80),ncol=8)
 #' cvpreds <- predict(m1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,...){
+predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,sort=FALSE,...){
   if(object$fit$penalty=="gq" & septau){
     septau = FALSE
     warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
   }
   coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
   if(is.null(dim(newx))){
-    c(1,newx) %*% coefs  
+    preds <- c(1,newx) %*% coefs  
   } else{
-    cbind(1,newx) %*% coefs
+    preds <- cbind(1,newx) %*% coefs
   }
+  if(ncol(preds)>1){
+    cross <- apply(preds,1,is.unsorted)
+    if(sum(cross) >1){
+      crossSpots <- which(cross)
+      if(sort){
+        warning(paste("Predictions were sorted to avoid crossing quantiles at",crossSpots))
+        cnames <- colnames(preds)
+        preds <- t(apply(preds,1,sort))
+        colnames(preds) <- cnames
+      }else{
+        warning("Crossing quantiles at", crossSpots)
+      }
+    }
+  }
+  preds
 }
 
 #' Predictions from rq.pen.seq object
