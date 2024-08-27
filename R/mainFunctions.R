@@ -616,12 +616,12 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
     if(sum(cross) >1){
       crossSpots <- which(cross)
       if(sort){
-        warning(paste("Predictions were sorted to avoid crossing quantiles at",crossSpots))
+        warning(paste("Predictions were sorted to avoid crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
         cnames <- colnames(preds)
         preds <- t(apply(preds,1,sort))
         colnames(preds) <- cnames
       }else{
-        warning("Crossing quantiles at", crossSpots)
+        warning(paste("Crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
       }
     }
   }
