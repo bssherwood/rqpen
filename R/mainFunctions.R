@@ -459,6 +459,12 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	coef.cutoff=1e-8,max.iter=5000,converge.eps=1e-4,lambda.discard=TRUE,weights=NULL,...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	if(length(tau)>length(unique(tau)){
+	  stop("All entries of tau should be unique")
+	}
+	if(!is.ordered(tau)){
+	  stop("Quantile values should be entered in ascending order")
+	}
 	if(length(y)!=nrow(x)){
 	  stop("length of x and number of rows in x are not the same")
 	}
@@ -637,6 +643,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
 #' @param lambda Tuning parameter of \eqn{\lambda}. Default is NULL, which returns coefficients for all values of \eqn{\lambda}.
 #' @param modelsIndex Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified. 
 #' @param lambdaIndex Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified. 
+#' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue. 
 #' @param ... Additional parameters passed to coef.rq.pen.seq() 
 #'
 #' @return A matrix of predictions for each tau and a combination
@@ -652,14 +659,29 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
 #' idxApproach <- predict(m1,newx,modelsIndex=2)
 #' bothIdxApproach <- predict(m1,newx,modelsIndex=2,lambdaIndex=1)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,...){
+predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,lambdaIndex=NULL,sort=FALSE,...){
   coefs <- coefficients(object,tau,a,lambda,modelsIndex,lambdaIndex,...)
   #lapply(coefs, quick.predict,newx=newx)
   if(is.null(dim(newx))){
-    c(1,newx) %*% coefs
+    preds <- c(1,newx) %*% coefs
   } else{
-    cbind(1,newx) %*% coefs
+    preds <- cbind(1,newx) %*% coefs
   }
+  if(ncol(preds)>1){
+    cross <- apply(preds,1,is.unsorted)
+    if(sum(cross) >1){
+      crossSpots <- which(cross)
+      if(sort){
+        warning(paste("Predictions were sorted to avoid crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
+        cnames <- colnames(preds)
+        preds <- t(apply(preds,1,sort))
+        colnames(preds) <- cnames
+      }else{
+        warning(paste("Crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
+      }
+    }
+  }
+  preds
 }
 
 #' Does k-folds cross validation for rq.pen. If multiple values of a are specified then does a grid based search for best value of \eqn{\lambda} and a.
@@ -2106,6 +2128,13 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 						scalex=TRUE,coef.cutoff=1e-8,max.iter=5000,converge.eps=1e-4,gamma=IQR(y)/10, lambda.discard=TRUE,weights=NULL, ...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
+	
+	if(length(tau)>length(unique(tau)){
+	  stop("All entries of tau should be unique")
+	}
+	if(!is.ordered(tau)){
+	  stop("Quantile values should be entered in ascending order")
+	}
 	
 	g <- length(unique(groups))
 	if(min(apply(x,2,sd))==0){

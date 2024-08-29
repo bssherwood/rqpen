@@ -1,3 +1,7 @@
+checkCross <- function(preds, ntau, nlambda){
+    
+}
+
 lambdanum <- function(model){
 	length(model$rho)
 }
