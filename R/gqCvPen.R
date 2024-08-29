@@ -107,7 +107,11 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
     test_wts <- weights[ind]
     
     train_model<- rq.gq.pen(x=train_x, y=train_y, tau=tau, lambda=lambda, lambda.discard=FALSE, weights=train_wts, ...) #,...
-    pred<- predict(train_model, newx = test_x)
+    if(is.null(dim(test_x))){
+      preds <- c(1,test_x) %*% coefficients(train_model)
+    } else{
+      preds <- cbind(1,test_x) %*% coefficients(train_model)
+    }
     #print(pred[,c(5,10,15)])
     if(cvFunc == "se"){
       se<- (test_y-pred)^2*test_wts

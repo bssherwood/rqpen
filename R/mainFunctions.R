@@ -667,20 +667,18 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
   } else{
     preds <- cbind(1,newx) %*% coefs
   }
-  if(ncol(preds)>1){
-    cross <- apply(preds,1,is.unsorted)
-    if(sum(cross) >1){
-      crossSpots <- which(cross)
-      if(sort){
-        warning(paste("Predictions were sorted to avoid crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
-        cnames <- colnames(preds)
-        preds <- t(apply(preds,1,sort))
-        colnames(preds) <- cnames
-      }else{
-        warning(paste("Crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
-      }
+  if(is.null(tau) & is.null(modelsIndex)){
+    ntau <- length(object$tau)
+  } else{
+    ntau <- max(length(tau),length(modelsIndex))
+  }
+  if(is.null(lambda)){
+    lambda <- object$lambda
+    if(is.null(lambdaIndex)==FALSE){
+      lambda <- lambda[lambdaIndex]
     }
   }
+  preds <- checkCross(preds,ntau,lambda,sort,object$penalty)
   preds
 }
 
