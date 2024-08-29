@@ -1,5 +1,10 @@
 checkCross <- function(preds, ntau, nlambda){
+#used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
+  for(i in 1:nlambda){
+    spots <- seq(i,(ntau-1)*nlambda+i,by=nlambda)
+    subPreds <- preds[,spots]
     
+  }  
 }
 
 lambdanum <- function(model){
