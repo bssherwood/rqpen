@@ -21,9 +21,9 @@ checkCross <- function(preds, ntau, lambda, sort, penalty){
   if(crossPresent){
     if(length(lambdaCross)==1){
       if(sort){
-        warning(paste("Predictions sorted for lambda", lambdaCross, "due to crossing quantiles at observations", paste(obsCross,collapse=", "))
+        warning(paste("Predictions sorted for lambda", lambdaCross, "due to crossing quantiles at observations", paste(obsCross,collapse=", ")))
       } else{
-        warning(paste("Predictions for lambda", lambdaCross, "have crossing quantiles at observations", paste(obsCross,collapse=", "))
+        warning(paste("Predictions for lambda", lambdaCross, "have crossing quantiles at observations", paste(obsCross,collapse=", ")))
       }
     } else{
       if(sort){
