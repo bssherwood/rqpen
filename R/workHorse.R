@@ -2,6 +2,8 @@ checkCross <- function(preds, ntau, lambda, sort, penalty){
 #used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
   nlambda <- length(lambda)
   crossPresent <- FALSE
+  lambdaCross <- NULL
+  obsCross <- NULL
   for(i in 1:nlambda){
     spots <- seq(i,(ntau-1)*nlambda+i,by=nlambda)
     subPreds <- preds[,spots]
@@ -10,14 +12,26 @@ checkCross <- function(preds, ntau, lambda, sort, penalty){
       crossPresent <- TRUE
       crossSpots <- which(cross==1)
       if(sort){
-        warning(paste("For lambda", lambda[i], "predictions sorted due to crossing quantiles at rows",  paste(crossSpots, collapse=", ")))
         preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
-      } else{
-        warning(paste("For lambda", lambda[i], "crossing quantiles at rows",  paste(crossSpots, collapse=", ")))
       }
+      lambdaCross <- c(lambdaCross,lambda[i])
+      obsCross <- c(obsCross,crossSpots)
     }
   }
   if(crossPresent){
+    if(length(lambdaCross)==1){
+      if(sort){
+        warning(paste("Predictions sorted for lambda", lambdaCross, "due to crossing quantiles at observations", paste(obsCross,collapse=", "))
+      } else{
+        warning(paste("Predictions for lambda", lambdaCross, "have crossing quantiles at observations", paste(obsCross,collapse=", "))
+      }
+    } else{
+      if(sort){
+        warning(paste("Predictions sorted for lambda values", paste(lambdaCross,collapse=", ")))
+      } else{
+        warning(paste("Crossing quantiles for predictions at lambda values", paste(lambdaCross,collapse=", ")))
+      }
+    }
     if(penalty !="gq"){
       warning(paste("Using rq.gq.pen() may reduce the number of crossings as "))
     }
