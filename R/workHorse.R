@@ -5,7 +5,7 @@ checkCross <- function(preds, ntau, lambda, sort, penalty){
   for(i in 1:nlambda){
     spots <- seq(i,(ntau-1)*nlambda+i,by=nlambda)
     subPreds <- preds[,spots]
-    cross <- apply(preds,1,is.unsorted)
+    cross <- apply(subPreds,1,is.unsorted)
     if(sum(cross)>1){
       crossPresent <- TRUE
       crossSpots <- which(cross==1)
