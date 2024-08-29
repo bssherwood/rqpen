@@ -459,7 +459,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	coef.cutoff=1e-8,max.iter=5000,converge.eps=1e-4,lambda.discard=TRUE,weights=NULL,...){
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
-	if(length(tau)>length(unique(tau)){
+	if(length(tau)>length(unique(tau))){
 	  stop("All entries of tau should be unique")
 	}
 	if(!is.ordered(tau)){
@@ -2129,7 +2129,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	penalty <- match.arg(penalty)
 	alg <- match.arg(alg)
 	
-	if(length(tau)>length(unique(tau)){
+	if(length(tau)>length(unique(tau))){
 	  stop("All entries of tau should be unique")
 	}
 	if(!is.ordered(tau)){
