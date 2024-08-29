@@ -1,5 +1,5 @@
 library(devtools)
-install_github("bssherwood/rqpen", force=TRUE)
+install_github("bssherwood/rqpen")#, force=TRUE)
 3
 library(rqPen)
 
@@ -7,6 +7,8 @@ x <- matrix(rnorm(800),ncol=8)
 y <- x[,1] + x[,3] + (1+x[,4])*rnorm(100)
 r1 <- rq.pen.cv(x,y,tau=c(.25,.3,.5))
 p <- predict(r1,newx=x,useDefaults = FALSE)
+
+rq.gq.pen.cv
 
 set.seed(1)
 n<- 20

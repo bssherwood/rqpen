@@ -462,7 +462,7 @@ rq.pen <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLAS
 	if(length(tau)>length(unique(tau))){
 	  stop("All entries of tau should be unique")
 	}
-	if(!is.ordered(tau)){
+	if(is.unsorted(tau)){
 	  stop("Quantile values should be entered in ascending order")
 	}
 	if(length(y)!=nrow(x)){
@@ -2130,7 +2130,7 @@ rq.group.pen <- function(x,y, tau=.5,groups=1:ncol(x), penalty=c("gLASSO","gAdLA
 	if(length(tau)>length(unique(tau))){
 	  stop("All entries of tau should be unique")
 	}
-	if(!is.ordered(tau)){
+	if(is.unsorted(tau)){
 	  stop("Quantile values should be entered in ascending order")
 	}
 	
