@@ -617,30 +617,35 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
   } else{
     preds <- cbind(1,newx) %*% coefs
   }
+  if(is.null(tau)){
+    tau <- object$fit$tau
+  }
+  ntau <- length(tau)
   if(useDefaults){
     if(septau){
-      
-      preds <- checkCrossSep
+      if(cvmin){
+        lambdaIndex <- object$btr$lambdaIndex
+      } else{
+        lambdaIndex <- object$btr$lambda1seIndex  
+      }
+      preds <- checkCrossSep()
     } else{
-      
+      if(cvmin){
+        lambdaIndex <- object$gtr$lambdaIndex
+      } else{
+        lambdaIndex <- object$gtr$lambda1seIndex
+      }
+      preds <- checkCross(preds, ntau, lambdaIndex, sort, object$fit$penalty)
     }
   } else{
-    
-  }
-  #FOLLOWING COEFFICIENTS CODE SHOULD BE ABLE TO GET THE INDICES AND TAU WE NEED 
-  if(ncol(preds)>1){
-    cross <- apply(preds,1,is.unsorted)
-    if(sum(cross) >1){
-      crossSpots <- which(cross)
-      if(sort){
-        warning(paste("Predictions were sorted to avoid crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
-        cnames <- colnames(preds)
-        preds <- t(apply(preds,1,sort))
-        colnames(preds) <- cnames
-      }else{
-        warning(paste("Crossing quantiles at", paste(crossSpots, collapse=", "), sep=" "))
+    if(is.null(lambdaIndex)){
+      if(is.null(lambda)){
+        lambdaIndex <- 1:length(r2$fit$lambda)
+      } else{
+        lambdaIndex <- which(object$fit$lambda %in% lambda)
       }
     }
+    preds <- checkCross(preds, ntau, lambdaIndex, sort, object$fit$penalty)
   }
   preds
 }
@@ -683,13 +688,14 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
   } else{
     ntau <- max(length(tau),length(modelsIndex))
   }
-  if(is.null(lambda)){
-    lambda <- object$lambda
-    if(is.null(lambdaIndex)==FALSE){
-      lambda <- lambda[lambdaIndex]
+  if(is.null(lambdaIndex)){
+    if(is.null(lambda)){
+      lambdaIndex <- 1:length(object$lambda)
+    } else{
+      lambdaIndex <- which(object$lambda %in% lambda)
     }
   }
-  preds <- checkCross(preds,ntau,lambda,sort,object$penalty)
+  preds <- checkCross(preds,ntau,lambdaIndex,sort,object$penalty)
   preds
 }
 
