@@ -1,5 +1,49 @@
-checkCross <- function(preds, ntau, lambda, sort, penalty){
+checkCross <- function(preds, ntau, lambdaIndex, sort, penalty){
 #used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
+  nlambda <- length(lambdaIndex)
+  crossPresent <- FALSE
+  lambdaCross <- NULL
+  obsCross <- NULL
+  for(i in 1:nlambda){
+    spots <- seq(i,(ntau-1)*nlambda+i,by=nlambda)
+    subPreds <- preds[,spots]
+    cross <- apply(subPreds,1,is.unsorted)
+    if(sum(cross)>1){
+      crossPresent <- TRUE
+      crossSpots <- which(cross==1)
+      if(sort){
+        preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
+      }
+      lambdaCross <- c(lambdaCross,i)
+      obsCross <- c(obsCross,crossSpots)
+    }
+  }
+  warningMessage <- NULL
+  if(crossPresent){
+    if(length(lambdaCross)==1){
+      if(sort){
+        warningMessage <- paste("Predictions sorted for lambda", lambdaIndex[lambdaCross], "due to crossing quantiles at observations", paste(obsCross,collapse=", "))
+      } else{
+        warningMessage <- paste("Predictions for lambda", lambdaIndex[lambdaCross], "have crossing quantiles at observations", paste(obsCross,collapse=", "))
+      }
+    } else{
+      if(sort){
+        warningMessage <- paste("Predictions sorted for lambda indices", paste(lambdaCross,collapse=", "), "due to crossing quantiles")
+      } else{
+        warningMessage <- paste("Crossing quantiles for predictions at lambda indices", paste(lambdaCross,collapse=", "))
+      }
+    }
+    if(penalty !="gq"){
+      warningMessage <- paste(warningMessage, "Using rq.gq.pen() may reduce the number of crossings")
+    }
+    warning(warningMessage)
+  }
+  preds 
+}
+
+#need to fix this code
+checkCrossSep <- function(preds, tau, lambda, sort, penalty){
+  #used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
   nlambda <- length(lambda)
   crossPresent <- FALSE
   lambdaCross <- NULL

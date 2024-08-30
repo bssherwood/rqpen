@@ -94,7 +94,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(length(tau)>length(unique(tau))){
     stop("All entries of tau should be unique")
   }
-  if(!is.ordered(tau)){
+  if(is.unsorted(tau)){
     stop("Quantile values should be entered in ascending order")
   }
   

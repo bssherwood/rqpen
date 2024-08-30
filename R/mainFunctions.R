@@ -617,6 +617,17 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
   } else{
     preds <- cbind(1,newx) %*% coefs
   }
+  if(useDefaults){
+    if(septau){
+      
+      preds <- checkCrossSep
+    } else{
+      
+    }
+  } else{
+    
+  }
+  #FOLLOWING COEFFICIENTS CODE SHOULD BE ABLE TO GET THE INDICES AND TAU WE NEED 
   if(ncol(preds)>1){
     cross <- apply(preds,1,is.unsorted)
     if(sum(cross) >1){
