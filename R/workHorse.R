@@ -14,27 +14,29 @@ checkCross <- function(preds, ntau, lambda, sort, penalty){
       if(sort){
         preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
       }
-      lambdaCross <- c(lambdaCross,lambda[i])
+      lambdaCross <- c(lambdaCross,i)
       obsCross <- c(obsCross,crossSpots)
     }
   }
+  warningMessage <- NULL
   if(crossPresent){
     if(length(lambdaCross)==1){
       if(sort){
-        warning(paste("Predictions sorted for lambda", lambdaCross, "due to crossing quantiles at observations", paste(obsCross,collapse=", ")))
+        warningMessage <- paste("Predictions sorted for lambda", lambda[lambdaCross], "due to crossing quantiles at observations", paste(obsCross,collapse=", "))
       } else{
-        warning(paste("Predictions for lambda", lambdaCross, "have crossing quantiles at observations", paste(obsCross,collapse=", ")))
+        warningMessage <- paste("Predictions for lambda", lambda[lambdaCross], "have crossing quantiles at observations", paste(obsCross,collapse=", "))
       }
     } else{
       if(sort){
-        warning(paste("Predictions sorted for lambda values", paste(lambdaCross,collapse=", ")))
+        warningMessage <- paste("Predictions sorted for lambda indices", paste(lambdaCross,collapse=", "), "due to crossing quantiles")
       } else{
-        warning(paste("Crossing quantiles for predictions at lambda values", paste(lambdaCross,collapse=", ")))
+        warningMessage <- paste("Crossing quantiles for predictions at lambda indices", paste(lambdaCross,collapse=", "))
       }
     }
     if(penalty !="gq"){
-      warning(paste("Using rq.gq.pen() may reduce the number of crossings as "))
+      warningMessage <- paste(warningMessage, "Using rq.gq.pen() may reduce the number of crossings")
     }
+    warning(warningMessage)
   }
   preds 
 }
