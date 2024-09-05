@@ -628,7 +628,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
       } else{
         lambdaIndex <- object$btr$lambda1seIndex  
       }
-      preds <- checkCrossSep()
+      preds <- checkCrossSep(preds, tau, lambdaIndex, sort, object$fit$penalty)
     } else{
       if(cvmin){
         lambdaIndex <- object$gtr$lambdaIndex
