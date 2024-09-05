@@ -46,11 +46,12 @@ checkCrossSep <- function(preds, sort, penalty){
   #used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
   cross <- apply(preds, 1, is.unsorted)
   if(sum(cross)>1){
+    crossSpots <- which(cross)
     if(sort){
       preds <- t(apply(preds,1,sort))
-      warningMessage <- paste("Quantile predictions sorted at observations ", cross, " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
+      warningMessage <- paste("Quantile predictions sorted at observations ", paste(crossSpots, collapse=", ") , " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
     } else{
-      warningMessage <- paste("Crossing quantiles at observations ", cross, " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
+      warningMessage <- paste("Crossing quantiles at observations ", paste(crossSpots, collapse=", "), " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
     }
     if(penalty !="gq"){
       warningMessage <- paste(warningMessage, "In addition, using rq.gq.pen() may reduce the number of crossings.")
