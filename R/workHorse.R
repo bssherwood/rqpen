@@ -42,12 +42,8 @@ checkCross <- function(preds, ntau, lambdaIndex, sort, penalty){
 }
 
 #need to fix this code
-checkCrossSep <- function(preds, tau, lambdaIndex, sort, penalty){
+checkCrossSep <- function(preds, sort, penalty){
   #used to check quantiles for the structure we have where the ordering is tau then lambda so it is tau1L1,tau1L2,...,tauKLFinal
-  nlambda <- length(lambda)
-  crossPresent <- FALSE
-  lambdaCross <- NULL
-  obsCross <- NULL
   cross <- apply(preds, 1, is.unsorted)
   if(sum(cross)>1){
     if(sort){
@@ -57,7 +53,7 @@ checkCrossSep <- function(preds, tau, lambdaIndex, sort, penalty){
       warningMessage <- paste("Crossing quantiles at observations ", cross, " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
     }
     if(penalty !="gq"){
-      warningMessage <- paste(warningMessage, "Using rq.gq.pen() may reduce the number of crossings")
+      warningMessage <- paste(warningMessage, "In addition, using rq.gq.pen() may reduce the number of crossings.")
     }
     warning(warningMessage)
   }
