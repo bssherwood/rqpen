@@ -57,10 +57,10 @@ transform_coefs <- function(coefs,mu_x,sigma_x,intercept=TRUE){
 
 transform_coefs.aug <- function(coefs,mu_x,sigma_x, ntau,intercept=TRUE){
   if(intercept){
-    new_coefs<- coefs[-(1:ntau)]/sigma_x
+    new_coefs<- coefs[-(1:ntau)]/rep(sigma_x, each=ntau)
     temp <- matrix(coefs[-(1:ntau)]*rep(mu_x/sigma_x, each=ntau), length(mu_x), ntau, byrow=TRUE)
-    intercept<- coefs[1:ntau] - apply(temp, 2, sum)
-    new_coefs<- c(intercept, new_coefs)
+    intercept0<- coefs[1:ntau] - apply(temp, 2, sum)
+    new_coefs<- c(intercept0, new_coefs)
   } else{
     new_coefs<- coefs/rep(sigma_x, each=ntau)
   }
