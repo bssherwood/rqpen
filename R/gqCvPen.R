@@ -62,6 +62,7 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
   #  lambda<- model_obj$lambda
   #  fullmodel<- model_obj
   #}else{
+  n <- length(y)
   
   
   if(is.null(weights)){
@@ -84,7 +85,6 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
   #   tauWeights <- tauWeights/sum(tauWeights)
   # } 
   
-  n <- length(y)
   if(is.null(foldid)){
     foldid <- sample(rep(1:nfolds, length=n))
   } else{
