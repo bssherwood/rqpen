@@ -99,7 +99,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   }
   
   if(length(y)!=nrow(x)){
-    stop("length of x and number of rows in x are not the same")
+    stop("length of y and number of rows in x are not the same")
   }
   if(is.null(weights)==FALSE){
     if(length(weights)!=length(y)){
