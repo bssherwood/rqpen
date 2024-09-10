@@ -114,13 +114,13 @@ rq.gq.pen.cv <- function(x=NULL, y=NULL, tau=NULL, lambda=NULL, nfolds=10, cvFun
     }
     #print(pred[,c(5,10,15)])
     if(cvFunc == "se"){
-      se<- (test_y-pred)^2*test_wts
+      se<- (test_y-preds)^2*test_wts
       mse[,i]<- apply(se,2,mean)#as.vector(do.call(c, lapply(se, apply, 2,mean))) 
     } 
     if(cvFunc == "rq"){
 	    #double for loop that could be removed
       #hacky code
-  	  test_err <- test_y-pred
+  	  test_err <- test_y-preds
   	  tpos <- 1
   	  for(tauval in tau){
   	    posseq <- seq(tpos,(nlambda-1)*ntau+tpos,ntau)
