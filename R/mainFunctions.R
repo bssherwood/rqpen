@@ -593,6 +593,8 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' @param septau Whether tuning parameter should be optimized separately for each quantile. 
 #' @param cvmin If TRUE then minimum error is used, if FALSE then one standard error rule is used. 
 #' @param useDefaults Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values. 
+#' @param lambda The value of lambda for which predictions are wanted. Ignored unless useDefaults is set to false.
+#' @param lambdaIndex The indices for lambda for which predictions are wanted. Ignored unless useDefaults is set to false. 
 #' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue. 
 #' @param ... Additional parameters sent to coef.rq.pen.seq.cv(). 
 #'
@@ -606,12 +608,12 @@ coef.rq.pen.seq <- function(object,tau=NULL,a=NULL,lambda=NULL,modelsIndex=NULL,
 #' newx <- matrix(runif(80),ncol=8)
 #' cvpreds <- predict(m1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,sort=FALSE,...){
+predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit$penalty!="gq",TRUE,FALSE),cvmin=TRUE,useDefaults=TRUE,sort=FALSE,lambda=NULL,lambdaIndex=NULL,...){
   if(object$fit$penalty=="gq" & septau){
     septau = FALSE
     warning("septau set to false because group quantile penalty was used, which is a joint optimization across all quantiles")
   }
-  coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,...)
+  coefs <- coefficients(object,septau=septau,cvmin=cvmin,useDefaults=useDefaults,tau=tau,lambda=lambda,lambdaIndex=lambdaIndex,...)
   if(is.null(dim(newx))){
     preds <- c(1,newx) %*% coefs  
   } else{
