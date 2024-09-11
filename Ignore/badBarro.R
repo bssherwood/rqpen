@@ -16,3 +16,9 @@ summary(y)
 summary(predict(r1,newx=x))
 summary(predict(r1,newx=x,lambdaIndex=2, useDefaults = FALSE))
 summary(predict(r1,newx=x,lambdaIndex=50, useDefaults = FALSE))
+
+x <- matrix(rnorm(8000),ncol=8)
+y <- 1 + x[,1] + x[,3] + x[,8] + rnorm(1000,sd=.1)
+y <- y/10
+
+g1 <- rq.gq.pen.cv(x,y,tau=c(.1,.5,.9))
