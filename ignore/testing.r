@@ -14,8 +14,6 @@ r5 <- rq.gq.pen(x,y,tau=c(.25,.3,.5))
 p4 <- predict(r2,newx=x)
 p5 <- predict(r2,newx=x,lambdaIndex=6, sort=TRUE)
 
-rq.gq.pen.cv
-
 set.seed(1)
 n<- 20
 p<- 5
