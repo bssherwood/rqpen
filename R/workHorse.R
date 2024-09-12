@@ -16,7 +16,9 @@ checkCross <- function(preds, ntau, lambdaIndex, sort, penalty){
       crossPresent <- TRUE
       crossSpots <- which(cross==1)
       if(sort){
+        cNames <- colnames(preds)
         preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
+        colnames(preds) <- cNames
       }
       lambdaCross <- c(lambdaCross,i)
       obsCross <- c(obsCross,crossSpots)
@@ -52,7 +54,9 @@ checkCrossSep <- function(preds, sort, penalty){
   if(sum(cross)>1){
     crossSpots <- which(cross)
     if(sort){
+      cnames <- colnames(preds)
       preds <- t(apply(preds,1,sort))
+      colnames(preds) <- cnames
       warningMessage <- paste("Quantile predictions sorted at observations ", paste(crossSpots, collapse=", ") , " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
     } else{
       warningMessage <- paste("Crossing quantiles at observations ", paste(crossSpots, collapse=", "), " when using seperate optimization for each lambda. Setting septau=FALSE may reduce the number of crossings.")
