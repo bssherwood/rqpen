@@ -312,7 +312,7 @@ predict.qic.select <- function(object, newx, sort=FALSE){
 	    if(sort){
 	      warning(paste("Quantile predictions at observations", paste(crossSpots, collapse=", "), "sorted due to crossing quantiles in original predictions."))  
 	      cNames <- colnames(preds)
-	      preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
+	      preds[crossSpots,] <- t(apply(preds[crossSpots,],1,sort))  
 	      colnames(preds) <- cNames
 	    } else{
 	      warning(paste("Crossing quantiles at observations", paste(crossSpots,collapse=", ")))
