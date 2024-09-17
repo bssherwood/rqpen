@@ -288,7 +288,7 @@ print.qic.select <- function(x,...){
 #'
 #' @param object qic.select object
 #' @param newx Data matrix to make predictions from. 
-#' @param ... optional arguments
+#' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue. 
 #'
 #' @return A matrix of predicted values.
 #' @export
@@ -301,12 +301,25 @@ print.qic.select <- function(x,...){
 #' newx <- matrix(runif(80),ncol=8)
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.qic.select <- function(object, newx, ...){
+predict.qic.select <- function(object, newx, sort=FALSE){
 	if(is.null(dim(newx))){
-	  c(1,newx) %*% coefficients(object)
+	  preds <- c(1,newx) %*% coefficients(object)
 	} else{
-	  cbind(1,newx) %*% coefficients(object)
+	  preds <- cbind(1,newx) %*% coefficients(object)
+	  cross <- apply(preds,1,is.unsorted)
+	  if(sum(cross)>0){
+	    crossSpots <- which(cross)
+	    if(sort){
+	      warning(paste("Quantile predictions at observations", paste(crossSpots, collapse=", "), "sorted due to crossing quantiles in original predictions."))  
+	      cNames <- colnames(preds)
+	      preds[crossSpots,spots] <- t(apply(preds[crossSpots,spots],1,sort))  
+	      colnames(preds) <- cNames
+	    } else{
+	      warning(paste("Crossing quantiles at observations", paste(crossSpots,collapse=", ")))
+	    }
+	  }
 	}
+  preds
 }
 
 
