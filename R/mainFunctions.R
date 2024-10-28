@@ -288,7 +288,8 @@ print.qic.select <- function(x,...){
 #'
 #' @param object qic.select object
 #' @param newx Data matrix to make predictions from. 
-#' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue. 
+#' @param sort If there are crossing quantiles the predictions will be sorted to avoid this issue.
+#' @param ... No additional parameters are used but this is needed for how R handles predict functions.  
 #'
 #' @return A matrix of predicted values.
 #' @export

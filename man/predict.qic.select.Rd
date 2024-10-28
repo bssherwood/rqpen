@@ -12,6 +12,8 @@
 \item{newx}{Data matrix to make predictions from.}
 
 \item{sort}{If there are crossing quantiles the predictions will be sorted to avoid this issue.}
+
+\item{...}{No additional parameters are used but this is needed for how R handles predict functions.}
 }
 \value{
 A matrix of predicted values.
