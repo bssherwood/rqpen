@@ -12,6 +12,7 @@
   lambda = NULL,
   modelsIndex = NULL,
   lambdaIndex = NULL,
+  sort = FALSE,
   ...
 )
 }
@@ -29,6 +30,8 @@
 \item{modelsIndex}{Index of the models for which coefficients should be returned. Does not need to be specified if tau or a are specified.}
 
 \item{lambdaIndex}{Index of the lambda values for which coefficients should be returned. Does not need to be specified if lambda is specified.}
+
+\item{sort}{If there are crossing quantiles the predictions will be sorted to avoid this issue.}
 
 \item{...}{Additional parameters passed to coef.rq.pen.seq()}
 }

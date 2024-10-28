@@ -11,6 +11,9 @@
   septau = ifelse(object$fit$penalty != "gq", TRUE, FALSE),
   cvmin = TRUE,
   useDefaults = TRUE,
+  sort = FALSE,
+  lambda = NULL,
+  lambdaIndex = NULL,
   ...
 )
 }
@@ -26,6 +29,12 @@
 \item{cvmin}{If TRUE then minimum error is used, if FALSE then one standard error rule is used.}
 
 \item{useDefaults}{Whether the default results are used. Set to FALSE if you you want to specify specific models and lambda values.}
+
+\item{sort}{If there are crossing quantiles the predictions will be sorted to avoid this issue.}
+
+\item{lambda}{The value of lambda for which predictions are wanted. Ignored unless useDefaults is set to false.}
+
+\item{lambdaIndex}{The indices for lambda for which predictions are wanted. Ignored unless useDefaults is set to false.}
 
 \item{...}{Additional parameters sent to coef.rq.pen.seq.cv().}
 }

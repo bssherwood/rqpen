@@ -15,4 +15,4 @@ ByteCompile: TRUE
 Encoding: UTF-8
 License: MIT + file LICENSE
 URL: https://github.com/bssherwood/rqpen/blob/master/ignore/rqPenArticle.pdf
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

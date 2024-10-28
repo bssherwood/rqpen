@@ -54,7 +54,7 @@ rq.nc.fit(
 Returns the following:
 \describe{
 \item{coefficients}{Coefficients from the penalized model.}
-\item{PenRho}{Penalized objective function value.}
+\item{PenRho}{Penalized objective function value.  If scalex=TRUE then this is the value for the scaled version of x.}
 \item{residuals}{ Residuals from the model.}
 \item{rho}{ Objective function evaluation without the penalty.}
 \item{coefficients}{ Coefficients from the penalized model.} 

@@ -15,3 +15,10 @@ The most important functions are rq.pen(), rq.group.pen(), rq.pen.cv() and rq.gr
 fit quantile regression models with individual or group penalties. The cv functions automate the cross-validation process for selection of tuning parameters.
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/bssherwood/rqpen/blob/master/ignore/rqPenArticle.pdf}
+}
+
+}

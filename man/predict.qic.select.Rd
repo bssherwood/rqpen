@@ -4,14 +4,14 @@
 \alias{predict.qic.select}
 \title{Predictions from a qic.select object}
 \usage{
-\method{predict}{qic.select}(object, newx, ...)
+\method{predict}{qic.select}(object, newx, sort = FALSE)
 }
 \arguments{
 \item{object}{qic.select object}
 
 \item{newx}{Data matrix to make predictions from.}
 
-\item{...}{optional arguments}
+\item{sort}{If there are crossing quantiles the predictions will be sorted to avoid this issue.}
 }
 \value{
 A matrix of predicted values.

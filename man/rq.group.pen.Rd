@@ -20,7 +20,7 @@ rq.group.pen(
   tau.penalty.factor = rep(1, length(tau)),
   scalex = TRUE,
   coef.cutoff = 1e-08,
-  max.iter = 500,
+  max.iter = 5000,
   converge.eps = 1e-04,
   gamma = IQR(y)/10,
   lambda.discard = TRUE,
@@ -89,7 +89,7 @@ Each model in the models list has the following values.
 \describe{
 \item{coefficients}{Coefficients for each value of lambda.}
 \item{rho}{The unpenalized objective function for each value of lambda.}
-\item{PenRho}{The penalized objective function for each value of lambda.}
+\item{PenRho}{The penalized objective function for each value of lambda.  If scalex=TRUE then this is the value for the scaled version of x.}
 \item{nzero}{The number of nonzero coefficients for each value of lambda.}
 \item{tau}{Quantile of the model.}
 \item{a}{Value of a for the penalized loss function.}

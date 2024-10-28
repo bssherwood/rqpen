@@ -1202,20 +1202,6 @@ rq.group.lin.prog <- function(x,y,groups,tau,lambda,intercept=TRUE,eps=1e-05,pen
     sub_fit
 }
 
-nonzero <- function (obj) 
-{
-    UseMethod("nonzero")
-}
-
-nonzero.cv.rq.group.pen <- function (obj) 
-{
-    coefs <- coefficients(obj)
-    if (obj$intercept) {
-		coefs <- coefs[-1]
-    }
-    tapply(coefs, obj$groups, sum) != 0
-}
-
 subtract <- function(predicted,obs){
 	obs-predicted
 }

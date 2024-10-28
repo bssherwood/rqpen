@@ -23,7 +23,7 @@ NULL
 #' The most important functions are rq.pen(), rq.group.pen(), rq.pen.cv() and rq.group.pen.cv(). These functions 
 #' fit quantile regression models with individual or group penalties. The cv functions automate the cross-validation process for selection of tuning parameters. 
 #' 
-#' @docType package
 #' @name rqPen
 #' @aliases rqPen-package
+"_PACKAGE"
 NULL

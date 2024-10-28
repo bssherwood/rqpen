@@ -14,12 +14,12 @@ rq.pen(
   nlambda = 100,
   eps = ifelse(nrow(x) < ncol(x), 0.05, 0.01),
   penalty.factor = rep(1, ncol(x)),
-  alg = c("huber", "br", "QICD", "fn"),
+  alg = c("huber", "br", "fn"),
   scalex = TRUE,
   tau.penalty.factor = rep(1, length(tau)),
   coef.cutoff = 1e-08,
-  max.iter = 10000,
-  converge.eps = 1e-07,
+  max.iter = 5000,
+  converge.eps = 1e-04,
   lambda.discard = TRUE,
   weights = NULL,
   ...
@@ -80,7 +80,7 @@ Each model in the models list has the following values.
 \describe{
 \item{coefficients:}{ Coefficients for each value of lambda.}
 \item{rho:}{ The unpenalized objective function for each value of lambda.}
-\item{PenRho:}{ The penalized objective function for each value of lambda.}
+\item{PenRho:}{ The penalized objective function for each value of lambda. If scalex=TRUE then this is the value for the scaled version of x.}
 \item{nzero:}{ The number of nonzero coefficients for each value of lambda.}
 \item{tau:}{ Quantile of the model.}
 \item{a:}{ Value of a for the penalized loss function.}
