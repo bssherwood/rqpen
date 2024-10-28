@@ -4,7 +4,7 @@
 \alias{predict.qic.select}
 \title{Predictions from a qic.select object}
 \usage{
-\method{predict}{qic.select}(object, newx, sort = FALSE)
+\method{predict}{qic.select}(object, newx, sort = FALSE, ...)
 }
 \arguments{
 \item{object}{qic.select object}
