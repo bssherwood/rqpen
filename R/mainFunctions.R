@@ -301,7 +301,7 @@ print.qic.select <- function(x,...){
 #' newx <- matrix(runif(80),ncol=8)
 #' preds <- predict(q1,newx)
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-predict.qic.select <- function(object, newx, sort=FALSE){
+predict.qic.select <- function(object, newx, sort=FALSE, ...){
 	if(is.null(dim(newx))){
 	  preds <- c(1,newx) %*% coefficients(object)
 	} else{
@@ -655,7 +655,7 @@ predict.rq.pen.seq.cv <- function(object, newx,tau=NULL,septau=ifelse(object$fit
   } else{
     if(is.null(lambdaIndex)){
       if(is.null(lambda)){
-        lambdaIndex <- 1:length(r2$fit$lambda)
+        lambdaIndex <- 1:length(object$fit$lambda)
       } else{
         lambdaIndex <- which(object$fit$lambda %in% lambda)
       }
