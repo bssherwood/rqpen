@@ -3,7 +3,9 @@ Type: Package
 Title: Penalized Quantile Regression
 Version: 4.1.2
 Date: 2024-10-28
-Author: Ben Sherwood [aut, cre], Adam Maidman [aut], Shaobo Li [aut] 
+Authors@R: c( person(given="Ben",family="Sherwood",role=c("aut","cre"), email="ben.sherwood@ku.edu"),
+              person(given="Shaobo", family="Li", role="aut"),
+              person(given="Adam", family="Maidman", role="aut"))
 Depends: R (>= 3.0.0)
 Imports: methods, quantreg, hqreg, hrqglas, data.table, Rdpack, lifecycle, plyr, Matrix, Rcpp
 LinkingTo: Rcpp, RcppArmadillo

@@ -726,7 +726,6 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' @param cvFunc Loss function for cross-validation. Defaults to quantile loss, but user can specify their own function.
 #' @param nfolds Number of folds.
 #' @param foldid Ids for folds. If set will override nfolds.
-#' @param nlambda Number of lambda, ignored if lambda is set.
 #' @param groupError If set to false then reported error is the sum of all errors, not the sum of error for each fold.  
 #' @param cvSummary Function to summarize the errors across the folds, default is mean. User can specify another function, such as median.
 #' @param tauWeights Weights for the different tau models. Only used in group tau results (gtr). 
@@ -775,7 +774,7 @@ predict.rq.pen.seq <- function(object, newx,tau=NULL,a=NULL,lambda=NULL,modelsIn
 #' r5 <- rq.pen.cv(x,y,penalty.factor=c(0,rep(1,7)))
 #' }
 #' @author Ben Sherwood, \email{ben.sherwood@ku.edu}
-rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,nlambda=100,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,weights=NULL,...){
+rq.pen.cv <- function(x,y,tau=.5,lambda=NULL,penalty=c("LASSO","Ridge","ENet","aLASSO","SCAD","MCP"),a=NULL,cvFunc=NULL,nfolds=10,foldid=NULL,groupError=TRUE,cvSummary=mean,tauWeights=rep(1,length(tau)),printProgress=FALSE,weights=NULL,...){
 	n <- length(y)
 	if(is.null(foldid)){
       foldid <- randomly_assign(n,nfolds)
