@@ -14,7 +14,6 @@ rq.pen.cv(
   cvFunc = NULL,
   nfolds = 10,
   foldid = NULL,
-  nlambda = 100,
   groupError = TRUE,
   cvSummary = mean,
   tauWeights = rep(1, length(tau)),
@@ -41,8 +40,6 @@ rq.pen.cv(
 \item{nfolds}{Number of folds.}
 
 \item{foldid}{Ids for folds. If set will override nfolds.}
-
-\item{nlambda}{Number of lambda, ignored if lambda is set.}
 
 \item{groupError}{If set to false then reported error is the sum of all errors, not the sum of error for each fold.}
 

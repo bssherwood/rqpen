@@ -22,3 +22,13 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Ben Sherwood \email{ben.sherwood@ku.edu}
+
+Authors:
+\itemize{
+  \item Shaobo Li
+  \item Adam Maidman
+}
+
+}
