@@ -1,0 +1,41 @@
+
+bibentry(bibtype = "Article",
+  title        = "rqPen: An R Package for Penalized Quantile Regression",
+  author       = c(person(given = "Ben", family = "Sherwood"),
+                   person(given = "Shaobo", family = "Li"),
+                   person(given = "Adam", family = "Maidman")),
+  journal      = "The R Journal",
+  year         = "2025",
+  volume       = "17",
+  number       = "2",
+  pages        = "146-175",
+  doi          = "10.32614/RJ-2025-017",
+  header       = "To cite rqPen in publications use:"
+)
+
+bibentry(bibtype = "Article",
+  title        = "Semismooth Newton Coordinate Descent Algorithm for Elastic-Net Penalized Huber Loss Regression and Quantile Regression",
+  author       = c(person(given = "Congrui", family = "Yi"),
+                   person(given = "Jian", family = "Huang")),
+  journal      = "Journal of Computational and Graphical Statistics",
+  year         = "2017",
+  volume       = "26",
+  number       = "3",
+  pages        = "547-557",
+  doi          = "10.1080/10618600.2016.1256816",
+  header       = "If using lasso with Huber approximation, the default for rq.pen and rq.pen.cv, please also cite:"
+)
+
+bibentry(bibtype = "Article",
+  title        = "Quantile regression feature selection and estimation with grouped variables using Huber approximation",
+  author       = c(person(given = "Ben", family = "Sherwood"),
+                   person(given = "Shaobo", family = "Li")),
+  journal      = "Statistics and Computing",
+  year         = "2022",
+  volume       = "32",
+  number       = "5",
+  pages        = "75",
+  doi          = "10.1007/s11222-022-10135-w",
+  header       = "If using group lasso with Huber approximation, the default in rq.group.pen and rq.group.pen.cv, please also cite:"
+)
+

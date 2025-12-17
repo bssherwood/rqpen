@@ -52,12 +52,3 @@ qs1 <- qic.select(fit1)
 qs2 <- qic.select(fit2)
 qs3 <- qic.select(fit3)
 ```
-
-See, https://github.com/bssherwood/rqpen/blob/master/ignore/rqPenArticle.pdf, for a vignette. The Huber approach for rq.pen relies on the R package hqreg and work presented in "Semismooth Newton Coordinate Descent Algorithm for Elastic-Net Penalized Huber Loss Regression and Quantile Regression". The Huber approach in rq.group.pen relies on R package hrqglas and work presented in An Efficient Approach to Feature Selection and Estimation for Quantile Regression with Grouped Variables
-
-
-## References
-
-Sherwood, B. and Li, S. (2022) An Efficient Approach to Feature Selection and Estimation for Quantile Regression with Grouped Variables, Statistics and computing, 75. 
-
-Yi, C. and Huang, J. (2015) Semismooth Newton Coordinate Descent Algorithm for Elastic-Net Penalized Huber Loss Regression and Quantile Regression, Journal of Computational and Graphical Statistics, 26:3, 547-557. 
