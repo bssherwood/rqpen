@@ -118,7 +118,12 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(sum(penalty.factor)==0 | sum(tau.penalty.factor)==0){
     stop("Cannot have zero for all entries of penalty factors. This would be an unpenalized model")
   }
-
+  if(length(penalty.factor)!=p){
+    stop("penalty.factor should be a length p vector")
+  }
+  if(length(tau.penalty.factor) != ntau){
+    stop("length of tau.penalty.factor should be the number of quantiles being modeled")
+  }
   ## standardize X
   if(scalex){
     x <- scale(x)
