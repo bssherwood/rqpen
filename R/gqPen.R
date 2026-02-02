@@ -80,7 +80,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   n<- np[1]; p<- np[2]
   #ng<- p
   nng<- rep(ntau, p)
-  if(is.null(penalty.factor)) penalty.factor<- 1
+  if(is.null(penalty.factor)) penalty.factor<- rep(1,p)
   if(is.null(weights)) weights<- rep(1, n)
   if(is.null(tau.penalty.factor)) tau.penalty.factor<- rep(1, ntau)
   
