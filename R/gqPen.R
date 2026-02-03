@@ -167,8 +167,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   grad_k<- -neg_gradient_aug(r0, weights_aug, tau_aug, gmma, Xaug, ntau) ## Rcpp
   #grad_k.norm<- tapply(grad_k, groupIndex, l2norm)
   grad_k.norm<- tapply(grad_k, groupIndex, weighted_norm, normweights=tau.penalty.factor)
+  penvars <- which(penalty.factor!=0)
   
-  lambda.max<- max(grad_k.norm/penalty.factor)
+  lambda.max<- max(grad_k.norm[penvars]/penalty.factor[penvars])
   if(is.null(lambda)){
     lambda.min<- lambda.max*eps #ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
