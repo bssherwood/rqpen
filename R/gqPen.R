@@ -124,6 +124,9 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   if(length(tau.penalty.factor) != ntau){
     stop("length of tau.penalty.factor should be the number of quantiles being modeled")
   }
+  if(sum(penalty.factor==0) >= n){
+    stop("The number of unpenalized variables must be smaller than n")
+  }
   ## standardize X
   if(scalex){
     x <- scale(x)
@@ -145,15 +148,22 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   
   ## initial value
   gmma0<- gmma
-  if(is.null(beta0)){
-    # intercept 
-    b.int<- quantile(y, probs = tau)
-    r<- Yaug-rep(b.int, each=n)
-    # null devience
-    dev0<- sum(weights_aug*rq.loss.aug(r,tau,n))
-    gmma.max<- 4; gmma<- min(gmma.max, max(gmma0, quantile(abs(r), probs = 0.1)))
-    beta0<- c(t(rbind(b.int, matrix(0,p, ntau)))) 
+  if(is.null(beta0) & min(penalty.factor)>0){
+      # intercept 
+      b.int<- quantile(y, probs = tau)
+      r<- Yaug-rep(b.int, each=n)
+      # null devience
+      dev0<- sum(weights_aug*rq.loss.aug(r,tau,n))
+      gmma.max<- 4; gmma<- min(gmma.max, max(gmma0, quantile(abs(r), probs = 0.1)))
+      beta0<- c(t(rbind(b.int, matrix(0,p, ntau))))
   } else{
+    if(is.null(beta0)){
+      #issue is that some vars are not penalized
+      beta0 <- matrix(0,nrow=p+1,ncol=ntau)
+      keepvars <- which(penalty.factor == 0)
+      initmodel <- rq(y ~ x[,keepvars], tau=tau)
+      beta0[c(1,keepvars+1),] <- coefficients(initmodel)
+    }
     r <- Yaug - c(cbind(1, x)%*%beta0)   # beta0 must be of the dimension (p+1)*ntau
     beta0 <- c(t(beta0))   
     dev0<- sum(rq.loss.aug(r,tau,n))
