@@ -180,10 +180,16 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   penvars <- which(penalty.factor!=0)
   
   lambda.max<- max(grad_k.norm[penvars]/penalty.factor[penvars])
+  lambda.preset <- FALSE
   if(is.null(lambda)){
     lambda.min<- lambda.max*eps #ifelse(n>p, lambda.max*0.001, lambda.max*0.01)
     #lambda<- seq(lambda.max, lambda.min, length.out = 100)
     lambda<- exp(seq(log(lambda.max), log(lambda.min), length.out = nlambda+1))
+  } else{
+    lambda.preset <- TRUE
+    #a hack to have this case work with the rest of the code, which assumes first lambda provides a sparse solution.
+    diff <- lambda[1] - lambda[2]
+    lambda <- c(lambda[1] + diff, lambda)
   }
   
   ## QM condition in Yang and Zou, Lemma 1 (2) -- PD matrix H
@@ -330,14 +336,18 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
       loss[j]<- dev1/n
       pen.loss[j]<- dev1/n+lambda[j]*sum(eigen.sub.H*sapply(1:p, function(xx) l2norm(beta0[-(1:ntau)][groupIndex==xx])))
       rel_dev[j]<- dev1/dev0
-	  if(j > 1){
-		rel_dev_change<- rel_dev[j]-rel_dev[j-1]
-		if(abs(rel_dev_change)<1e-3 & j>70 & lambda.discard) break
+	    if(j > 1){
+		    rel_dev_change<- rel_dev[j]-rel_dev[j-1]
+		    if(abs(rel_dev_change)<1e-3 & j>70 & lambda.discard) break
       }
     } # end of for loop of lambda
     
     
     stop.ind<- which(rel_dev!=0)
+    if(lambda.preset){
+      stop.ind <- stop.ind[-1]#removing the first initial beta for this group because the initial lambda was not actually part of the preset lambda values
+                              #see code around setting lambda values for more details on why this is done. 
+    }
     if(length(stop.ind)==0) stop.ind<- 1:length(lambda)
     
       stop.ind<- stop.ind#[-1]
