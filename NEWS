@@ -1,6 +1,7 @@
-rqPen 4.2 (Release date: 2026-02-02)
+rqPen 4.2 (Release date: 2026-02-03)
 =============
-* Fixed bug where penalty.factor was defaulting to scalar, but should be a vector. This was causing algorithm to not work properly. 
+* Fixed bug where in rq.gq.pen where penalty.factor was defaulting to scalar, but should be a vector. This was causing algorithm to not work properly. 
+* Fixed bug in rq.gq.pen where penalty.factors set to zero where not working
 
 rqPen 4.1.4 (Release date: 2025-12-17)
 =============
