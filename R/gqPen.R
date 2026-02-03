@@ -384,7 +384,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
     if(scalex){
       coefs <- apply(coefs, 2, transform_coefs,mu_x,sigma_x)
     }
-    models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
+    models[[i]] <- rq.pen.modelreturn(coefs,x,y,tau[i],output$lambda,penalty.factor*tau.penalty.factor[i],"gq",1,weights=weights)
     modelnames <- c(modelnames,paste0("tau",tau[i],"a",1))
     modelsInfo <- rbind(modelsInfo,c(i,1,tau[i]))
   }
@@ -392,7 +392,7 @@ rq.gq.pen <- function(x, y, tau, lambda=NULL, nlambda=100,  eps = ifelse(nrow(x)
   modelsInfo <- data.frame(modelsInfo)
   colnames(modelsInfo) <- c("modelIndex","a","tau")
   names(models) <- modelnames
-  returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau, a=1,modelsInfo=modelsInfo,lambda=lambda[1:ncol(coefs)],penalty="gq",call=match.call())
+  returnVal <- list(models=models, n=n, p=p,alg="huber",tau=tau, a=1,modelsInfo=modelsInfo,lambda=output$lambda,penalty="gq",call=match.call())
   class(returnVal) <- "rq.pen.seq"
   returnVal
 } # end of function
